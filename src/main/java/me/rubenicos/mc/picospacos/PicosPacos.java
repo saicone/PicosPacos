@@ -1,5 +1,6 @@
 package me.rubenicos.mc.picospacos;
 
+import me.rubenicos.mc.picospacos.core.data.Database;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +22,8 @@ public class PicosPacos extends JavaPlugin {
         SETTINGS = new Settings("settings.yml");
         SETTINGS.listener(this::onSettingsReload);
 
-        Locale.init();
+        Locale.reload();
+        Database.reload();
     }
 
     @Override
@@ -34,5 +36,6 @@ public class PicosPacos extends JavaPlugin {
             getLogger().severe("Cannot reload settings.yml file! Check console.");
         }
         Locale.reload();
+        Database.reload();
     }
 }

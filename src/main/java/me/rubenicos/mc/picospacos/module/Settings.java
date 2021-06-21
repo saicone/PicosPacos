@@ -154,7 +154,7 @@ public class Settings {
         return yaml.get(path.split("\\."));
     }
 
-    @Nullable
+    @NotNull
     public String getString(@NotNull String path) {
         return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path))));
     }
