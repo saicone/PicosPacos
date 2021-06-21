@@ -1,0 +1,7 @@
+name: PicosPacos
+description: The ultimate system to protect items
+version: ${version}
+main: me.rubenicos.mc.picospacos.PicosPacos
+authors: [Rubenicos]
+api-version: 1.13
+softdepend: [Vault, PlaceholderAPI]

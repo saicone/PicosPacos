@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+group = 'me.rubenicos.mc.picospacos'
+version = '0.1.0'
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.yml'
+        expand(
+                'version': project.version
+        )
+    }
+}
+
+repositories {
+    // Spigot
+    maven { url 'https://repo.codemc.org/repository/nms/' }
+    // PlaceholderAPI
+    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    // Vault
+    // DreamYaml
+    maven { url 'https://jitpack.io' }
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot:1.17-R0.1-SNAPSHOT'
+    compileOnly 'me.clip:placeholderapi:2.10.9'
+    compileOnly ('com.github.MilkBowl:VaultAPI:1.7') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
+
+    // Shaded Dependencies
+    implementation 'com.github.Osiris-Team:Dream-Yaml:5.0'
+
+    compileOnly 'org.jetbrains:annotations:21.0.0'
+
+    compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
+}
+
+shadowJar {
+    relocate 'com.osiris.dyml', project.group + '.module.lib.dyml'
+    minimize()
+}
+
+jar.dependsOn (shadowJar)
