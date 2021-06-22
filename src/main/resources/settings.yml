@@ -1,3 +1,16 @@
 Locale:
   Language: 'en_US'
   LogLevel: 2
+
+Database:
+  Type: 'SQLITE'
+
+Hook:
+  PlayerholderAPI:
+    enabled: true
+    identifiers:
+      - 'picospacos'
+      - 'pipa'
+    cache: 20
+  Vault:
+    enabled: true

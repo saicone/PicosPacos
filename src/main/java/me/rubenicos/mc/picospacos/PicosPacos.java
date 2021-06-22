@@ -3,6 +3,7 @@ package me.rubenicos.mc.picospacos;
 import me.rubenicos.mc.picospacos.core.data.Database;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
+import me.rubenicos.mc.picospacos.module.hook.HookLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PicosPacos extends JavaPlugin {
@@ -24,6 +25,7 @@ public class PicosPacos extends JavaPlugin {
 
         Locale.reload();
         Database.reload();
+        HookLoader.reload();
     }
 
     @Override
@@ -37,5 +39,6 @@ public class PicosPacos extends JavaPlugin {
         }
         Locale.reload();
         Database.reload();
+        HookLoader.reload();
     }
 }

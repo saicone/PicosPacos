@@ -1,5 +1,6 @@
 package me.rubenicos.mc.picospacos.module;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.rubenicos.mc.picospacos.PicosPacos;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.network.chat.ChatComponentText;
@@ -32,6 +33,7 @@ public class Locale {
     private static boolean useSpigot = false;
     private static boolean useNMS = false;
     private static boolean useRGB = false;
+    public static boolean allowPAPI = false;
 
     // Reflected methods for actionbar
     private static MethodHandle ACTIONBAR_COMPONENT;
@@ -239,6 +241,16 @@ public class Locale {
         Object con = PLAYER_CONNECTION.invoke(PLAYER_HANDLE.invoke(player));
         if (con != null && packet != null) {
             sendPacket.invoke(con, packet);
+        }
+    }
+
+    public static String parsePlaceholders(Player player, String text, boolean color) {
+        if (color) text = color(text);
+
+        if (allowPAPI && text.contains("%")) {
+            return PlaceholderAPI.setPlaceholders(player, text);
+        } else {
+            return text;
         }
     }
 
