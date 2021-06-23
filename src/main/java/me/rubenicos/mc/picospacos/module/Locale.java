@@ -100,10 +100,10 @@ public class Locale {
      */
     public static void reload() {
         if (lang == null) {
-            lang = new Settings("lang/" + PicosPacos.SETTINGS.getString("Locale.Language") + ".yml", "lang/en_US.yml", false, true);
+            lang = new Settings("lang/" + PicosPacos.SETTINGS().getString("Locale.Language") + ".yml", "lang/en_US.yml", false, true);
             lang.reload();
         }
-        String path = "lang/" + PicosPacos.SETTINGS.getString("Locale.Language") + ".yml";
+        String path = "lang/" + PicosPacos.SETTINGS().getString("Locale.Language") + ".yml";
         if (!lang.getPath().equals(path)) {
             lang.setPath(path);
             lang.reloadDefault("lang/en_US.yml");
@@ -113,7 +113,7 @@ public class Locale {
                 PicosPacos.get().getLogger().severe("Cannot reload " + path + " file! Check console.");
             }
         }
-        logLevel = PicosPacos.SETTINGS.getInt("Locale.LogLevel");
+        logLevel = PicosPacos.SETTINGS().getInt("Locale.LogLevel");
     }
 
     /**

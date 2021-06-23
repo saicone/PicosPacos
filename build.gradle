@@ -7,6 +7,7 @@ group = 'me.rubenicos.mc.picospacos'
 version = '0.1.0'
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from(sourceSets.main.resources.srcDirs) {
         include '**/*.yml'
         expand(
@@ -44,6 +45,7 @@ dependencies {
 shadowJar {
     relocate 'com.osiris.dyml', project.group + '.module.lib.dyml'
     minimize()
+    archiveClassifier.set('')
 }
 
 jar.dependsOn (shadowJar)

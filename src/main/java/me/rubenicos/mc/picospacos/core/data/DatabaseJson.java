@@ -16,7 +16,7 @@ public class DatabaseJson extends Database {
     }
 
     @Override
-    void save(Player player, PlayerData data) {
+    void save(PlayerData data) {
 
     }
 

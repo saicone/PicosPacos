@@ -4,6 +4,10 @@ import me.rubenicos.mc.picospacos.PicosPacos;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -21,7 +25,7 @@ public abstract class Database {
 
     abstract void disable();
 
-    abstract void save(Player player, PlayerData data);
+    abstract void save(PlayerData data);
 
     abstract PlayerData get(Player player);
 
@@ -37,8 +41,12 @@ public abstract class Database {
     public void savePlayer(Player player) {
         PlayerData data = players.get(player.getName());
         if (data != null && data.hasEdited()) {
-            save(player, players.get(player.getName()));
+            save(data);
         }
+    }
+
+    void saveAll() {
+        players.values().forEach(this::save);
     }
 
     public PlayerData getPlayer(Player player) {
@@ -60,17 +68,32 @@ public abstract class Database {
         return instance;
     }
 
+    public static void load(PicosPacos pl) {
+        pl.getServer().getPluginManager().registerEvents(new Listener() {
+            @SuppressWarnings("unused")
+            @EventHandler
+            public void onJoin(PlayerJoinEvent e) {
+                instance.loadPlayer(e.getPlayer());
+            }
+
+            @SuppressWarnings("unused")
+            @EventHandler
+            public void onQuit(PlayerQuitEvent e) {
+                instance.savePlayer(e.getPlayer());
+            }
+        }, pl);
+        reload();
+    }
+
     public static void reload() {
-        String type = PicosPacos.SETTINGS.getString("Database.Type").toUpperCase();
+        String type = PicosPacos.SETTINGS().getString("Database.Type").toUpperCase();
         if (type.equals(current)) {
             return;
         } else {
             current = type;
         }
 
-        if (instance != null) {
-            instance.disable();
-        }
+        unload();
 
         try {
             if (types.containsKey(type)) {
@@ -90,6 +113,14 @@ public abstract class Database {
             instance = new DatabaseJson();
         }
         instance.enable();
+        Bukkit.getOnlinePlayers().forEach(player -> instance.loadPlayer(player));
+    }
+
+    public static void unload() {
+        if (instance != null) {
+            instance.saveAll();
+            instance.disable();
+        }
     }
 
     public static Map<String, Class<? extends Database>> getTypes() {

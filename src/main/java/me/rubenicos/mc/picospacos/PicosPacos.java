@@ -10,7 +10,7 @@ public class PicosPacos extends JavaPlugin {
 
     private static PicosPacos instance;
 
-    public static Settings SETTINGS;
+    private static Settings SETTINGS;
 
     public static PicosPacos get() {
         return instance;
@@ -24,13 +24,18 @@ public class PicosPacos extends JavaPlugin {
         SETTINGS.listener(this::onSettingsReload);
 
         Locale.reload();
-        Database.reload();
+        Database.load(this);
         HookLoader.reload();
     }
 
     @Override
     public void onDisable() {
+        HookLoader.unload();
+        Database.unload();
+    }
 
+    public static Settings SETTINGS() {
+        return SETTINGS;
     }
 
     private void onSettingsReload() {

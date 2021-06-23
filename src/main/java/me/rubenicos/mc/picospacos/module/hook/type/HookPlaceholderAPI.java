@@ -68,11 +68,11 @@ public class HookPlaceholderAPI implements HookType {
     }
 
     private void loadIdentifiers() {
-        identifiers = PicosPacos.SETTINGS.getStringList("Hook.PlaceholderAPI.identifiers");
+        identifiers = PicosPacos.SETTINGS().getStringList("Hook.PlaceholderAPI.identifiers");
     }
 
     private void loadCacheTime() {
-        cacheTime = PicosPacos.SETTINGS.getInt("Hook.PlaceholderAPI.cache");
+        cacheTime = PicosPacos.SETTINGS().getInt("Hook.PlaceholderAPI.cache");
         if (cacheTime < 1) {
             cacheTime = 20;
         }
