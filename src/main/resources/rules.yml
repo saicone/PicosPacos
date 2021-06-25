@@ -1,6 +1,8 @@
 simpleRule:
+  type: DEATH
   name: '&e&lThunder Sword'
 complexRule:
+  type: DEATH, DROP
   name:
     contains:
       - 'Thunder'

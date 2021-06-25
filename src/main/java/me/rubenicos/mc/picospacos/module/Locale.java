@@ -145,7 +145,20 @@ public class Locale {
      * @param args Arguments to replace via {@link #replaceArgs(String, String...)}.
      */
     public static void sendTo(CommandSender user, String path, String... args) {
-        text(user, replaceArgs(lang.getStringList(path), args));
+        if (lang.isSection(path)) {
+            if (user instanceof Player) {
+                String type = lang.getString(path + ".type").toLowerCase();
+                if (type.equals("title")) {
+                    sendTitle((Player) user, lang.getString(path + ".title"), lang.getString(path + ".subtitle"), lang.getInt(path + ".fadeIn", 10), lang.getInt(path + ".stay", 70), lang.getInt(path + ".fadeOut", 20), args);
+                } else if (type.equals("actionbar")) {
+                    sendActionbar((Player) user, lang.getString(path + ".text"), args);
+                }
+            } else {
+                log(0, "&cCannot send complex message type to console! Path: {0}", path);
+            }
+        } else {
+            text(user, replaceArgs(lang.getStringList(path), args));
+        }
     }
 
     /**
@@ -207,11 +220,11 @@ public class Locale {
         Bukkit.getOnlinePlayers().forEach(player -> player.sendTitle(title0, subtitle0, fadeIn, stay, fadeOut));
     }
 
-    public void sendActionbar(Player player, String path, String... args) {
+    public static void sendActionbar(Player player, String path, String... args) {
         actionbar(player, replaceArgs(lang.getString(path), args));
     }
 
-    public void broadcastActionbar(String path, String... args) {
+    public static void broadcastActionbar(String path, String... args) {
         String text = replaceArgs(lang.getString(path), args);
         Bukkit.getOnlinePlayers().forEach(player -> actionbar(player, text));
     }

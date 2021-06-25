@@ -25,6 +25,7 @@ import java.util.Map;
 public class Settings {
 
     private final PicosPacos pl = PicosPacos.get();
+    private final Map<String, Boolean> sections = new HashMap<>();
     private final Map<String, Object> cache = new HashMap<>();
 
     private String path;
@@ -155,6 +156,21 @@ public class Settings {
         return yaml.get(path.split("\\."));
     }
 
+    public boolean isSection(String path) {
+        return sections.getOrDefault(path, isSection0(path));
+    }
+
+    private boolean isSection0(String path) {
+        DYModule module = get(path);
+        if (module != null && !module.getChildModules().isEmpty()) {
+            sections.put(path, true);
+            return true;
+        } else {
+            sections.put(path, false);
+            return false;
+        }
+    }
+
     @NotNull
     public String getString(@NotNull String path) {
         return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path))));
@@ -184,16 +200,24 @@ public class Settings {
         }
     }
 
-    public int getInt(@NotNull String path) {
-        return (int) cache.getOrDefault(path, cache(path, getInt0(path)));
+    public int getInt(@NotNull String path, int def) {
+        return (int) cache.getOrDefault(path, cache(path, getInt0(path, def)));
     }
 
-    public Object getInt0(String path) {
+    public int getInt(@NotNull String path) {
+        return (int) cache.getOrDefault(path, cache(path, getInt0(path, -1)));
+    }
+
+    public Object getInt0(String path, int def) {
         DYModule module = get(path);
         if (module == null) {
-            return -1;
+            return def;
         } else {
-            return module.asInt();
+            try {
+                return Integer.parseInt(module.asString());
+            } catch (NumberFormatException e) {
+                return def;
+            }
         }
     }
 
