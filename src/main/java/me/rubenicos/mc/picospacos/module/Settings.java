@@ -133,6 +133,7 @@ public class Settings {
     }
 
     public void listener(Runnable runnable) {
+        runnable.run();
         this.listener = (event) -> {
             if (event.getWatchEventKind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                 Bukkit.getScheduler().runTaskAsynchronously(pl, runnable);

@@ -12,10 +12,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class Database {
 
-    private final Map<String, PlayerData> players = new HashMap<>();
+    private final Map<UUID, PlayerData> players = new HashMap<>();
 
     boolean init() {
         return true;
@@ -27,19 +28,23 @@ public abstract class Database {
 
     abstract void save(PlayerData data);
 
-    abstract PlayerData get(Player player);
+    abstract PlayerData get(String name, String uuid);
 
     public PlayerData loadPlayer(Player player) {
-        PlayerData data = get(player);
+        return loadPlayer(player.getName(), player.getUniqueId());
+    }
+
+    public PlayerData loadPlayer(String name, UUID uuid) {
+        PlayerData data = get(name, uuid.toString());
         if (data == null) {
-            data = new PlayerData(player);
+            data = new PlayerData(name, uuid.toString(), 0);
         }
-        players.put(player.getName(), data);
+        players.put(uuid, data);
         return data;
     }
 
     public void savePlayer(Player player) {
-        PlayerData data = players.get(player.getName());
+        PlayerData data = players.get(player.getUniqueId());
         if (data != null && data.hasEdited()) {
             save(data);
         }
@@ -50,10 +55,15 @@ public abstract class Database {
     }
 
     public PlayerData getPlayer(Player player) {
-        return players.getOrDefault(player.getName(), loadPlayer(player));
+        return players.getOrDefault(player.getUniqueId(), loadPlayer(player));
+    }
+
+    public PlayerData getPlayer(UUID uuid) {
+        return players.get(uuid);
     }
 
     private static Database instance;
+    private static boolean loaded = false;
     private static String current = "";
 
     private static final Map<String, Class<? extends Database>> types = new HashMap<>();
@@ -68,24 +78,24 @@ public abstract class Database {
         return instance;
     }
 
-    public static void load(PicosPacos pl) {
-        pl.getServer().getPluginManager().registerEvents(new Listener() {
-            @SuppressWarnings("unused")
-            @EventHandler
-            public void onJoin(PlayerJoinEvent e) {
-                instance.loadPlayer(e.getPlayer());
-            }
-
-            @SuppressWarnings("unused")
-            @EventHandler
-            public void onQuit(PlayerQuitEvent e) {
-                instance.savePlayer(e.getPlayer());
-            }
-        }, pl);
-        reload();
-    }
-
     public static void reload() {
+        if (!loaded) {
+            PicosPacos.get().getServer().getPluginManager().registerEvents(new Listener() {
+                @SuppressWarnings("unused")
+                @EventHandler
+                public void onJoin(PlayerJoinEvent e) {
+                    instance.loadPlayer(e.getPlayer());
+                }
+
+                @SuppressWarnings("unused")
+                @EventHandler
+                public void onQuit(PlayerQuitEvent e) {
+                    instance.savePlayer(e.getPlayer());
+                }
+            }, PicosPacos.get());
+            loaded = true;
+        }
+
         String type = PicosPacos.SETTINGS().getString("Database.Type").toUpperCase();
         if (type.equals(current)) {
             return;

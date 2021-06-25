@@ -1,0 +1,12 @@
+simpleRule:
+  name: '&e&lThunder Sword'
+complexRule:
+  name:
+    contains:
+      - 'Thunder'
+      - 'Protected'
+    equals:
+      - '&e&lThunder Sword'
+      - '&cSome &eProtected &cItem'
+    regex:
+      - '(?i) '

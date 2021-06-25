@@ -1,6 +1,7 @@
 package me.rubenicos.mc.picospacos.core.data;
 
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class DatabaseJson extends Database {
@@ -21,7 +22,7 @@ public class DatabaseJson extends Database {
     }
 
     @Override
-    PlayerData get(Player player) {
+    PlayerData get(String name, String uuid) {
         return null;
     }
 }
