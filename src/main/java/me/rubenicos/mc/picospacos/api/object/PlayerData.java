@@ -15,6 +15,7 @@ public class PlayerData {
     private final List<ItemStack> items = new ArrayList<>();
 
     private boolean edited = false;
+    private boolean onDatabase = false;
 
     public PlayerData(Player player) {
         this(player, 0);
@@ -38,8 +39,20 @@ public class PlayerData {
         return uuid;
     }
 
+    public void setEdited(boolean edited) {
+        this.edited = edited;
+    }
+
     public boolean hasEdited() {
         return edited;
+    }
+
+    public void setOnDB(boolean onDatabase) {
+        this.onDatabase = onDatabase;
+    }
+
+    public boolean onDB() {
+        return onDatabase;
     }
 
     public int getSaves() {
@@ -62,11 +75,19 @@ public class PlayerData {
     }
 
     public List<ItemStack> getItems() {
-        edited = true;
         return items;
     }
 
-    public String toString() {
-        return Locale.replaceArgs("{\"name\":\"{0}\",\"uuid\":\"{1}\",\"saves\":{2}}", name, uuid, String.valueOf(saves));
+    public String items() {
+        return "";
+    }
+
+    public void addItems(String items) {
+
+    }
+
+    public void addItems(List<ItemStack> items) {
+        edited = true;
+        this.items.addAll(items);
     }
 }

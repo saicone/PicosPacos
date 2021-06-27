@@ -44,17 +44,15 @@ Database:
     user: 'username'
     # Database password
     password: 'password'
-    # Table prefix, set '' to disable
-    table-prefix: 'pixelbuy_'
-    # Data types configuration, touch only if you know what you are doing
-    data-type:
-      player: 'VARCHAR(255)'
-      playerdata: 'MEDIUMTEXT'
+    # Database timeout to check if had valid connection
+    timeout: 1000
     # Database queries configuration, touch only if you know what you are doing
     query:
-      create-table: 'CREATE TABLE IF NOT EXISTS ''%prefix%PlayerData'' (player {0} NOT NULL, data {1}, PRIMARY KEY(player));'
-      save-data: 'INSERT INTO ''%prefix%PlayerData'' (player, data) VALUES (''{0}'', ''{1}'') ON DUPLICATE KEY UPDATE ''data'' = ''{1}'';'
-      get-data: 'SELECT ''data'' FROM ''%prefix%PlayerData'' WHERE ''player'' = ''{0}'';'
+      create: 'CREATE TABLE IF NOT EXISTS picospacos_players (player VARCHAR(255) NOT NULL, saves INT, items MEDIUMTEXT, PRIMARY KEY(player))'
+      insert: 'INSERT INTO picospacos_players (player, saves, items) VALUES (?, ?, ?)'
+      delete: 'DELETE FROM picospacos_players WHERE player = ?'
+      update: 'UPDATE picospacos_players SET saves = ?, items = ? WHERE player = ?'
+      select: 'SELECT * FROM picospacos_players WHERE player = ?'
 
 
 # Plugin hooks configuration

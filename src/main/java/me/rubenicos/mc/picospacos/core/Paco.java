@@ -35,7 +35,7 @@ public class Paco implements Listener {
     }
 
     public void disable() {
-        players.forEach((player, items) -> Database.get().getPlayer(player).getItems().addAll(items));
+        players.forEach((player, items) -> Database.get().getPlayer(player).addItems(items));
         players.clear();
         deathRules.clear();
         dropRules.clear();

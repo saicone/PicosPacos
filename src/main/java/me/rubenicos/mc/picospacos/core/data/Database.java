@@ -2,6 +2,7 @@ package me.rubenicos.mc.picospacos.core.data;
 
 import me.rubenicos.mc.picospacos.PicosPacos;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
+import me.rubenicos.mc.picospacos.module.Locale;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,7 +53,7 @@ public abstract class Database {
     }
 
     void saveAll() {
-        players.values().forEach(this::save);
+        Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> players.values().forEach(this::save));
     }
 
     public PlayerData getPlayer(Player player) {
@@ -85,28 +86,32 @@ public abstract class Database {
                 @SuppressWarnings("unused")
                 @EventHandler
                 public void onJoin(PlayerJoinEvent e) {
-                    PlayerData data = instance.loadPlayer(e.getPlayer());
-                    if (!data.getItems().isEmpty()) {
-                        if (PicosPacos.SETTINGS.getInt("Config.Join-Delay") > 0) {
-                            Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> {
+                    Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> {
+                        PlayerData data = instance.loadPlayer(e.getPlayer());
+                        if (!data.getItems().isEmpty()) {
+                            if (PicosPacos.SETTINGS.getInt("Config.Join-Delay") > 0) {
+                                Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> {
+                                    if (e.getPlayer().isOnline()) {
+                                        e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
+                                        data.getItems().clear();
+                                        data.setEdited(true);
+                                    }
+                                }, PicosPacos.SETTINGS.getInt("Config.Join-Delay") * 20L);
+                            } else {
                                 if (e.getPlayer().isOnline()) {
                                     e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
                                     data.getItems().clear();
+                                    data.setEdited(true);
                                 }
-                            }, PicosPacos.SETTINGS.getInt("Config.Join-Delay") * 20L);
-                        } else {
-                            if (e.getPlayer().isOnline()) {
-                                e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
-                                data.getItems().clear();
                             }
                         }
-                    }
+                    });
                 }
 
                 @SuppressWarnings("unused")
                 @EventHandler
                 public void onQuit(PlayerQuitEvent e) {
-                    instance.savePlayer(e.getPlayer());
+                    Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> instance.savePlayer(e.getPlayer()));
                 }
             }, PicosPacos.get());
             loaded = true;
@@ -114,6 +119,11 @@ public abstract class Database {
 
         String type = PicosPacos.SETTINGS.getString("Database.Type").toUpperCase();
         if (type.equals(current)) {
+            if (instance.init()) {
+                instance.enable();
+            } else {
+                Locale.log(1, "");
+            }
             return;
         } else {
             current = type;
@@ -125,21 +135,21 @@ public abstract class Database {
             if (types.containsKey(type)) {
                 instance = types.get(type).getDeclaredConstructor().newInstance();
             } else {
-                Bukkit.getLogger().warning("The " + current + " database type does'nt exist, using SQLITE type instead...");
+                Locale.log(1, "The {0} database type does'nt exist, using SQLITE type instead...", current);
                 instance = new DatabaseSqlite();
             }
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
-            Bukkit.getLogger().severe("Failed to initialize " + current + " database type, using SQLITE type instead...");
+            Locale.log(1, "Failed to initialize {0} database type, using SQLITE type instead...", current);
             instance = new DatabaseSqlite();
         }
         if (!instance.init()) {
             instance = null;
-            Bukkit.getLogger().severe("Failed to setup " + current + " database type, using JSON type instead...");
+            Locale.log(1, "Failed to setup {0} database type, using JSON type instead...", current);
             instance = new DatabaseJson();
         }
         instance.enable();
-        Bukkit.getOnlinePlayers().forEach(player -> instance.loadPlayer(player));
+        Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> Bukkit.getOnlinePlayers().forEach(player -> instance.loadPlayer(player)));
     }
 
     public static void unload() {
