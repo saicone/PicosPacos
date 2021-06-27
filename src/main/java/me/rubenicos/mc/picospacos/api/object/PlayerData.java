@@ -62,6 +62,7 @@ public class PlayerData {
     }
 
     public List<ItemStack> getItems() {
+        edited = true;
         return items;
     }
 

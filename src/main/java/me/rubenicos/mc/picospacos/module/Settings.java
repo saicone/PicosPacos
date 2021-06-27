@@ -17,30 +17,38 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.StandardWatchEventKinds;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Settings {
 
     private final PicosPacos pl = PicosPacos.get();
     private final Map<String, Boolean> sections = new HashMap<>();
+    private final List<String> keys = new ArrayList<>();
     private final Map<String, Object> cache = new HashMap<>();
 
     private String path;
-    private final boolean update;
+    private boolean update;
     private boolean defaultExists = true;
 
     private DreamYaml yaml;
     private DreamYaml defYaml;
     private DYFileEventListener<DYFileEvent> listener;
 
+    public Settings() { }
+
     public Settings(String path) {
-        this(path, path, true, true);
+        init(path);
     }
 
     public Settings(String path, String defPath, boolean requireDef, boolean update) {
+        init(path, defPath, requireDef, update);
+    }
+
+    public void init(String path) {
+        init(path, path, true, true);
+    }
+
+    public void init(String path, String defPath, boolean requireDef, boolean update) {
         this.path = path;
         this.update = update;
         InputStream in = pl.getResource(path);
@@ -95,6 +103,8 @@ public class Settings {
     }
 
     public boolean reload() {
+        sections.clear();
+        keys.clear();
         cache.clear();
         if (yaml != null && listener != null) {
             yaml.removeFileEventListener(listener);
@@ -127,6 +137,9 @@ public class Settings {
                 e.printStackTrace();
             }
         }
+
+        yaml.getAllLoaded().forEach(module -> keys.add(module.getFirstKey()));
+
         if (listener != null) {
             addListener();
         }
@@ -171,15 +184,24 @@ public class Settings {
         }
     }
 
-    @NotNull
-    public String getString(@NotNull String path) {
-        return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path))));
+    public List<String> getKeys() {
+        return keys;
     }
 
-    private Object getString0(String path) {
+    @NotNull
+    public String getString(@NotNull String path, String def) {
+        return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path, def))));
+    }
+
+    @NotNull
+    public String getString(@NotNull String path) {
+        return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path, "null"))));
+    }
+
+    private Object getString0(String path, String def) {
         DYModule module = get(path);
         if (module == null) {
-            return null;
+            return def;
         } else {
             return module.asString();
         }
@@ -208,7 +230,7 @@ public class Settings {
         return (int) cache.getOrDefault(path, cache(path, getInt0(path, -1)));
     }
 
-    public Object getInt0(String path, int def) {
+    private Object getInt0(String path, int def) {
         DYModule module = get(path);
         if (module == null) {
             return def;

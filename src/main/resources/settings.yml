@@ -1,16 +1,77 @@
+# Locale configuration
 Locale:
+  # Language file to use
+  # Available files are on "plugins/PicosPacos/lang" folder
+  # You can create your own language file and put the name here
   Language: 'en_US'
+  # Log levels (Messages to see in console)
+  # 0 = Disabled
+  # 1 = Errors
+  # 2 = Errors and warnings
+  # 3 = Errors, warnings and information
+  # 4 = Errors, warnings, information and debug messages
   LogLevel: 2
 
-Database:
-  Type: 'SQLITE'
 
+# Plugin configuration
+Config:
+  # Delay in seconds to give saved items on respawn
+  # Set to 0 to disable
+  Respawn-Delay: 0
+  # Delay in seconds to give saved on join (Only if player disconnects after death)
+  Join-Delay: 10
+
+
+# Database configuration
+Database:
+  # Available types:
+  # * JSON - Save player data locally in .json file
+  # * SQLITE - Save player data locally in one .db file (Recommended for local database)
+  # * SQL - Save player data externally in sql database, you can configure this below
+  Type: 'SQLITE'
+  # Available types:
+  # * UUID - Use player uuid to recognize him on database
+  # * NAME - Use player name to recognize him on database (Recommended for cracked/offline servers)
+  Method: 'UUID'
+  # SQL database configuration (Only touch on use)
+  Sql:
+    # Class driver to use, mysql by default
+    class: 'com.mysql.jdbc.Driver'
+    # Connection url, change "localhost:3306" and "database" with your own info
+    # If you know about sql flags change them if needed
+    url: 'jdbc:mysql://localhost:3306/database?autoReconnect=true&useSSL=false&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8'
+    # Database user
+    user: 'username'
+    # Database password
+    password: 'password'
+    # Table prefix, set '' to disable
+    table-prefix: 'pixelbuy_'
+    # Data types configuration, touch only if you know what you are doing
+    data-type:
+      player: 'VARCHAR(255)'
+      playerdata: 'MEDIUMTEXT'
+    # Database queries configuration, touch only if you know what you are doing
+    query:
+      create-table: 'CREATE TABLE IF NOT EXISTS ''%prefix%PlayerData'' (player {0} NOT NULL, data {1}, PRIMARY KEY(player));'
+      save-data: 'INSERT INTO ''%prefix%PlayerData'' (player, data) VALUES (''{0}'', ''{1}'') ON DUPLICATE KEY UPDATE ''data'' = ''{1}'';'
+      get-data: 'SELECT ''data'' FROM ''%prefix%PlayerData'' WHERE ''player'' = ''{0}'';'
+
+
+# Plugin hooks configuration
 Hook:
+  # PlaceholderAPI hook
   PlayerholderAPI:
+    # Enable or not this hook
     enabled: true
+    # Identifiers to parse placeholder expansion
     identifiers:
       - 'picospacos'
       - 'pipa'
+    # Time in seconds to cache placeholder requests by default
+    # To cache a request you need to add "_cache" at final of placeholder
+    # or add "_cache:<seconds>" for custom time, for example %<identifier>_saves_cache:5%
     cache: 20
+  # Vault hook
   Vault:
+    # Enable or not this hook
     enabled: true

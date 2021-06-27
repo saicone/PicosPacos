@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -84,7 +85,22 @@ public abstract class Database {
                 @SuppressWarnings("unused")
                 @EventHandler
                 public void onJoin(PlayerJoinEvent e) {
-                    instance.loadPlayer(e.getPlayer());
+                    PlayerData data = instance.loadPlayer(e.getPlayer());
+                    if (!data.getItems().isEmpty()) {
+                        if (PicosPacos.SETTINGS.getInt("Config.Join-Delay") > 0) {
+                            Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> {
+                                if (e.getPlayer().isOnline()) {
+                                    e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
+                                    data.getItems().clear();
+                                }
+                            }, PicosPacos.SETTINGS.getInt("Config.Join-Delay") * 20L);
+                        } else {
+                            if (e.getPlayer().isOnline()) {
+                                e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
+                                data.getItems().clear();
+                            }
+                        }
+                    }
                 }
 
                 @SuppressWarnings("unused")
@@ -96,7 +112,7 @@ public abstract class Database {
             loaded = true;
         }
 
-        String type = PicosPacos.SETTINGS().getString("Database.Type").toUpperCase();
+        String type = PicosPacos.SETTINGS.getString("Database.Type").toUpperCase();
         if (type.equals(current)) {
             return;
         } else {

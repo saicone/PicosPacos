@@ -1,4 +1,4 @@
-package me.rubenicos.mc.picospacos.core.paco;
+package me.rubenicos.mc.picospacos.core;
 
 import me.rubenicos.mc.picospacos.PicosPacos;
 import me.rubenicos.mc.picospacos.api.event.InventoryPacoEvent;
@@ -7,6 +7,7 @@ import me.rubenicos.mc.picospacos.api.object.PacoRule;
 import me.rubenicos.mc.picospacos.core.data.Database;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -44,7 +45,25 @@ public class Paco implements Listener {
         if (!file.reload()) {
             pl.getLogger().severe("Cannot reload rules.yml file");
         } else {
-            // Load rules...
+            file.getKeys().forEach(key -> {
+                if (file.isSection(key)) {
+                    String type = file.getString(key + ".type");
+                    if (!type.equals("null") || !type.isBlank()) {
+                        String[] types = type.split(",");
+                        PacoRule rule = null;
+                        for (String s : types) {
+                            s = s.trim();
+                            if (s.equalsIgnoreCase("DEATH")) {
+                                deathRules.add((rule == null ? rule = new PacoRule(file, key) : rule));
+                            } else if (s.equalsIgnoreCase("DROP")) {
+                                dropRules.add((rule == null ? rule = new PacoRule(file, key) : rule));
+                            }
+                        }
+                    }
+                } else {
+                    // Do stuff with JSON formatted string
+                }
+            });
         }
     }
 
@@ -87,8 +106,19 @@ public class Paco implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
         if (players.containsKey(e.getPlayer().getUniqueId())) {
-            e.getPlayer().getInventory().addItem(players.get(e.getPlayer().getUniqueId()).toArray(new ItemStack[0]));
-            players.get(e.getPlayer().getUniqueId()).clear();
+            if (PicosPacos.SETTINGS.getInt("Config.Respawn-Delay") > 0) {
+                Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
+                    if (e.getPlayer().isOnline()) {
+                        e.getPlayer().getInventory().addItem(players.get(e.getPlayer().getUniqueId()).toArray(new ItemStack[0]));
+                        players.get(e.getPlayer().getUniqueId()).clear();
+                    }
+                }, PicosPacos.SETTINGS.getInt("Config.Respawn-Delay") * 20L);
+            } else {
+                if (e.getPlayer().isOnline()) {
+                    e.getPlayer().getInventory().addItem(players.get(e.getPlayer().getUniqueId()).toArray(new ItemStack[0]));
+                    players.get(e.getPlayer().getUniqueId()).clear();
+                }
+            }
         }
     }
 

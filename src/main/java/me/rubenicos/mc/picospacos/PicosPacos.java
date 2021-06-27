@@ -1,7 +1,7 @@
 package me.rubenicos.mc.picospacos;
 
 import me.rubenicos.mc.picospacos.core.data.Database;
-import me.rubenicos.mc.picospacos.core.paco.Paco;
+import me.rubenicos.mc.picospacos.core.Paco;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import me.rubenicos.mc.picospacos.module.hook.HookLoader;
@@ -11,7 +11,7 @@ public class PicosPacos extends JavaPlugin {
 
     private static PicosPacos instance;
 
-    private static Settings SETTINGS;
+    public static final Settings SETTINGS = new Settings();
     private Paco paco;
 
     public static PicosPacos get() {
@@ -22,7 +22,7 @@ public class PicosPacos extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        SETTINGS = new Settings("settings.yml");
+        SETTINGS.init("settings.yml");
         SETTINGS.listener(this::onSettingsReload);
 
         paco = new Paco(this);
@@ -33,10 +33,6 @@ public class PicosPacos extends JavaPlugin {
         paco.disable();
         HookLoader.unload();
         Database.unload();
-    }
-
-    public static Settings SETTINGS() {
-        return SETTINGS;
     }
 
     private void onSettingsReload() {

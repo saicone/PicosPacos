@@ -1,6 +1,9 @@
 simpleRule:
   type: DEATH
   name: '&e&lThunder Sword'
+  lore:
+    - '&7This item can''t be'
+    - '&7lose on death!'
 complexRule:
   type: DEATH, DROP
   name:
