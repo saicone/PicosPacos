@@ -9,7 +9,6 @@ import java.sql.*;
 public class DatabaseSql extends Database {
 
     private Connection con;
-    private boolean useID;
 
     private String URL;
     private String USER;
@@ -61,6 +60,7 @@ public class DatabaseSql extends Database {
 
     @Override
     void enable() {
+        super.enable();
         try (Statement stmt = con.createStatement()) {
             stmt.executeUpdate(PicosPacos.SETTINGS.getString("Database.Sql.query.create", "CREATE TABLE IF NOT EXISTS picospacos_players (player VARCHAR(255) NOT NULL, saves INT, items MEDIUMTEXT, PRIMARY KEY(player))"));
         } catch (SQLException e) {
@@ -79,7 +79,7 @@ public class DatabaseSql extends Database {
 
     @Override
     void save(PlayerData data) {
-        if (data.onDB() && data.getItems().isEmpty()) {
+        if (data.isTrash()) {
             try (PreparedStatement stmt = con.prepareStatement(DELETE)) {
                 stmt.setString(1, useID ? data.getUuid() : data.getName());
                 stmt.executeUpdate();

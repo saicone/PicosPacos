@@ -20,13 +20,17 @@ public abstract class Database {
 
     private final Map<UUID, PlayerData> players = new HashMap<>();
 
+    boolean useID = true;
+
     boolean init() {
         return true;
     }
 
-    abstract void enable();
+    void enable() {
+        useID = PicosPacos.SETTINGS.getString("Database.Method").equalsIgnoreCase("UUID");
+    }
 
-    abstract void disable();
+    void disable() { }
 
     abstract void save(PlayerData data);
 

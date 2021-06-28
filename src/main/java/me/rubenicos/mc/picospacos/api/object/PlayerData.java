@@ -1,6 +1,5 @@
 package me.rubenicos.mc.picospacos.api.object;
 
-import me.rubenicos.mc.picospacos.module.Locale;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -89,5 +88,9 @@ public class PlayerData {
     public void addItems(List<ItemStack> items) {
         edited = true;
         this.items.addAll(items);
+    }
+
+    public boolean isTrash() {
+        return onDatabase && items.isEmpty() && saves == 0;
     }
 }
