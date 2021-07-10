@@ -35,7 +35,7 @@ public class Paco implements Listener {
     }
 
     public void disable() {
-        players.forEach((player, items) -> Database.get().getPlayer(player).addItems(items));
+        players.forEach((player, items) -> Database.Instance.get().getPlayer(player).addItems(items));
         players.clear();
         deathRules.clear();
         dropRules.clear();
@@ -71,12 +71,12 @@ public class Paco implements Listener {
     public void onDeath(PlayerDeathEvent e) {
         if (e.getKeepInventory()) return;
 
-        if (Database.get().getPlayer(e.getEntity()).getSaves() > 0) {
+        if (Database.Instance.get().getPlayer(e.getEntity()).getSaves() > 0) {
             InventoryPacoEvent event = new InventoryPacoEvent(e.getEntity(), e.getDrops());
             pl.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 e.setKeepInventory(true);
-                Database.get().getPlayer(e.getEntity()).reduceSaves(1);
+                Database.Instance.get().getPlayer(e.getEntity()).reduceSaves(1);
                 return;
             }
         }

@@ -25,6 +25,8 @@ public class PicosPacos extends JavaPlugin {
         SETTINGS.init("settings.yml");
         SETTINGS.listener(this::onSettingsReload);
 
+        Database.Instance.load(this);
+
         paco = new Paco(this);
     }
 
@@ -32,7 +34,7 @@ public class PicosPacos extends JavaPlugin {
     public void onDisable() {
         paco.disable();
         HookLoader.unload();
-        Database.unload();
+        Database.Instance.unload();
     }
 
     private void onSettingsReload() {
@@ -40,7 +42,7 @@ public class PicosPacos extends JavaPlugin {
             getLogger().severe("Cannot reload settings.yml file");
         }
         Locale.reload();
-        Database.reload();
+        Database.Instance.reload();
         HookLoader.reload();
     }
 }

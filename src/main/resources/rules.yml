@@ -1,17 +1,45 @@
-simpleRule:
-  type: DEATH
-  name: '&e&lThunder Sword'
+exampleRule1:
+  type: DEATH, DROP
+  material: 'CONTAINS=SWORD'
+  name: 'CONTAINS=Thunder'
   lore:
+    - 'EQUAL'
     - '&7This item can''t be'
     - '&7lose on death!'
-complexRule:
+  amount: 'REGEX=12|41|52'
+exampleRule2:
+  type: DEATH
+  material: 'IRON_PICKAXE'
+  name: 'REGEX=&eCool Pick(axe)?'
+  lore:
+    - 'CONTAINS'
+    - 'Protected'
+    - 'Second chance'
+exampleRule3:
+  type: DROP
+  material: 'IRON_BLOCK'
+  customModelData: 43
+  nbt:
+    someKey: 'internal data'
+    otherKey: true
+    somePath:
+      someKey: 'CONTAINS=custom'
+      otherKey: 53
+    someList:
+      0:
+        someKey: 'CONTAINS=nodrop'
+      2:
+        somePath:
+          someKey: 'internal data'
+    otherList: 'CONTAINS=protected'
+
+exampleRule4:
   type: DEATH, DROP
-  name:
-    contains:
-      - 'Thunder'
-      - 'Protected'
-    equals:
-      - '&e&lThunder Sword'
-      - '&cSome &eProtected &cItem'
-    regex:
-      - '(?i) '
+  material: 'DIAMOND_SHOVEL'
+  name: '&cThe Best Shovel'
+  lore:
+    - 'CONTAINS'
+    - 'Item of %player_name%'
+  enchantments:
+    - 'EQUAL=EXACT'
+    - 'FIRE_ASPECT=2'
