@@ -15,11 +15,25 @@ Locale:
 
 # Plugin configuration
 Config:
-  # Delay in seconds to give saved items on respawn
-  # Set to 0 to disable
-  Respawn-Delay: 0
-  # Delay in seconds to give saved on join (Only if player disconnects after death)
-  Join-Delay: 10
+  # Give saved items on player respawn
+  Respawn:
+    # Enable or not this function
+    Enabled: true
+    # Blacklisted worlds
+    Blacklist-Worlds:
+      - 'worldName'
+    # Delay in seconds to give saved items on respawn
+    # Set to 0 to disable
+    Delay: 0
+  # Give saved items on player joins (Only if player disconnects after death)
+  Join:
+    # Enable or not this function
+    Enabled: true
+    # Blacklisted worlds
+    Blacklist-Worlds:
+      - 'worldName'
+    # Delay in seconds to give saved on join
+    Delay: 10
 
 
 # Database configuration

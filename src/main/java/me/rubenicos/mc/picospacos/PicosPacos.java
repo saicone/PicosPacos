@@ -25,8 +25,6 @@ public class PicosPacos extends JavaPlugin {
         SETTINGS.init("settings.yml");
         SETTINGS.listener(this::onSettingsReload);
 
-        Database.Instance.load(this);
-
         paco = new Paco(this);
     }
 

@@ -84,10 +84,6 @@ public abstract class Database {
             return instance;
         }
 
-        public static void load(PicosPacos pl) {
-            PicosPacos.get().getServer().getPluginManager().registerEvents(new Database$Listener(pl), pl);
-        }
-
         public static void reload() {
             String type = PicosPacos.SETTINGS.getString("Database.Type").toUpperCase();
             if (type.equals(current)) {
@@ -143,46 +139,6 @@ public abstract class Database {
 
         public static String getCurrent() {
             return current;
-        }
-    }
-
-    private static final class Database$Listener implements Listener {
-
-        private final PicosPacos pl;
-
-        public Database$Listener(PicosPacos pl) {
-            this.pl = pl;
-        }
-
-        @SuppressWarnings("unused")
-        @EventHandler
-        public void onJoin(PlayerJoinEvent e) {
-            Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-                PlayerData data = Instance.get().loadPlayer(e.getPlayer());
-                if (!data.getItems().isEmpty()) {
-                    if (PicosPacos.SETTINGS.getInt("Config.Join-Delay") > 0) {
-                        Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
-                            if (e.getPlayer().isOnline()) {
-                                e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
-                                data.getItems().clear();
-                                data.setEdited(true);
-                            }
-                        }, PicosPacos.SETTINGS.getInt("Config.Join-Delay") * 20L);
-                    } else {
-                        if (e.getPlayer().isOnline()) {
-                            e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
-                            data.getItems().clear();
-                            data.setEdited(true);
-                        }
-                    }
-                }
-            });
-        }
-
-        @SuppressWarnings("unused")
-        @EventHandler
-        public void onQuit(PlayerQuitEvent e) {
-            Bukkit.getScheduler().runTaskAsynchronously(pl, () -> Instance.get().savePlayer(e.getPlayer()));
         }
     }
 }

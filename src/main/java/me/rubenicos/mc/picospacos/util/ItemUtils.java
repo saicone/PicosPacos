@@ -1,49 +1,76 @@
 package me.rubenicos.mc.picospacos.util;
 
-import com.google.common.base.Preconditions;
-import com.mojang.serialization.Dynamic;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.datafix.DataConverterRegistry;
-import net.minecraft.util.datafix.fixes.DataConverterTypes;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.*;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class ItemUtils {
 
-    public String serialize(ItemStack it) {
+    public String itemArrayToBase64(ItemStack[] items) {
+        String data = "";
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream)) {
+            dataOutput.writeInt(items.length);
+
+            for (ItemStack item : items) {
+                if (item != null) {
+                    dataOutput.writeObject(itemToBytes(item));
+                } else {
+                    dataOutput.writeObject(null);
+                }
+            }
+
+            data = Base64Coder.encodeLines(outputStream.toByteArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public ItemStack[] itemArrayFromBase64(String data) {
+        ItemStack[] items = null;
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data)); BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
+            ItemStack[] stacks = new ItemStack[dataInput.readInt()];
+
+            for (int Index = 0; Index < stacks.length; Index++) {
+                byte[] stack = (byte[]) dataInput.readObject();
+
+                if (stack != null) {
+                    stacks[Index] = itemFromBytes(stack);
+                } else {
+                    stacks[Index] = null;
+                }
+            }
+
+            items = stacks;
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    private byte[] itemToBytes(ItemStack it) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(out)))) {
             ItemNBT.Instance.get().writeNBT(it, dataOut);
-            return Base64Coder.encodeLines(out.toByteArray());
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        return null;
+        return out.toByteArray();
     }
 
-
-    public ItemStack deserializeItem(byte[] data) {
-        Preconditions.checkNotNull(data, "null cannot be deserialized");
-        Preconditions.checkArgument(data.length > 0, "cannot deserialize nothing");
-
-        try {
-            NBTTagCompound compound = net.minecraft.nbt.NBTCompressedStreamTools.readNBT(
-                    new ByteArrayInputStream(data)
-            );
-            int dataVersion = compound.getInt("DataVersion");
-
-            Preconditions.checkArgument(dataVersion <= getDataVersion(), "Newer version! Server downgrades are not supported!");
-            Dynamic<NBTBase> converted = DataConverterRegistry.getDataFixer().update(DataConverterTypes.ITEM_STACK, new Dynamic<NBTBase>(DynamicOpsNBT.a, compound), dataVersion, getDataVersion());
-            return CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.fromCompound((NBTTagCompound) converted.getValue()));
-        } catch (IOException ex) {
-            com.destroystokyo.paper.util.SneakyThrow.sneaky(ex);
-            throw new RuntimeException();
+    private ItemStack itemFromBytes(byte[] data) {
+        ItemStack item = null;
+        try (DataInputStream dataIn = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(data))))) {
+            item = ItemNBT.Instance.get().readNBT(dataIn);
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
+        return item;
     }
 
     public boolean nbtEquals(ItemStack item, String text, String[] path) {
