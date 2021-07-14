@@ -34,6 +34,14 @@ Config:
       - 'worldName'
     # Delay in seconds to give saved on join
     Delay: 10
+  # Drop warning configuration
+  Drop:
+    # Enable or not this feature
+    Enabled: true
+    # Blacklisted worlds
+    Blacklist-Worlds: []
+    # Permission to have this feature
+    Permission: 'picospacos.drop'
 
 
 # Database configuration
@@ -83,6 +91,8 @@ Hook:
     # To cache a request you need to add "_cache" at final of placeholder
     # or add "_cache:<seconds>" for custom time, for example %<identifier>_saves_cache:5%
     cache: 20
+    # Text to put in rule tags name to allow PlaceholderAPI
+    rule: 'allowPapi'
   # Vault hook
   Vault:
     # Enable or not this hook

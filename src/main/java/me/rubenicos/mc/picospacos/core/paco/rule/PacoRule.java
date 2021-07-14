@@ -1,4 +1,4 @@
-package me.rubenicos.mc.picospacos.api.object;
+package me.rubenicos.mc.picospacos.core.paco.rule;
 
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.inventory.ItemStack;

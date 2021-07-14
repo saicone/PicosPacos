@@ -1,9 +1,11 @@
 package me.rubenicos.mc.picospacos.api.object;
 
+import me.rubenicos.mc.picospacos.util.ItemUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PlayerData {
@@ -78,11 +80,11 @@ public class PlayerData {
     }
 
     public String items() {
-        return "";
+        return ItemUtils.itemArrayToBase64(items.toArray(new ItemStack[0]));
     }
 
     public void addItems(String items) {
-
+        this.items.addAll(Arrays.asList(ItemUtils.itemArrayFromBase64(items)));
     }
 
     public void addItems(List<ItemStack> items) {

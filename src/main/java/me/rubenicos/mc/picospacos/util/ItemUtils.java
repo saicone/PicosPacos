@@ -11,7 +11,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class ItemUtils {
 
-    public String itemArrayToBase64(ItemStack[] items) {
+    public static String itemArrayToBase64(ItemStack[] items) {
         String data = "";
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream)) {
             dataOutput.writeInt(items.length);
@@ -31,7 +31,7 @@ public class ItemUtils {
         return data;
     }
 
-    public ItemStack[] itemArrayFromBase64(String data) {
+    public static ItemStack[] itemArrayFromBase64(String data) {
         ItemStack[] items = null;
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data)); BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
             ItemStack[] stacks = new ItemStack[dataInput.readInt()];
@@ -53,7 +53,7 @@ public class ItemUtils {
         return items;
     }
 
-    private byte[] itemToBytes(ItemStack it) {
+    private static byte[] itemToBytes(ItemStack it) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(out)))) {
             ItemNBT.Instance.get().writeNBT(it, dataOut);
@@ -63,7 +63,7 @@ public class ItemUtils {
         return out.toByteArray();
     }
 
-    private ItemStack itemFromBytes(byte[] data) {
+    private static ItemStack itemFromBytes(byte[] data) {
         ItemStack item = null;
         try (DataInputStream dataIn = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(data))))) {
             item = ItemNBT.Instance.get().readNBT(dataIn);
@@ -73,28 +73,28 @@ public class ItemUtils {
         return item;
     }
 
-    public boolean nbtEquals(ItemStack item, String text, String[] path) {
+    public static boolean nbtEquals(ItemStack item, String text, String[] path) {
         for (String s : ItemNBT.Instance.get().of(item, path)) {
             if (s.equals(text)) return true;
         }
         return false;
     }
 
-    public boolean nbtEqualsIgnoreCase(ItemStack item, String text, String[] path) {
+    public static boolean nbtEqualsIgnoreCase(ItemStack item, String text, String[] path) {
         for (String s : ItemNBT.Instance.get().of(item, path)) {
             if (s.equalsIgnoreCase(text)) return true;
         }
         return false;
     }
 
-    public boolean nbtContains(ItemStack item, String text, String[] path) {
+    public static boolean nbtContains(ItemStack item, String text, String[] path) {
         for (String s : ItemNBT.Instance.get().of(item, path)) {
             if (s.contains(text)) return true;
         }
         return false;
     }
 
-    public boolean nbtRegex(ItemStack item, String text, String[] path) {
+    public static boolean nbtRegex(ItemStack item, String text, String[] path) {
         for (String s : ItemNBT.Instance.get().of(item, path)) {
             if (TextUtils.regexMatch(text, s)) return true;
         }

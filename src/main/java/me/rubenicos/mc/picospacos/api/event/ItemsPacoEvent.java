@@ -1,6 +1,6 @@
 package me.rubenicos.mc.picospacos.api.event;
 
-import me.rubenicos.mc.picospacos.api.object.PacoRule;
+import me.rubenicos.mc.picospacos.core.paco.rule.PacoRule;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

@@ -267,6 +267,14 @@ public class Locale {
         }
     }
 
+    public static String parsePlaceholders(Player player, String text) {
+        if (allowPAPI && text.contains("%")) {
+            return PlaceholderAPI.setPlaceholders(player, text);
+        } else {
+            return text;
+        }
+    }
+
     public static String color(String s) {
         if (useRGB && s.contains("&#")) {
             StringBuilder builder = new StringBuilder();

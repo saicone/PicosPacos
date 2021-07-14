@@ -1,11 +1,11 @@
-package me.rubenicos.mc.picospacos.core;
+package me.rubenicos.mc.picospacos.core.paco;
 
 import me.rubenicos.mc.picospacos.PicosPacos;
+import me.rubenicos.mc.picospacos.api.PicosPacosAPI;
 import me.rubenicos.mc.picospacos.api.event.InventoryPacoEvent;
 import me.rubenicos.mc.picospacos.api.event.ItemsPacoEvent;
-import me.rubenicos.mc.picospacos.api.object.PacoRule;
+import me.rubenicos.mc.picospacos.core.paco.rule.PacoRule;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
-import me.rubenicos.mc.picospacos.core.data.Database;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
@@ -38,7 +38,7 @@ public class Paco implements Listener {
     }
 
     public void disable() {
-        players.forEach((player, items) -> Database.Instance.get().getPlayer(player).addItems(items));
+        players.forEach((player, items) -> PicosPacosAPI.getPlayer(player).addItems(items));
         players.clear();
         deathRules.clear();
         dropRules.clear();
@@ -74,12 +74,12 @@ public class Paco implements Listener {
     public void onDeath(PlayerDeathEvent e) {
         if (e.getKeepInventory()) return;
 
-        if (Database.Instance.get().getPlayer(e.getEntity()).getSaves() > 0) {
+        if (PicosPacosAPI.getPlayer(e.getEntity()).getSaves() > 0) {
             InventoryPacoEvent event = new InventoryPacoEvent(e.getEntity(), e.getDrops());
             pl.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 e.setKeepInventory(true);
-                Database.Instance.get().getPlayer(e.getEntity()).reduceSaves(1);
+                PicosPacosAPI.getPlayer(e.getEntity()).reduceSaves(1);
                 return;
             }
         }
@@ -128,7 +128,7 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {
-        if (e.isCancelled()) return;
+        if (e.isCancelled() || !PicosPacos.SETTINGS.getBoolean("Config.Drop.Enabled") || PicosPacos.SETTINGS.getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName()) || !e.getPlayer().hasPermission(PicosPacos.SETTINGS.getString("Config.Drop.Permission", "picospacos.drop.protection"))) return;
 
         if (warnings.contains(e.getPlayer().getUniqueId())) {
             warnings.remove(e.getPlayer().getUniqueId());
@@ -147,7 +147,7 @@ public class Paco implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-            PlayerData data = Database.Instance.get().loadPlayer(e.getPlayer());
+            PlayerData data = PicosPacosAPI.loadPlayer(e.getPlayer());
             if (PicosPacos.SETTINGS.getBoolean("Config.Join.Enabled") && !PicosPacos.SETTINGS.getStringList("Config.Join.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
                 if (!data.getItems().isEmpty()) {
                     if (PicosPacos.SETTINGS.getInt("Config.Join.Delay", 10) > 0) {
@@ -172,6 +172,12 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        Bukkit.getScheduler().runTaskAsynchronously(pl, () -> Database.Instance.get().savePlayer(e.getPlayer()));
+        Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+            if (players.containsKey(e.getPlayer().getUniqueId())) {
+                PicosPacosAPI.getPlayer(e.getPlayer()).addItems(players.get(e.getPlayer().getUniqueId()));
+                players.remove(e.getPlayer().getUniqueId());
+            }
+            PicosPacosAPI.savePlayer(e.getPlayer());
+        });
     }
 }

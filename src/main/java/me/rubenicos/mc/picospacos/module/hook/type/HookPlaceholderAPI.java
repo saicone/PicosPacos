@@ -2,7 +2,7 @@ package me.rubenicos.mc.picospacos.module.hook.type;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.rubenicos.mc.picospacos.PicosPacos;
-import me.rubenicos.mc.picospacos.core.data.Database;
+import me.rubenicos.mc.picospacos.api.PicosPacosAPI;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.hook.HookType;
 import org.bukkit.Bukkit;
@@ -106,7 +106,7 @@ public class HookPlaceholderAPI implements HookType {
         if (args.length < 1) {
             return "Without enought args";
         } else if (args[0].toLowerCase().equals("saves")) {
-            result = String.valueOf(Database.get().getPlayer(player).getSaves());
+            result = String.valueOf(PicosPacosAPI.getPlayer(player).getSaves());
         }
 
         return (save ? cache(player.getName() + "|" + params, result, time) : result);

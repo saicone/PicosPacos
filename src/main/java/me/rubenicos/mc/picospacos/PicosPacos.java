@@ -1,7 +1,7 @@
 package me.rubenicos.mc.picospacos;
 
 import me.rubenicos.mc.picospacos.core.data.Database;
-import me.rubenicos.mc.picospacos.core.Paco;
+import me.rubenicos.mc.picospacos.core.paco.Paco;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import me.rubenicos.mc.picospacos.module.hook.HookLoader;

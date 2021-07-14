@@ -17,4 +17,20 @@ public class TextUtils {
         regexCache.put(regex, pattern);
         return pattern;
     }
+
+    public static int asInt(String s, int def) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e){
+            return def;
+        }
+    }
+
+    public static double asDouble(String s, double def) {
+        try {
+            return Double.parseDouble(s);
+        } catch (NullPointerException | NumberFormatException e){
+            return def;
+        }
+    }
 }
