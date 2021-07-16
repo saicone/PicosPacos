@@ -258,21 +258,28 @@ public class Locale {
     }
 
     public static String parsePlaceholders(Player player, String text, boolean color) {
-        if (color) text = color(text);
+        String s = allowPAPI && text.contains("%") ? PlaceholderAPI.setPlaceholders(player, text) : text;
+        return color ? color(s) : s;
+    }
 
-        if (allowPAPI && text.contains("%")) {
-            return PlaceholderAPI.setPlaceholders(player, text);
+    public static List<String> parsePlaceholders(Player player, List<String> list, boolean color) {
+        if (allowPAPI) {
+            List<String> list1 = new ArrayList<>();
+            list.forEach(s -> list1.add(color ? color(PlaceholderAPI.setPlaceholders(player, s)) : PlaceholderAPI.setPlaceholders(player, s)));
+            return list1;
+        } else if (color) {
+            List<String> list1 = new ArrayList<>();
+            list.forEach(s -> list1.add(color(s)));
+            return list1;
         } else {
-            return text;
+            return list;
         }
     }
 
-    public static String parsePlaceholders(Player player, String text) {
-        if (allowPAPI && text.contains("%")) {
-            return PlaceholderAPI.setPlaceholders(player, text);
-        } else {
-            return text;
-        }
+    public static List<String> color(List<String> list) {
+        List<String> list1 = new ArrayList<>();
+        list.forEach(s -> list1.add(color(s)));
+        return list1;
     }
 
     public static String color(String s) {

@@ -23,7 +23,7 @@ public class ComparatorType {
         }
     }
 
-    public boolean compare(String base, String variable) {
+    public boolean compareString(String base, String variable) {
         return base.equals(variable);
     }
 
@@ -31,25 +31,33 @@ public class ComparatorType {
         return base[0] == variable;
     }
 
-    public boolean compare(List<String> base, List<String> variable) {
+    public boolean compareInt(int variable, int... base) {
+        return base[0] == variable;
+    }
+
+    public boolean compareShort(short variable, short... base) {
+        return base[0] == variable;
+    }
+
+    public boolean compareList(List<String> base, List<String> variable) {
         for (String s : variable) {
             if (base.contains(s)) return true;
         }
         return false;
     }
 
-    public boolean compareAll(List<String> base, List<String> variable) {
+    public boolean compareListAll(List<String> base, List<String> variable) {
         return variable.containsAll(base);
     }
 
     private static final class Contains extends ComparatorType {
         @Override
-        public boolean compare(String base, String variable) {
+        public boolean compareString(String base, String variable) {
             return variable.contains(base);
         }
 
         @Override
-        public boolean compare(List<String> base, List<String> variable) {
+        public boolean compareList(List<String> base, List<String> variable) {
             for (String s : variable) {
                 for (String s1 : base) {
                     if (s.contains(s1)) return true;
@@ -59,7 +67,7 @@ public class ComparatorType {
         }
 
         @Override
-        public boolean compareAll(List<String> base, List<String> variable) {
+        public boolean compareListAll(List<String> base, List<String> variable) {
             for (String s : base) {
                 for (String s1 : variable) {
                     if (!s1.contains(s)) return false;
@@ -71,12 +79,12 @@ public class ComparatorType {
 
     private static final class Regex extends ComparatorType {
         @Override
-        public boolean compare(String base, String variable) {
+        public boolean compareString(String base, String variable) {
             return TextUtils.regexMatch(base, variable);
         }
 
         @Override
-        public boolean compare(List<String> base, List<String> variable) {
+        public boolean compareList(List<String> base, List<String> variable) {
             for (String s : variable) {
                 for (String s1 : base) {
                     if (TextUtils.regexMatch(s1, s)) return true;
@@ -86,7 +94,7 @@ public class ComparatorType {
         }
 
         @Override
-        public boolean compareAll(List<String> base, List<String> variable) {
+        public boolean compareListAll(List<String> base, List<String> variable) {
             for (String s : base) {
                 for (String s1 : variable) {
                     if (!TextUtils.regexMatch(s, s1)) return false;
@@ -101,6 +109,16 @@ public class ComparatorType {
         public boolean compareDouble(double variable, double... base) {
             return base[0] < variable;
         }
+
+        @Override
+        public boolean compareInt(int variable, int... base) {
+            return base[0] < variable;
+        }
+
+        @Override
+        public boolean compareShort(short variable, short... base) {
+            return base[0] < variable;
+        }
     }
 
     private static final class Less extends ComparatorType {
@@ -108,11 +126,39 @@ public class ComparatorType {
         public boolean compareDouble(double variable, double... base) {
             return base[0] > variable;
         }
+
+        @Override
+        public boolean compareInt(int variable, int... base) {
+            return base[0] > variable;
+        }
+
+        @Override
+        public boolean compareShort(short variable, short... base) {
+            return base[0] > variable;
+        }
     }
 
     private static final class Between extends ComparatorType {
         @Override
         public boolean compareDouble(double variable, double... base) {
+            if (base.length > 1) {
+                return base[0] < Math.max(base[0], base[1]) && variable > base[0];
+            } else {
+                return base[0] == variable;
+            }
+        }
+
+        @Override
+        public boolean compareInt(int variable, int... base) {
+            if (base.length > 1) {
+                return base[0] < Math.max(base[0], base[1]) && variable > base[0];
+            } else {
+                return base[0] == variable;
+            }
+        }
+
+        @Override
+        public boolean compareShort(short variable, short... base) {
             if (base.length > 1) {
                 return base[0] < Math.max(base[0], base[1]) && variable > base[0];
             } else {

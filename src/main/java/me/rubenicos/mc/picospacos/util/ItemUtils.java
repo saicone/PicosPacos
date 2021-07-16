@@ -1,11 +1,17 @@
 package me.rubenicos.mc.picospacos.util;
 
+import com.google.common.collect.Multimap;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.*;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -71,6 +77,22 @@ public class ItemUtils {
             e.printStackTrace();
         }
         return item;
+    }
+
+    public static List<String> flagsToList(Set<ItemFlag> flags) {
+        List<String> list = new ArrayList<>();
+        flags.forEach(flag -> list.add(flag.name()));
+        return list;
+    }
+
+    public static Set<Map.Entry<String, Integer>> enchantsToSet(Map<Enchantment, Integer> enchants) {
+        Map<String, Integer> map = new HashMap<>();
+        enchants.forEach((enchant, level) -> map.put(enchant.toString(), level));
+        return map.entrySet();
+    }
+
+    public static Multimap<String, String> attributesToMap(Multimap<Attribute, AttributeModifier> attributes) {
+
     }
 
     public static boolean nbtEquals(ItemStack item, String text, String[] path) {

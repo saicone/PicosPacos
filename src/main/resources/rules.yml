@@ -35,8 +35,8 @@ exampleRule4:
   type: DEATH, DROP
   material: 'DIAMOND_SHOVEL'
   name: '&cThe Best Shovel'
-  lore:contains:all:
+  lore:contains:all<allowPapi>:
     - 'Item of %player_name%'
     - 'Protected item'
-  enchantments:equal:exact:
+  enchantments:equal:exact:all:
     - 'FIRE_ASPECT=2'
