@@ -188,6 +188,15 @@ public class Settings {
         return keys;
     }
 
+    public List<String> getKeys(String path) {
+        DYModule module = get(path);
+        if (module != null && !module.getChildModules().isEmpty()) {
+            return module.getKeys();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     @NotNull
     public String getString(@NotNull String path, String def) {
         return String.valueOf(cache.getOrDefault(path, cache(path, getString0(path, def))));

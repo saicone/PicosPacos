@@ -1,8 +1,5 @@
 package me.rubenicos.mc.picospacos.util;
 
-import com.google.common.collect.Multimap;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -89,10 +86,6 @@ public class ItemUtils {
         Map<String, Integer> map = new HashMap<>();
         enchants.forEach((enchant, level) -> map.put(enchant.toString(), level));
         return map.entrySet();
-    }
-
-    public static Multimap<String, String> attributesToMap(Multimap<Attribute, AttributeModifier> attributes) {
-
     }
 
     public static boolean nbtEquals(ItemStack item, String text, String[] path) {

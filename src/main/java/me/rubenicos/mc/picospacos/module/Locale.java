@@ -257,10 +257,19 @@ public class Locale {
         }
     }
 
+    public static String parsePlaceholders(Player player, String text) {
+        return parsePlaceholders(player, text, false);
+    }
+
     public static String parsePlaceholders(Player player, String text, boolean color) {
         String s = allowPAPI && text.contains("%") ? PlaceholderAPI.setPlaceholders(player, text) : text;
         return color ? color(s) : s;
     }
+
+    public static List<String> parsePlaceholders(Player player, List<String> list) {
+        return parsePlaceholders(player, list, false);
+    }
+
 
     public static List<String> parsePlaceholders(Player player, List<String> list, boolean color) {
         if (allowPAPI) {

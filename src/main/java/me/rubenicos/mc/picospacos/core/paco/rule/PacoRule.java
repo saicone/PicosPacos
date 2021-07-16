@@ -1,15 +1,24 @@
 package me.rubenicos.mc.picospacos.core.paco.rule;
 
-import me.rubenicos.mc.picospacos.module.Settings;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class PacoRule {
+import java.util.List;
 
-    public PacoRule(Settings file, String key) {
+public final class PacoRule {
 
+    private final List<TagType> tags;
+
+    public PacoRule(List<TagType> tags) {
+        this.tags = tags;
     }
 
-    public boolean match(ItemStack item) {
+    public boolean match(ItemStack item, Player player) {
+        for (TagType tag : tags) {
+            if (!tag.valid(item, player)) {
+                return false;
+            }
+        }
         return true;
     }
 }

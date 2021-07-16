@@ -6,6 +6,7 @@ import me.rubenicos.mc.picospacos.api.event.InventoryPacoEvent;
 import me.rubenicos.mc.picospacos.api.event.ItemsPacoEvent;
 import me.rubenicos.mc.picospacos.core.paco.rule.PacoRule;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
+import me.rubenicos.mc.picospacos.core.paco.rule.Parameter;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
@@ -57,9 +58,19 @@ public class Paco implements Listener {
                         for (String s : types) {
                             s = s.trim();
                             if (s.equalsIgnoreCase("DEATH")) {
-                                deathRules.add((rule == null ? rule = new PacoRule(file, key) : rule));
+                                if (rule == null) {
+                                    rule = Parameter.ruleOf(file, key);
+                                }
+                                if (rule != null) {
+                                    deathRules.add(rule);
+                                }
                             } else if (s.equalsIgnoreCase("DROP")) {
-                                dropRules.add((rule == null ? rule = new PacoRule(file, key) : rule));
+                                if (rule == null) {
+                                    rule = Parameter.ruleOf(file, key);
+                                }
+                                if (rule != null) {
+                                    dropRules.add(rule);
+                                }
                             }
                         }
                     }
@@ -87,7 +98,7 @@ public class Paco implements Listener {
         deathRules.forEach(rule -> {
             List<ItemStack> matches = new ArrayList<>();
             e.getDrops().forEach(item -> {
-                if (rule.match(item)) {
+                if (rule.match(item, e.getEntity())) {
                     matches.add(item);
                 }
             });
@@ -136,7 +147,7 @@ public class Paco implements Listener {
         }
 
         dropRules.forEach(rule -> {
-            if (rule.match(e.getItemDrop().getItemStack())) {
+            if (rule.match(e.getItemDrop().getItemStack(), e.getPlayer())) {
                 e.setCancelled(true);
                 warnings.add(e.getPlayer().getUniqueId());
                 Locale.sendTo(e.getPlayer(), "");

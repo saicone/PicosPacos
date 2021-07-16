@@ -29,7 +29,8 @@ exampleRule3:
       2:
         somePath:
           someKey: 'internal data'
-    otherList:contains: 'protected'
+    otherList:contains:
+      - 'protected'
 
 exampleRule4:
   type: DEATH, DROP
