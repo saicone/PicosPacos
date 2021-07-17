@@ -39,13 +39,13 @@ public class Paco implements Listener {
     }
 
     public void disable() {
-        players.forEach((player, items) -> PicosPacosAPI.getPlayer(player).addItems(items));
+        players.forEach((player, items) -> PicosPacosAPI.getPlayerOrLoad(player).addItems(items));
         players.clear();
         deathRules.clear();
         dropRules.clear();
     }
 
-    private void onRulesReload() {
+    public void onRulesReload() {
         if (!file.reload()) {
             pl.getLogger().severe("Cannot reload rules.yml file");
         } else {
@@ -75,7 +75,7 @@ public class Paco implements Listener {
                         }
                     }
                 } else {
-                    // Do stuff with JSON formatted string
+                    // TODO: Do stuff with JSON formatted string
                 }
             });
         }
@@ -85,12 +85,13 @@ public class Paco implements Listener {
     public void onDeath(PlayerDeathEvent e) {
         if (e.getKeepInventory()) return;
 
-        if (PicosPacosAPI.getPlayer(e.getEntity()).getSaves() > 0) {
+        PlayerData player = PicosPacosAPI.getPlayer(e.getEntity());
+        if (player != null && player.getSaves() > 0) {
             InventoryPacoEvent event = new InventoryPacoEvent(e.getEntity(), e.getDrops());
             pl.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 e.setKeepInventory(true);
-                PicosPacosAPI.getPlayer(e.getEntity()).reduceSaves(1);
+                player.reduceSaves(1);
                 return;
             }
         }
@@ -150,7 +151,7 @@ public class Paco implements Listener {
             if (rule.match(e.getItemDrop().getItemStack(), e.getPlayer())) {
                 e.setCancelled(true);
                 warnings.add(e.getPlayer().getUniqueId());
-                Locale.sendTo(e.getPlayer(), "");
+                Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
             }
         });
     }
@@ -185,7 +186,7 @@ public class Paco implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
             if (players.containsKey(e.getPlayer().getUniqueId())) {
-                PicosPacosAPI.getPlayer(e.getPlayer()).addItems(players.get(e.getPlayer().getUniqueId()));
+                PicosPacosAPI.getPlayerOrLoad(e.getPlayer()).addItems(players.get(e.getPlayer().getUniqueId()));
                 players.remove(e.getPlayer().getUniqueId());
             }
             PicosPacosAPI.savePlayer(e.getPlayer());

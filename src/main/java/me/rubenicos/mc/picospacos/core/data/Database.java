@@ -56,11 +56,25 @@ public abstract class Database {
     }
 
     public PlayerData getPlayer(Player player) {
-        return players.getOrDefault(player.getUniqueId(), loadPlayer(player));
+        return getPlayer(player.getUniqueId(), false);
+    }
+
+    public PlayerData getPlayer(Player player, boolean load) {
+        return getPlayer(player.getUniqueId(), load);
     }
 
     public PlayerData getPlayer(UUID uuid) {
-        return players.get(uuid);
+        return getPlayer(uuid, false);
+    }
+
+    public PlayerData getPlayer(UUID uuid, boolean load) {
+        if (players.containsKey(uuid)) {
+            return players.get(uuid);
+        } else if (load) {
+            return loadPlayer(Bukkit.getOfflinePlayer(uuid).getName(), uuid);
+        } else {
+            return null;
+        }
     }
 
     public static class Instance {

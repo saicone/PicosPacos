@@ -124,8 +124,8 @@ public class Locale {
      * @param args Arguments to replace via {@link #replaceArgs(String, String...)}.
      */
     public static void log(int level, String path, String... args) {
-        if (level <= logLevel) {
-            sendToConsole(path, args);
+        if (level >= logLevel) {
+            text(Bukkit.getConsoleSender(), replaceArgs(lang.getStringList(path), args));
         }
     }
 
@@ -152,9 +152,11 @@ public class Locale {
                     sendTitle((Player) user, lang.getString(path + ".title"), lang.getString(path + ".subtitle"), lang.getInt(path + ".fadeIn", 10), lang.getInt(path + ".stay", 70), lang.getInt(path + ".fadeOut", 20), args);
                 } else if (type.equals("actionbar")) {
                     sendActionbar((Player) user, lang.getString(path + ".text"), args);
+                } else {
+                    log(1, "Log.Locale.Invalid-Type", type, path);
                 }
             } else {
-                log(0, "&cCannot send complex message type to console! Path: {0}", path);
+                log(1, "Log.Locale.Unsupported-Sender", path);
             }
         } else {
             text(user, replaceArgs(lang.getStringList(path), args));
@@ -318,7 +320,8 @@ public class Locale {
         try {
             Integer.parseInt(color, 16);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Invalid HEX color: #" + color);
+            log(2, "Log.Locale.Invalid-Hex", color);
+            return "<Invalid HEX>";
         }
 
         StringBuilder hex = new StringBuilder("§x");

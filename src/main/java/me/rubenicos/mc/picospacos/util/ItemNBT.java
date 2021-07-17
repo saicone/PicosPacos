@@ -7,9 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.*;
 
 /**
@@ -19,15 +16,13 @@ import java.util.*;
  */
 public class ItemNBT {
 
-    final MethodHandles.Lookup lookup = MethodHandles.lookup();
-    final Map<String, MethodHandle> methods = new HashMap<>();
-
     public ItemNBT() {
         try {
             Class<?> craft = Class.forName("org.bukkit.craftbukkit." + Instance.version + ".inventory.CraftItemStack");
-            Class<?> stack = Class.forName("net.minecraft.server." + Instance.version + ".ItemStack");
-            methods.put("asNMSCopy", lookup.findStatic(craft, "asNMSCopy", MethodType.methodType((Instance.verNumber >= 17 ? net.minecraft.world.item.ItemStack.class : stack), ItemStack.class)));
-            methods.put("asCraftMirror", lookup.findStatic(craft, "asCraftMirror", MethodType.methodType(ItemStack.class, (Instance.verNumber >= 17 ? net.minecraft.world.item.ItemStack.class : stack))));
+            Class<?> stack = Instance.verNumber >= 17 ? net.minecraft.world.item.ItemStack.class : Class.forName("net.minecraft.server." + Instance.version + ".ItemStack");
+
+            LookupUtils.addStaticMethod("asNMSCopy", craft, "asNMSCopy", stack, ItemStack.class);
+            LookupUtils.addStaticMethod("asCraftMirror", craft, "asNMSCopy", ItemStack.class, stack);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -44,7 +39,7 @@ public class ItemNBT {
     public List<String> of(ItemStack item, String... path) {
         net.minecraft.world.item.ItemStack stack = null;
         try {
-            stack = (net.minecraft.world.item.ItemStack) methods.get("asNMSCopy").invoke(item);
+            stack = (net.minecraft.world.item.ItemStack) LookupUtils.get("asNMSCopy").invoke(item);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
@@ -88,7 +83,7 @@ public class ItemNBT {
     public void writeNBT(ItemStack item, DataOutput dataOutput) throws Throwable {
         net.minecraft.world.item.ItemStack stack = null;
         try {
-            stack = (net.minecraft.world.item.ItemStack) methods.get("asNMSCopy").invoke(item);
+            stack = (net.minecraft.world.item.ItemStack) LookupUtils.get("asNMSCopy").invoke(item);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
@@ -99,7 +94,7 @@ public class ItemNBT {
 
     public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
         NBTTagCompound compound = NBTCompressedStreamTools.a((DataInput) dataInput);
-        return (ItemStack) methods.get("asCraftMirror").invoke(net.minecraft.world.item.ItemStack.a(compound));
+        return (ItemStack) LookupUtils.get("asCraftMirror").invoke(net.minecraft.world.item.ItemStack.a(compound));
     }
 
     // Class instance for old server versions
@@ -114,19 +109,19 @@ public class ItemNBT {
             Class<?> c2 = null;
             try {
                 c1 = Class.forName("net.minecraft.server." + Instance.version + ".NBTTagCompound");
-                methods.put("get", lookup.findVirtual(c1, "get", MethodType.methodType(Class.forName("net.minecraft.server." + Instance.version + ".NBTBase"), String.class)));
+                LookupUtils.addMethod("get", c1, "get", Class.forName("net.minecraft.server." + Instance.version + ".NBTBase"), String.class);
 
                 c2 = Class.forName("net.minecraft.server." + Instance.version + ".NBTTagList");
-                methods.put("list", lookup.findGetter(c2, "list", List.class));
+                LookupUtils.addField("list", c2, "list", List.class);
 
                 Class<?> itemStack = Class.forName("net.minecraft.server." + Instance.version + ".ItemStack");
-                methods.put("stack", lookup.findConstructor(itemStack, MethodType.methodType(void.class, c1)));
-                methods.put("hasTag", lookup.findVirtual(itemStack, "hasTag", MethodType.methodType(Boolean.class)));
-                methods.put("setTag", lookup.findVirtual(itemStack, "getTag", MethodType.methodType(c1)));
+                LookupUtils.addConstructor("stack", itemStack, void.class, c1);
+                LookupUtils.addMethod("hasTag", itemStack, "hasTag", Boolean.class);
+                LookupUtils.addMethod("setTag", itemStack, "getTag", c1);
 
                 Class<?> streamTools = Class.forName("net.minecraft.server." + Instance.version + ".NBTCompressedStreamTools");
-                methods.put("write", lookup.findStatic(streamTools, "a", MethodType.methodType(void.class, c1, DataOutput.class)));
-                methods.put("read", lookup.findStatic(streamTools, "a", MethodType.methodType(c1, (Instance.verNumber >= 13 ? DataInput.class : DataInputStream.class))));
+                LookupUtils.addStaticMethod("write", streamTools, "a", void.class, c1, DataOutput.class);
+                LookupUtils.addStaticMethod("read", streamTools, "a", c1, Instance.verNumber >= 13 ? DataInput.class : DataInputStream.class);
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
                 e.printStackTrace();
             }
@@ -137,13 +132,13 @@ public class ItemNBT {
         @Override
         public List<String> of(ItemStack item, String... path) {
             try {
-                Object stack = methods.get("asNMSCopy").invoke(item);
-                if (stack == null || methods.get("hasTag").invokeExact(stack).equals(false)) return Collections.emptyList();
+                Object stack = LookupUtils.get("asNMSCopy").invoke(item);
+                if (stack == null || LookupUtils.get("hasTag").invokeExact(stack).equals(false)) return Collections.emptyList();
 
-                Object compound = methods.get("getTag").invokeExact(stack);
+                Object compound = LookupUtils.get("getTag").invokeExact(stack);
                 for (String s : path) {
                     if (tagCompound.isInstance(compound)) {
-                        compound = methods.get("get").invokeExact(stack, s);
+                        compound = LookupUtils.get("get").invokeExact(stack, s);
                     } else if (tagList.isInstance(compound)) {
                         int i;
                         try {
@@ -151,7 +146,7 @@ public class ItemNBT {
                         } catch (NumberFormatException e) {
                             return Collections.emptyList();
                         }
-                        compound = ((List<?>) methods.get("list").invokeExact(compound)).get(i);
+                        compound = ((List<?>) LookupUtils.get("list").invokeExact(compound)).get(i);
                     } else {
                         if (compound == null) {
                             return Collections.emptyList();
@@ -162,7 +157,7 @@ public class ItemNBT {
                 }
                 if (tagList.isInstance(compound)) {
                     List<String> list = new ArrayList<>();
-                    ((List<?>) methods.get("list").invokeExact(compound)).forEach(base -> {
+                    ((List<?>) LookupUtils.get("list").invokeExact(compound)).forEach(base -> {
                         if (!tagCompound.isInstance(base) && !tagList.isInstance(base)) {
                             list.add(base.toString());
                         }
@@ -177,20 +172,20 @@ public class ItemNBT {
 
         @Override
         public void writeNBT(ItemStack item, DataOutput dataOutput) throws Throwable {
-            Object stack = methods.get("asNMSCopy").invoke(item);
+            Object stack = LookupUtils.get("asNMSCopy").invoke(item);
 
             if (stack == null) return;
 
-            Object base = methods.get("getTag").invokeExact(stack);
+            Object base = LookupUtils.get("getTag").invokeExact(stack);
             if (base != null) {
-                methods.get("write").invoke(base, dataOutput);
+                LookupUtils.get("write").invoke(base, dataOutput);
             }
         }
 
         @Override
         public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
-            Object compound = methods.get("read").invoke(dataInput);
-            return (ItemStack) methods.get("asCraftMirror").invoke(methods.get("stack").invoke(compound));
+            Object compound = LookupUtils.get("read").invoke(dataInput);
+            return (ItemStack) LookupUtils.get("asCraftMirror").invoke(LookupUtils.get("stack").invoke(compound));
         }
     }
 

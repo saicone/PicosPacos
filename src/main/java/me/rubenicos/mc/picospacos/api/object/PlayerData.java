@@ -70,6 +70,11 @@ public class PlayerData {
         saves = saves + amount;
     }
 
+    public void takeSaves(int amount) {
+        edited = true;
+        saves = saves - amount;
+    }
+
     public void reduceSaves(int amount) {
         edited = true;
         saves = saves - amount;

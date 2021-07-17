@@ -1,0 +1,39 @@
+Paco:
+  Drop:
+    # You can change message types, for example
+    # To send a title use "title" type and add parameters
+    # Warning:
+    #   type: 'title'
+    #   title: '&cAre you sure to drop this item?'
+    #   subtitle: '&fDrop again to confirm'
+    #   fadeIn: 10
+    #   stay: 70
+    #   fadeOut: 20
+    # To send a actionbar use "actionbar" type and add parameters
+    # Warning:
+    #   type: actionbar
+    #   text: '&c&lDrop again the item to confirm'
+    # Messages without type be displayed on chat
+    Warning: '&c&lAre you sure to drop this item? &f&lDrop again to confirm'
+
+Command:
+  Help:
+    - '&6----------[PicosPacos]------------'
+    - '&e/picospacos &7- &fView info about plugin'
+    - '&e/picospacos help &7- &fDisplay this information'
+    - '&e/picospacos reload &7- &fReload the plugin'
+    - '&e/picospacos saves <give/take/set> <player> <amount> &7- &fEdit player saves'
+    - '&6---------------------------------'
+  Reload: '&6Picos&ePacos &8» &aPlugin reloaded successfully &a[&f{0} &ams]'
+  Saves:
+    Usage: '&6Picos&ePacos &8» &eUsage: &f/picospacos saves <give/take/set> <player> <amount>'
+    Invalid-Amount: '&6Picos&ePacos &8» &c"{0}" is not a valid number!'
+    Give: '&6Picos&ePacos &8» &aThe player &f{0} received &f{1} &ainventory saves'
+    Take: '&6Picos&ePacos &8» &f{0} &cinventory saves have been removed from player &f{1}'
+    Set: '&6Picos&ePacos &8» &9The player &f{0} &9now has &f{1} &9inventory saves'
+
+Log:
+  Locale:
+    Invalid-Hex: '&6Invalid HEX color "{0}"'
+    Invalid-Type: '&cMessage type "{0}" is invalid! Path {1}'
+    Unsupported-Sender: '&cCannot send complex message type to console! Path: {0}'

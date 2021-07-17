@@ -97,3 +97,15 @@ Hook:
   Vault:
     # Enable or not this hook
     enabled: true
+
+# Plugin command configuration
+Command:
+  aliases:
+    - 'ppacos'
+    - 'picosp'
+    - 'pp'
+  permission:
+    use: 'picospacos.use'
+    help: 'picospacos.command.help'
+    reload: 'picospacos.command.reload'
+    saves: 'picospacos.command.saves'
