@@ -1,4 +1,8 @@
 exampleRule1:
+  # Rule types can be:
+  # DEATH - Items who match be protected after death
+  # DROP - Items who match will display a warning when player try to drop
+  # DISABLED - Disable the rule
   type: DEATH, DROP
   material:contains: 'SWORD'
   name:contains: 'Thunder'

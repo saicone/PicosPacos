@@ -55,29 +55,43 @@ public class Paco implements Listener {
                     if (!type.equals("null") || !type.isBlank()) {
                         String[] types = type.split(",");
                         PacoRule rule = null;
+                        boolean invalid = false;
                         for (String s : types) {
+                            if (invalid) break;
                             s = s.trim();
                             if (s.equalsIgnoreCase("DEATH")) {
                                 if (rule == null) {
                                     rule = Parameter.ruleOf(file, key);
                                 }
-                                if (rule != null) {
+                                if (rule == null) {
+                                    invalid = true;
+                                    Locale.sendToConsole("Paco.Error.Tags", key);
+                                } else {
                                     deathRules.add(rule);
                                 }
                             } else if (s.equalsIgnoreCase("DROP")) {
                                 if (rule == null) {
                                     rule = Parameter.ruleOf(file, key);
                                 }
-                                if (rule != null) {
+                                if (rule == null) {
+                                    invalid = true;
+                                    Locale.sendToConsole("Paco.Error.Tags", key);
+                                } else {
                                     dropRules.add(rule);
                                 }
+                            } else if (!s.equalsIgnoreCase("DISABLED")) {
+                                Locale.sendToConsole("Paco.Error.Rule-Type", s, key);
                             }
                         }
+                    } else {
+                        Locale.sendToConsole("Paco.Error.Rule-Type", type, key);
                     }
                 } else {
                     // TODO: Do stuff with JSON formatted string
+                    Locale.sendToConsole("Paco.Error.Section", key);
                 }
             });
+            Locale.sendToConsole("Paco.Loaded", String.valueOf(deathRules.size() + dropRules.size()));
         }
     }
 

@@ -21,7 +21,7 @@ import java.util.*;
 
 public class Settings {
 
-    private final PicosPacos pl = PicosPacos.get();
+    private PicosPacos pl;
     private final Map<String, Boolean> sections = new HashMap<>();
     private final List<String> keys = new ArrayList<>();
     private final Map<String, Object> cache = new HashMap<>();
@@ -49,6 +49,7 @@ public class Settings {
     }
 
     public void init(String path, String defPath, boolean requireDef, boolean update) {
+        this.pl = PicosPacos.get();
         this.path = path;
         this.update = update;
         InputStream in = pl.getResource(path);

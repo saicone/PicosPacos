@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 
-import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 public class CommandLoader {
@@ -17,36 +17,58 @@ public class CommandLoader {
     static {
         CommandMap m = null;
         try {
-            m = (CommandMap) LookupUtils.getField(Bukkit.getServer().getClass(), "commandMap", CommandMap.class).invoke(Bukkit.getServer());
+            m = (CommandMap) LookupUtils.getField(Bukkit.getServer().getClass(), "commandMap").get(Bukkit.getServer());
+            Class<? extends CommandMap> c1 = m.getClass();
+            LookupUtils.addField("commands", c1.getSimpleName().equals("CraftCommandMap") ? c1.getSuperclass() : c1, "knownCommands", Map.class);
         } catch (Throwable e) {
             e.printStackTrace();
         }
         map = m;
     }
 
+    @SuppressWarnings("unchecked")
     public static void reload() {
-        if (!cmd.isRegistered()) {
-            map.register("picospacos", cmd);
+        cmd.setPermission(PicosPacos.SETTINGS.getString("Command.permission.use", "picospacos.use"));
+        cmd.setPerms(PicosPacos.SETTINGS.getString("Command.permission.all", "picospacos.*"),PicosPacos.SETTINGS.getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.SETTINGS.getString("Command.permission.saves", "picospacos.command.saves"));
+
+        Map<String, Command> commands;
+        try {
+            commands = (Map<String, Command>) LookupUtils.get("commands").invoke(map);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return;
         }
-        cmd.setAliases(PicosPacos.SETTINGS.getStringList("Command.aliases"));
-        cmd.setPermission(PicosPacos.SETTINGS.getString("Command.permission.use"));
+        if (!cmd.isRegistered()) {
+            commands.put("picospacos", cmd);
+            cmd.register(map);
+        }
+        List<String> aliases = PicosPacos.SETTINGS.getStringList("Command.aliases");
+        cmd.getAliases().forEach(alias -> {
+            if (!aliases.contains(alias) && !alias.equalsIgnoreCase("picospacos") && commands.containsKey(alias) && commands.get(alias).getName().equalsIgnoreCase("picospacos")) {
+                commands.remove(alias);
+            }
+        });
+        aliases.forEach(alias -> {
+            if (!cmd.getAliases().contains(alias) && !alias.equalsIgnoreCase("picospacos") && !commands.containsKey(alias)) {
+                commands.put(alias, cmd);
+            }
+        });
+        cmd.setAliases(aliases);
     }
 
     @SuppressWarnings("unchecked")
     public static void unload() {
-        Class<? extends CommandMap> m = map.getClass();
+        if (!cmd.isRegistered()) return;
         Map<String, Command> commands;
         try {
-            final Field cmds = m.getSimpleName().equals("CraftCommandMap") ? m.getSuperclass().getDeclaredField("knownCommands") : m.getDeclaredField("knownCommands");
-            cmds.setAccessible(true);
-            commands = (Map<String, Command>) cmds.get(map);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+            commands = (Map<String, Command>) LookupUtils.get("commands").invoke(map);
+        } catch (Throwable e) {
             e.printStackTrace();
             return;
         }
-        commands.remove(cmd.getName());
+        commands.remove("picospacos");
         cmd.getAliases().forEach(alias -> {
-            if (commands.containsKey(alias) && commands.get(alias).toString().contains(cmd.getName())) {
+            if (commands.containsKey(alias) && commands.get(alias).getName().equalsIgnoreCase("picospacos")) {
                 commands.remove(alias);
             }
         });

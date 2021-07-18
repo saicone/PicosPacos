@@ -42,10 +42,13 @@ dependencies {
     compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
 }
 
+compileJava {
+    options.release = 11
+}
+
 shadowJar {
     relocate 'com.osiris.dyml', project.group + '.module.lib.dyml'
     minimize()
-    archiveClassifier.set('')
 }
 
 jar.dependsOn (shadowJar)

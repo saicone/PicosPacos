@@ -105,7 +105,7 @@ Command:
     - 'picosp'
     - 'pp'
   permission:
+    all: 'picospacos.*'
     use: 'picospacos.use'
-    help: 'picospacos.command.help'
     reload: 'picospacos.command.reload'
     saves: 'picospacos.command.saves'

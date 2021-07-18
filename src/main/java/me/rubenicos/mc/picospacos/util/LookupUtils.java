@@ -3,6 +3,7 @@ package me.rubenicos.mc.picospacos.util;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,11 +26,14 @@ public class LookupUtils {
     }
 
     public static void addField(String name, Class<?> clazz, String field, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-        methods.put(name, getField(clazz, field, type));
+        Field f = getField(clazz, field);
+        methods.put(name, lookup.unreflectGetter(f));
     }
 
-    public static MethodHandle getField(Class<?> clazz, String field, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-        return lookup.findGetter(clazz, field, type);
+    public static Field getField(Class<?> clazz, String field) throws NoSuchFieldException {
+        Field f = clazz.getDeclaredField(field);
+        f.setAccessible(true);
+        return f;
     }
 
     public static void addConstructor(String name, Class<?> clazz, Class<?>... classes) throws NoSuchMethodException, IllegalAccessException {

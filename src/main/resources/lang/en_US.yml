@@ -15,8 +15,14 @@ Paco:
     #   text: '&c&lDrop again the item to confirm'
     # Messages without type be displayed on chat
     Warning: '&c&lAre you sure to drop this item? &f&lDrop again to confirm'
+  Loaded: '&6Picos&ePacos &8» &aPaco loaded &f{0} &aitem rules'
+  Error:
+    Section: '&6Picos&ePacos &8» &cPath "{0}" isn''t a section!'
+    Rule-Type: '&6Picos&ePacos &8» &cUnknown rule type "{0}", check rule {1} on rules.yml'
+    Tags: '&6Picos&ePacos &8» &cRule {0} has not tags to parse!'
 
 Command:
+  NoPerm: '&6Picos&ePacos &8» &cYou don''t have permission to execute this command!'
   Help:
     - '&6----------[PicosPacos]------------'
     - '&e/picospacos &7- &fView info about plugin'

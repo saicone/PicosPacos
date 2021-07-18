@@ -31,7 +31,7 @@ public class PicosPacos extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        paco.disable();
+        if (paco != null) paco.disable();
         CommandLoader.unload();
         HookLoader.unload();
         Database.Instance.unload();
