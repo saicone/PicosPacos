@@ -19,7 +19,7 @@ public class CommandLoader {
         try {
             m = (CommandMap) LookupUtils.getField(Bukkit.getServer().getClass(), "commandMap").get(Bukkit.getServer());
             Class<? extends CommandMap> c1 = m.getClass();
-            LookupUtils.addField("commands", c1.getSimpleName().equals("CraftCommandMap") ? c1.getSuperclass() : c1, "knownCommands", Map.class);
+            LookupUtils.addField("commands", c1.getSimpleName().equals("CraftCommandMap") ? c1.getSuperclass() : c1, "knownCommands");
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -28,8 +28,8 @@ public class CommandLoader {
 
     @SuppressWarnings("unchecked")
     public static void reload() {
-        cmd.setPermission(PicosPacos.SETTINGS.getString("Command.permission.use", "picospacos.use"));
-        cmd.setPerms(PicosPacos.SETTINGS.getString("Command.permission.all", "picospacos.*"),PicosPacos.SETTINGS.getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.SETTINGS.getString("Command.permission.saves", "picospacos.command.saves"));
+        cmd.setPermission(PicosPacos.getSettings().getString("Command.permission.use", "picospacos.use"));
+        cmd.setPerms(PicosPacos.getSettings().getString("Command.permission.all", "picospacos.*"), PicosPacos.getSettings().getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.getSettings().getString("Command.permission.saves", "picospacos.command.saves"));
 
         Map<String, Command> commands;
         try {
@@ -42,7 +42,7 @@ public class CommandLoader {
             commands.put("picospacos", cmd);
             cmd.register(map);
         }
-        List<String> aliases = PicosPacos.SETTINGS.getStringList("Command.aliases");
+        List<String> aliases = PicosPacos.getSettings().getStringList("Command.aliases");
         cmd.getAliases().forEach(alias -> {
             if (!aliases.contains(alias) && !alias.equalsIgnoreCase("picospacos") && commands.containsKey(alias) && commands.get(alias).getName().equalsIgnoreCase("picospacos")) {
                 commands.remove(alias);

@@ -23,22 +23,22 @@ public class DatabaseSql extends Database {
     boolean init() {
         // Check if driver exists
         try {
-            Class.forName(PicosPacos.SETTINGS.getString("Database.Sql.class", "com.mysql.jdbc.Driver"));
+            Class.forName(PicosPacos.getSettings().getString("Database.Sql.class", "com.mysql.jdbc.Driver"));
         } catch (ClassNotFoundException e) {
             Locale.log(2, "");
         }
 
         // Test database connection
-        String url = PicosPacos.SETTINGS.getString("Database.Sql.url");
-        String user = PicosPacos.SETTINGS.getString("Database.Sql.user");
-        String pass = PicosPacos.SETTINGS.getString("Database.Sql.password");
+        String url = PicosPacos.getSettings().getString("Database.Sql.url");
+        String user = PicosPacos.getSettings().getString("Database.Sql.user");
+        String pass = PicosPacos.getSettings().getString("Database.Sql.password");
         if (!url.equals(URL) && !user.equals(USER) && !pass.equals(PASS)) {
             URL = url;
             USER = user;
             PASS = pass;
             try {
                 con = DriverManager.getConnection(URL, USER, PASS);
-                if (!con.isValid(PicosPacos.SETTINGS.getInt("Database.Sql.timeout", 1000))) {
+                if (!con.isValid(PicosPacos.getSettings().getInt("Database.Sql.timeout", 1000))) {
                     Locale.log(1, "");
                     return false;
                 }
@@ -48,13 +48,13 @@ public class DatabaseSql extends Database {
             }
         }
 
-        useID = PicosPacos.SETTINGS.getString("Database.Method").equalsIgnoreCase("UUID");
+        useID = PicosPacos.getSettings().getString("Database.Method").equalsIgnoreCase("UUID");
 
         // Update queries
-        INSERT = PicosPacos.SETTINGS.getString("Database.Sql.query.insert", "INSERT INTO picospacos_players (player, saves, items) VALUES (?, ?, ?)");
-        DELETE = PicosPacos.SETTINGS.getString("Database.Sql.query.delete", "DELETE FROM picospacos_players WHERE player = ?");
-        UPDATE = PicosPacos.SETTINGS.getString("Database.Sql.query.update", "UPDATE picospacos_players SET saves = ?, items = ? WHERE player = ?");
-        SELECT = PicosPacos.SETTINGS.getString("Database.Sql.query.select", "SELECT * FROM picospacos_players WHERE player = ?");
+        INSERT = PicosPacos.getSettings().getString("Database.Sql.query.insert", "INSERT INTO picospacos_players (player, saves, items) VALUES (?, ?, ?)");
+        DELETE = PicosPacos.getSettings().getString("Database.Sql.query.delete", "DELETE FROM picospacos_players WHERE player = ?");
+        UPDATE = PicosPacos.getSettings().getString("Database.Sql.query.update", "UPDATE picospacos_players SET saves = ?, items = ? WHERE player = ?");
+        SELECT = PicosPacos.getSettings().getString("Database.Sql.query.select", "SELECT * FROM picospacos_players WHERE player = ?");
         return true;
     }
 
@@ -62,7 +62,7 @@ public class DatabaseSql extends Database {
     void enable() {
         super.enable();
         try (Statement stmt = con.createStatement()) {
-            stmt.executeUpdate(PicosPacos.SETTINGS.getString("Database.Sql.query.create", "CREATE TABLE IF NOT EXISTS picospacos_players (player VARCHAR(255) NOT NULL, saves INT, items MEDIUMTEXT, PRIMARY KEY(player))"));
+            stmt.executeUpdate(PicosPacos.getSettings().getString("Database.Sql.query.create", "CREATE TABLE IF NOT EXISTS picospacos_players (player VARCHAR(255) NOT NULL, saves INT, items MEDIUMTEXT, PRIMARY KEY(player))"));
         } catch (SQLException e) {
             Locale.log(1, "");
         }

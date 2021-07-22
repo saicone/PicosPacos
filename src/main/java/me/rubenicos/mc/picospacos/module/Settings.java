@@ -8,8 +8,8 @@ import com.osiris.dyml.exceptions.DuplicateKeyException;
 import com.osiris.dyml.exceptions.IllegalListException;
 import com.osiris.dyml.watcher.DYFileEvent;
 import com.osiris.dyml.watcher.DYFileEventListener;
-import me.rubenicos.mc.picospacos.PicosPacos;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,61 +19,100 @@ import java.io.InputStream;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.*;
 
-public class Settings {
+/**
+ * Settings class for YAML files on plugin folder. <br>
+ * Depends on {@link DreamYaml}.
+ * @author Rubenicos
+ * @version 2.0
+ */
+public class Settings extends DreamYaml {
 
-    private PicosPacos pl;
+    private final JavaPlugin plugin;
+
     private final Map<String, Boolean> sections = new HashMap<>();
     private final List<String> keys = new ArrayList<>();
     private final Map<String, Object> cache = new HashMap<>();
 
-    private String path;
-    private boolean update;
+    private final String path;
+    private final boolean update;
     private boolean defaultExists = true;
 
-    private DreamYaml yaml;
     private DreamYaml defYaml;
     private DYFileEventListener<DYFileEvent> listener;
 
-    public Settings() { }
-
-    public Settings(String path) {
-        init(path);
+    /**
+     * Create a {@link Settings} object from Bukkit plugin.
+     * Take in count this requires a path of YAML file inside
+     * plugin folder.
+     *
+     * @param plugin                  Bukkit plugin who tries to create the object.
+     * @param path                    Plugin file path to load the settings
+     */
+    public Settings(@NotNull JavaPlugin plugin, @NotNull String path) {
+        this(plugin, path, path, true, true, true, false);
     }
 
-    public Settings(String path, String defPath, boolean requireDef, boolean update) {
-        init(path, defPath, requireDef, update);
+    /**
+     * Create a {@link Settings} object from Bukkit plugin.
+     * Take in count this requires a path of YAML file inside
+     * plugin folder.
+     *
+     * @param plugin                  Bukkit plugin who tries to create the object.
+     * @param path                    Plugin file path to load the settings
+     * @param defPath                 Default path to get a InputStream from plugin .jar file
+     *                                in case of normal path doesn't exists inside plugin.
+     * @param requireDef              The needed of default file, if true the plugin will
+     *                                unloaded when error is present while loading InputStream.
+     * @param update                  Set true to load new stuff from InputStream into file.
+     */
+    public Settings(@NotNull JavaPlugin plugin, @NotNull String path, String defPath, boolean requireDef, boolean update) {
+        this(plugin, path, defPath, requireDef, update, true, false);
     }
 
-    public void init(String path) {
-        init(path, path, true, true);
-    }
-
-    public void init(String path, String defPath, boolean requireDef, boolean update) {
-        this.pl = PicosPacos.get();
+    /**
+     * Create a {@link Settings} object from Bukkit plugin.
+     * Take in count this requires a path of YAML file inside
+     * plugin folder.
+     *
+     * @param plugin                  Bukkit plugin who tries to create the object.
+     * @param path                    Plugin file path to load the settings
+     * @param defPath                 Default path to get a InputStream from plugin .jar file
+     *                                in case of normal path doesn't exists inside plugin.
+     * @param requireDef              The needed of default file, if true the plugin will
+     *                                unloaded when error is present while loading InputStream.
+     * @param update                  Set true to load new stuff from InputStream into file.
+     * @param isPostProcessingEnabled (DreamYaml) Enabled by default. <br>
+     *                                You can also enable/disable specific post-processing options individually: <br>
+     *                                See {@link DreamYaml#isPostProcessingEnabled()} for details.
+     * @param isDebugEnabled          (DreamYaml) Disabled by default. Shows debugging stuff.
+     */
+    public Settings(@NotNull JavaPlugin plugin, @NotNull String path, String defPath, boolean requireDef, boolean update, boolean isPostProcessingEnabled, boolean isDebugEnabled) {
+        super(new File(plugin.getDataFolder() + File.separator + path), isPostProcessingEnabled, isDebugEnabled);
+        this.plugin = plugin;
         this.path = path;
         this.update = update;
-        InputStream in = pl.getResource(path);
-        if (in == null) {
-            in = pl.getResource(defPath);
+        if (defPath == null && !requireDef) return;
+        InputStream in = plugin.getResource(path);
+        if (in == null && defPath != null) {
+            in = plugin.getResource(defPath);
         }
-
         if (in == null) {
             if (requireDef) {
                 Bukkit.getLogger().severe("Cannot find " + defPath + " file on plugin JAR!");
-                pl.getPluginLoader().disablePlugin(pl);
+                plugin.getPluginLoader().disablePlugin(plugin);
                 return;
             }
             defaultExists = false;
         } else {
             try {
-                defYaml = new DreamYaml(in);
+                defYaml = new DreamYaml(in).load();
             } catch (IllegalListException | IOException | DuplicateKeyException | DYReaderException e) {
                 e.printStackTrace();
                 defaultExists = false;
             }
             if (requireDef && !defaultExists) {
                 Bukkit.getLogger().severe("Cannot load " + defPath + " file on plugin JAR!");
-                pl.getPluginLoader().disablePlugin(pl);
+                plugin.getPluginLoader().disablePlugin(plugin);
             }
         }
     }
@@ -82,68 +121,41 @@ public class Settings {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void reloadDefault(String path) {
-        InputStream in = pl.getResource(this.path);
-        if (in == null) {
-            in = pl.getResource(path);
-        }
-        if (in != null) {
-            try {
-                defYaml = new DreamYaml(in);
-                defaultExists = true;
-            } catch (IllegalListException | IOException | DuplicateKeyException | DYReaderException e) {
-                Bukkit.getLogger().severe("Cannot load " + path + " file on plugin JAR!");
-                e.printStackTrace();
-                defaultExists = false;
-            }
-        }
-    }
-
     public boolean reload() {
         sections.clear();
         keys.clear();
         cache.clear();
-        if (yaml != null && listener != null) {
-            yaml.removeFileEventListener(listener);
-        }
-        String path = pl.getDataFolder() + File.separator + this.path;
+        String path = plugin.getDataFolder() + File.separator + this.path;
         File file = new File(path);
         if (!file.exists()) {
             try {
-                pl.saveResource(this.path, false);
+                plugin.saveResource(this.path, false);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
                 return false;
             }
         }
+
         try {
-            yaml = new DreamYaml(file);
-        } catch (IllegalListException | IOException | DuplicateKeyException | DYReaderException e) {
-            Bukkit.getLogger().severe("Cannot load " + this.path + " file on plugin folder!");
+            load();
+        } catch (IOException | IllegalListException | DYReaderException | DuplicateKeyException e) {
             e.printStackTrace();
             return false;
         }
 
         if (defaultExists && update) {
-            yaml.getAllInEdit().clear();
-            yaml.getAllInEdit().addAll(defYaml.getAllLoaded());
+            getAllInEdit().clear();
+            getAllInEdit().addAll(defYaml.getAllLoaded());
             try {
-                yaml.saveAndLoad();
+                save(true);
+                load();
             } catch (IllegalListException | IOException | DYWriterException | DuplicateKeyException | DYReaderException e) {
                 Bukkit.getLogger().severe("Cannot update " + this.path + " file on plugin folder!");
                 e.printStackTrace();
             }
         }
 
-        yaml.getAllLoaded().forEach(module -> keys.add(module.getFirstKey()));
-
-        if (listener != null) {
-            addListener();
-        }
+        getAllLoaded().forEach(module -> keys.add(module.getFirstKey()));
         return true;
     }
 
@@ -151,7 +163,7 @@ public class Settings {
         runnable.run();
         this.listener = (event) -> {
             if (event.getWatchEventKind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                Bukkit.getScheduler().runTaskAsynchronously(pl, runnable);
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
             }
         };
         addListener();
@@ -159,15 +171,15 @@ public class Settings {
 
     private void addListener() {
         try {
-            yaml.addFileEventListener(listener);
+            addFileEventListener(listener);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Nullable
-    public DYModule get(String path) {
-        return yaml.get(path.split("\\."));
+    public DYModule getModule(String path) {
+        return get(path.split("\\."));
     }
 
     public boolean isSection(String path) {
@@ -175,7 +187,7 @@ public class Settings {
     }
 
     private boolean isSection0(String path) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module != null && !module.getChildModules().isEmpty()) {
             sections.put(path, true);
             return true;
@@ -190,7 +202,7 @@ public class Settings {
     }
 
     public List<String> getKeys(String path) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module != null && !module.getChildModules().isEmpty()) {
             return module.getKeys();
         } else {
@@ -209,7 +221,7 @@ public class Settings {
     }
 
     private Object getString0(String path, String def) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module == null) {
             return def;
         } else {
@@ -224,11 +236,23 @@ public class Settings {
     }
 
     private Object getStringList0(String path) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module == null) {
             return Collections.emptyList();
         } else {
-            return module.asStringList();
+            List<String> list = module.asStringList();
+            if (list == null) {
+                String s = module.asString();
+                if (s == null) {
+                    return Collections.emptyList();
+                } else {
+                    return Collections.singleton(s);
+                }
+            } else if (list.isEmpty()) {
+                return Collections.emptyList();
+            } else {
+                return list;
+            }
         }
     }
 
@@ -241,7 +265,7 @@ public class Settings {
     }
 
     private Object getInt0(String path, int def) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module == null) {
             return def;
         } else {
@@ -258,7 +282,7 @@ public class Settings {
     }
 
     private Object getBoolean0(String path) {
-        DYModule module = get(path);
+        DYModule module = getModule(path);
         if (module == null) {
             return false;
         } else {

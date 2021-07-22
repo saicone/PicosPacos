@@ -2,22 +2,14 @@ package me.rubenicos.mc.picospacos.module;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.rubenicos.mc.picospacos.PicosPacos;
+import me.rubenicos.mc.picospacos.util.LookupUtils;
+import me.rubenicos.mc.picospacos.util.Server;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.network.chat.ChatComponentText;
-import net.minecraft.network.chat.ChatMessageType;
-import net.minecraft.network.chat.IChatMutableComponent;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.PacketPlayOutChat;
-import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.server.network.PlayerConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,65 +22,28 @@ import java.util.List;
 public class Locale {
 
     // Options depending server type and version
-    private static boolean useSpigot = false;
-    private static boolean useNMS = false;
-    private static boolean useRGB = false;
+    private static final boolean useSpigot;
+    private static final boolean useRGB;
+    private static final boolean newPacket;
     public static boolean allowPAPI = false;
 
-    // Reflected methods for actionbar
-    private static MethodHandle ACTIONBAR_COMPONENT;
-    private static MethodHandle CHAT_PACKET;
+    // Reflected ChatMessageType
     private static Object ACTIONBAR_TYPE;
-
-    // Reflected methods to send packets
-    private static MethodHandle PLAYER_HANDLE;
-    private static MethodHandle PLAYER_CONNECTION;
-    private static MethodHandle sendPacket;
 
     // Locale options
     private static Settings lang;
     private static int logLevel = -1;
 
     static {
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        int verNumber = Integer.parseInt(version.split("_")[1]);
-        try {
-            Class.forName("org.spigotmc.SpigotConfig");
-            useSpigot = true;
-        } catch (ClassNotFoundException ex) {
+        useSpigot = Server.isSpigot;
+        useRGB = Server.verNumber >= 16;
+        newPacket = Server.verNumber >= 14;
+        if (!useSpigot) {
             try {
-                MethodHandles.Lookup lookup = MethodHandles.lookup();
-                Class<?> craftPlayer = Class.forName("net.minecraft.server." + version + ".entity.CraftPlayer");
-                if (verNumber >= 17) {
-                    useNMS = true;
-
-                    PLAYER_HANDLE = lookup.findVirtual(craftPlayer, "getHandle", MethodType.methodType(EntityPlayer.class));
-                    PLAYER_CONNECTION = lookup.findGetter(EntityPlayer.class, "b", PlayerConnection.class);
-                    sendPacket = lookup.findVirtual(PlayerConnection.class, "sendPacket", MethodType.methodType(void.class, Packet.class));
-                } else {
-                    ACTIONBAR_COMPONENT = lookup.findConstructor(Class.forName("net.minecraft.server." + version + ".ChatComponentText"), MethodType.methodType(void.class, String.class));
-                    Class<?> chatMessageType = Class.forName("net.minecraft.server." + version + ".ChatMessageType");
-                    CHAT_PACKET = lookup.findConstructor(Class.forName("net.minecraft.server." + version + ".PacketPlayOutChat"), MethodType.methodType(void.class, Class.forName("net.minecraft.server." + version + ".IChatBaseComponent"), chatMessageType));
-                    for (Object type : chatMessageType.getEnumConstants()) {
-                        String name = type.toString();
-                        if (name.equals("GAME_INFO") || name.equalsIgnoreCase("ACTION_BAR")) {
-                            ACTIONBAR_TYPE = type;
-                            break;
-                        }
-                    }
-
-                    Class<?> entityPlayer = Class.forName("net.minecraft.server." + version + ".EntityPlayer");
-                    PLAYER_HANDLE = lookup.findVirtual(craftPlayer, "getHandle", MethodType.methodType(entityPlayer));
-                    Class<?> playerConnection = Class.forName("net.minecraft.server." + version + ".PlayerConnection");
-                    PLAYER_CONNECTION = lookup.findGetter(entityPlayer, "playerConnection", playerConnection);
-                    sendPacket = lookup.findVirtual(playerConnection, "sendPacket", MethodType.methodType(void.class, Class.forName("net.minecraft.server." + version + ".Packet")));
-                }
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
+                ACTIONBAR_TYPE = LookupUtils.get("chatType").invoke((byte) 2);
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
-        }
-        if (verNumber >= 16) {
-            useRGB = true;
         }
     }
 
@@ -99,21 +54,21 @@ public class Locale {
      * the updater will use en_US language to put the changes.
      */
     public static void reload() {
+        String path = "lang/" + PicosPacos.getSettings().getString("Locale.Language") + ".yml";
         if (lang == null) {
-            lang = new Settings("lang/" + PicosPacos.SETTINGS.getString("Locale.Language") + ".yml", "lang/en_US.yml", false, true);
+            lang = new Settings(PicosPacos.get(), path, "lang/en_US.yml", false, true);
             lang.reload();
         }
-        String path = "lang/" + PicosPacos.SETTINGS.getString("Locale.Language") + ".yml";
+
         if (!lang.getPath().equals(path)) {
-            lang.setPath(path);
-            lang.reloadDefault("lang/en_US.yml");
+            lang = new Settings(PicosPacos.get(), path, "lang/en_US.yml", false, true);
             if (lang.reload()) {
                 sendToConsole("");
             } else {
                 PicosPacos.get().getLogger().severe("Cannot reload " + path + " file! Check console.");
             }
         }
-        logLevel = PicosPacos.SETTINGS.getInt("Locale.LogLevel");
+        logLevel = PicosPacos.getSettings().getInt("Locale.LogLevel");
     }
 
     /**
@@ -245,17 +200,17 @@ public class Locale {
 
     private static void packetActionbar(Player player, String text) throws Throwable {
         Object packet;
-        if (useNMS) {
-            IChatMutableComponent actionbar = new ChatComponentText(text);
-            packet = new PacketPlayOutChat(actionbar, ChatMessageType.a((byte) 2), player.getUniqueId());
+        if (newPacket) {
+            packet = LookupUtils.get("chatPacket").invoke(LookupUtils.get("chatComponent").invoke(text), ACTIONBAR_TYPE, player.getUniqueId());
         } else {
-            Object actionbar = ACTIONBAR_COMPONENT.invoke(text);
-            packet = CHAT_PACKET.invoke(actionbar, ACTIONBAR_TYPE);
+            packet = LookupUtils.get("chatPacket").invoke(LookupUtils.get("chatComponent").invoke(text), ACTIONBAR_TYPE);
         }
 
-        Object con = PLAYER_CONNECTION.invoke(PLAYER_HANDLE.invoke(player));
-        if (con != null && packet != null) {
-            sendPacket.invoke(con, packet);
+        if (packet != null) {
+            Object con = LookupUtils.get("playerConnection").invoke(LookupUtils.get("playerHandle").invoke(player));
+            if (con != null) {
+                LookupUtils.get("sendPacket").invoke(con, packet);
+            }
         }
     }
 
@@ -333,7 +288,7 @@ public class Locale {
     }
 
     public static List<String> replaceArgs(List<String> list, String... args) {
-        if (args.length < 1) return list;
+        if (args.length < 1 && list.isEmpty()) return list;
         List<String> l0 = new ArrayList<>();
         list.forEach(s -> list.add(replaceArgs0(s, args)));
         return l0;

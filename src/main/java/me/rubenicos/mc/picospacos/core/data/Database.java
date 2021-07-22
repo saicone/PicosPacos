@@ -22,7 +22,7 @@ public abstract class Database {
     }
 
     void enable() {
-        useID = PicosPacos.SETTINGS.getString("Database.Method").equalsIgnoreCase("UUID");
+        useID = PicosPacos.getSettings().getString("Database.Method").equalsIgnoreCase("UUID");
     }
 
     void disable() { }
@@ -52,6 +52,10 @@ public abstract class Database {
     }
 
     void saveAll() {
+        players.values().forEach(this::save);
+    }
+
+    void saveAllAsync() {
         Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> players.values().forEach(this::save));
     }
 
@@ -94,7 +98,7 @@ public abstract class Database {
         }
 
         public static void reload() {
-            String type = PicosPacos.SETTINGS.getString("Database.Type").toUpperCase();
+            String type = PicosPacos.getSettings().getString("Database.Type").toUpperCase();
             if (type.equals(current)) {
                 if (instance.init()) {
                     instance.enable();

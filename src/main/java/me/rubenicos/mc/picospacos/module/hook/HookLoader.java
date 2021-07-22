@@ -19,13 +19,13 @@ public class HookLoader {
     public static void reload() {
         hooks.forEach(hook -> {
             if (loaded.contains(hook.pluginName())) {
-                if (PicosPacos.SETTINGS.getBoolean("Hook." + hook.pluginName() + ".enabled")) {
+                if (PicosPacos.getSettings().getBoolean("Hook." + hook.pluginName() + ".enabled")) {
                     hook.reload();
                 } else {
                     hook.unload();
                     loaded.remove(hook.pluginName());
                 }
-            } else if (PicosPacos.SETTINGS.getBoolean("Hook." + hook.pluginName() + ".enabled")) {
+            } else if (PicosPacos.getSettings().getBoolean("Hook." + hook.pluginName() + ".enabled")) {
                 hook.load();
                 loaded.add(hook.pluginName());
             }

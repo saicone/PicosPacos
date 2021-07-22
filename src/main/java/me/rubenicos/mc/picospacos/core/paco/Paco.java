@@ -33,7 +33,7 @@ public class Paco implements Listener {
 
     public Paco(PicosPacos pl) {
         this.pl = pl;
-        file = new Settings("rules.yml", "rules.yml", false, false);
+        file = new Settings(pl, "rules.yml", null, false, false);
         file.listener(this::onRulesReload);
         pl.getServer().getPluginManager().registerEvents(this, pl);
     }
@@ -134,15 +134,15 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        if (!PicosPacos.SETTINGS.getBoolean("Config.Respawn.Enabled") || PicosPacos.SETTINGS.getStringList("Config.Respawn.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) return;
+        if (!PicosPacos.getSettings().getBoolean("Config.Respawn.Enabled") || PicosPacos.getSettings().getStringList("Config.Respawn.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) return;
         if (players.containsKey(e.getPlayer().getUniqueId())) {
-            if (PicosPacos.SETTINGS.getInt("Config.Respawn-Delay", 0) > 0) {
+            if (PicosPacos.getSettings().getInt("Config.Respawn-Delay", 0) > 0) {
                 Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
                     if (e.getPlayer().isOnline()) {
                         e.getPlayer().getInventory().addItem(players.get(e.getPlayer().getUniqueId()).toArray(new ItemStack[0]));
                         players.get(e.getPlayer().getUniqueId()).clear();
                     }
-                }, PicosPacos.SETTINGS.getInt("Config.Respawn-Delay", 0) * 20L);
+                }, PicosPacos.getSettings().getInt("Config.Respawn-Delay", 0) * 20L);
             } else {
                 if (e.getPlayer().isOnline()) {
                     e.getPlayer().getInventory().addItem(players.get(e.getPlayer().getUniqueId()).toArray(new ItemStack[0]));
@@ -154,7 +154,7 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {
-        if (e.isCancelled() || !PicosPacos.SETTINGS.getBoolean("Config.Drop.Enabled") || PicosPacos.SETTINGS.getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName()) || !e.getPlayer().hasPermission(PicosPacos.SETTINGS.getString("Config.Drop.Permission", "picospacos.drop.protection"))) return;
+        if (e.isCancelled() || !PicosPacos.getSettings().getBoolean("Config.Drop.Enabled") || PicosPacos.getSettings().getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName()) || !e.getPlayer().hasPermission(PicosPacos.getSettings().getString("Config.Drop.Permission", "picospacos.drop.protection"))) return;
 
         if (warnings.contains(e.getPlayer().getUniqueId())) {
             warnings.remove(e.getPlayer().getUniqueId());
@@ -174,16 +174,16 @@ public class Paco implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
             PlayerData data = PicosPacosAPI.loadPlayer(e.getPlayer());
-            if (PicosPacos.SETTINGS.getBoolean("Config.Join.Enabled") && !PicosPacos.SETTINGS.getStringList("Config.Join.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
+            if (PicosPacos.getSettings().getBoolean("Config.Join.Enabled") && !PicosPacos.getSettings().getStringList("Config.Join.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
                 if (!data.getItems().isEmpty()) {
-                    if (PicosPacos.SETTINGS.getInt("Config.Join.Delay", 10) > 0) {
+                    if (PicosPacos.getSettings().getInt("Config.Join.Delay", 10) > 0) {
                         Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
                             if (e.getPlayer().isOnline()) {
                                 e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
                                 data.getItems().clear();
                                 data.setEdited(true);
                             }
-                        }, PicosPacos.SETTINGS.getInt("Config.Join.Delay", 10) * 20L);
+                        }, PicosPacos.getSettings().getInt("Config.Join.Delay", 10) * 20L);
                     } else {
                         if (e.getPlayer().isOnline()) {
                             e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));

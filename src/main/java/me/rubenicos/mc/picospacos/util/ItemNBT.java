@@ -1,7 +1,6 @@
 package me.rubenicos.mc.picospacos.util;
 
 import net.minecraft.nbt.*;
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.DataInput;
@@ -15,18 +14,6 @@ import java.util.*;
  * @version 0.2
  */
 public class ItemNBT {
-
-    public ItemNBT() {
-        try {
-            Class<?> craft = Class.forName("org.bukkit.craftbukkit." + Instance.version + ".inventory.CraftItemStack");
-            Class<?> stack = Instance.verNumber >= 17 ? net.minecraft.world.item.ItemStack.class : Class.forName("net.minecraft.server." + Instance.version + ".ItemStack");
-
-            LookupUtils.addStaticMethod("asNMSCopy", craft, "asNMSCopy", stack, ItemStack.class);
-            LookupUtils.addStaticMethod("asCraftMirror", craft, "asNMSCopy", ItemStack.class, stack);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Get ItemStack NBTBase by provided path and convert into String. <br>
@@ -94,7 +81,7 @@ public class ItemNBT {
 
     public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
         NBTTagCompound compound = NBTCompressedStreamTools.a((DataInput) dataInput);
-        return (ItemStack) LookupUtils.get("asCraftMirror").invoke(net.minecraft.world.item.ItemStack.a(compound));
+        return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(net.minecraft.world.item.ItemStack.a(compound));
     }
 
     // Class instance for old server versions
@@ -104,24 +91,23 @@ public class ItemNBT {
         private final Class<?> tagList;
 
         public ItemNBT$Old() {
-            super();
             Class<?> c1 = null;
             Class<?> c2 = null;
             try {
-                c1 = Class.forName("net.minecraft.server." + Instance.version + ".NBTTagCompound");
-                LookupUtils.addMethod("get", c1, "get", Class.forName("net.minecraft.server." + Instance.version + ".NBTBase"), String.class);
+                c1 = Class.forName("net.minecraft.server." + Server.version + ".NBTTagCompound");
+                LookupUtils.addMethod("get", c1, "get", Class.forName("net.minecraft.server." + Server.version + ".NBTBase"), String.class);
 
-                c2 = Class.forName("net.minecraft.server." + Instance.version + ".NBTTagList");
-                LookupUtils.addField("list", c2, "list", List.class);
+                c2 = Class.forName("net.minecraft.server." + Server.version + ".NBTTagList");
+                LookupUtils.addField("list", c2, "list");
 
-                Class<?> itemStack = Class.forName("net.minecraft.server." + Instance.version + ".ItemStack");
+                Class<?> itemStack = Class.forName("net.minecraft.server." + Server.version + ".ItemStack");
                 LookupUtils.addConstructor("stack", itemStack, void.class, c1);
                 LookupUtils.addMethod("hasTag", itemStack, "hasTag", Boolean.class);
                 LookupUtils.addMethod("setTag", itemStack, "getTag", c1);
 
-                Class<?> streamTools = Class.forName("net.minecraft.server." + Instance.version + ".NBTCompressedStreamTools");
+                Class<?> streamTools = Class.forName("net.minecraft.server." + Server.version + ".NBTCompressedStreamTools");
                 LookupUtils.addStaticMethod("write", streamTools, "a", void.class, c1, DataOutput.class);
-                LookupUtils.addStaticMethod("read", streamTools, "a", c1, Instance.verNumber >= 13 ? DataInput.class : DataInputStream.class);
+                LookupUtils.addStaticMethod("read", streamTools, "a", c1, Server.verNumber >= 13 ? DataInput.class : DataInputStream.class);
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
                 e.printStackTrace();
             }
@@ -185,7 +171,7 @@ public class ItemNBT {
         @Override
         public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
             Object compound = LookupUtils.get("read").invoke(dataInput);
-            return (ItemStack) LookupUtils.get("asCraftMirror").invoke(LookupUtils.get("stack").invoke(compound));
+            return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(LookupUtils.get("stack").invoke(compound));
         }
     }
 
@@ -195,18 +181,12 @@ public class ItemNBT {
         // Instance of ItemNBT depending on server version
         private static final ItemNBT instance;
 
-        static final String version;
-        static final int verNumber;
-
         public static ItemNBT get() {
             return instance;
         }
 
         static {
-            version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            verNumber = Integer.parseInt(version.split("_")[1]);
-
-            if (verNumber >= 17) {
+            if (Server.verNumber >= 17) {
                 instance = new ItemNBT();
             } else {
                 instance = new ItemNBT$Old();
