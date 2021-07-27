@@ -39,7 +39,7 @@ public class PicosPacosCommand extends Command {
     public boolean execute(@NotNull CommandSender sender, @NotNull String s, @NotNull String[] args) {
         if (args.length < 1) {
             sender.sendMessage(Locale.color("&6> PicosPacos Plugin"));
-            sender.sendMessage(Locale.replaceArgs("&6> Version: &f", pl.getDescription().getVersion()));
+            sender.sendMessage(Locale.replaceArgs("&6> Version: &f {0}", pl.getDescription().getVersion()));
             sender.sendMessage(Locale.color("&6> Created by: &fRubenicos"));
         } else if (args[0].equalsIgnoreCase("reload")) {
             if (hasPerm(sender, permReload)){

@@ -29,8 +29,9 @@ public class Settings extends DreamYaml {
 
     private final JavaPlugin plugin;
 
-    private final Map<String, Boolean> sections = new HashMap<>();
+    private final Map<String, Section> sections = new HashMap<>();
     private final List<String> keys = new ArrayList<>();
+    private final List<String> deepKeys = new ArrayList<>();
     private final Map<String, Object> cache = new HashMap<>();
 
     private final String path;
@@ -98,7 +99,7 @@ public class Settings extends DreamYaml {
         }
         if (in == null) {
             if (requireDef) {
-                Bukkit.getLogger().severe("Cannot find " + defPath + " file on plugin JAR!");
+                plugin.getLogger().severe("Cannot find " + defPath + " file on plugin JAR!");
                 plugin.getPluginLoader().disablePlugin(plugin);
                 return;
             }
@@ -111,7 +112,7 @@ public class Settings extends DreamYaml {
                 defaultExists = false;
             }
             if (requireDef && !defaultExists) {
-                Bukkit.getLogger().severe("Cannot load " + defPath + " file on plugin JAR!");
+                plugin.getLogger().severe("Cannot load " + defPath + " file on plugin JAR!");
                 plugin.getPluginLoader().disablePlugin(plugin);
             }
         }
@@ -144,18 +145,33 @@ public class Settings extends DreamYaml {
         }
 
         if (defaultExists && update) {
-            getAllInEdit().clear();
-            getAllInEdit().addAll(defYaml.getAllLoaded());
+            List<List<String>> paths = new ArrayList<>();
+            getAllLoaded().forEach(module -> {
+                paths.add(module.getKeys());
+                getAllInEdit().add(module);
+            });
+            defYaml.getAllLoaded().forEach(module -> {
+                if (!paths.contains(module.getKeys())) {
+                    getAllLoaded().add(module);
+                    getAllInEdit().add(module);
+                }
+            });
             try {
                 save(true);
                 load();
             } catch (IllegalListException | IOException | DYWriterException | DuplicateKeyException | DYReaderException e) {
-                Bukkit.getLogger().severe("Cannot update " + this.path + " file on plugin folder!");
+                plugin.getLogger().severe("Cannot update " + this.path + " file on plugin folder!");
                 e.printStackTrace();
             }
         }
 
-        getAllLoaded().forEach(module -> keys.add(module.getFirstKey()));
+        getAllLoaded().forEach(module -> {
+            List<String> k = module.getKeys();
+            if (!keys.contains(k.get(0))) {
+                keys.add(k.get(0));
+            }
+            deepKeys.add(String.join(".", k));
+        });
         return true;
     }
 
@@ -166,7 +182,9 @@ public class Settings extends DreamYaml {
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
             }
         };
-        addListener();
+        if (getBoolean("File-Listener")) {
+            addListener();
+        }
     }
 
     private void addListener() {
@@ -177,34 +195,57 @@ public class Settings extends DreamYaml {
         }
     }
 
+    public void removeListener() {
+        try {
+            removeFileEventListener(listener);
+        } catch (NullPointerException ignored) { }
+    }
+
     @Nullable
     public DYModule getModule(String path) {
-        return get(path.split("\\."));
+        return getModule(Arrays.asList(path.split("\\.")));
+    }
+
+    private DYModule getModule(List<String> keys) {
+        for (DYModule module : getAllLoaded()) {
+            if (module.getKeys().equals(keys)) return module;
+        }
+        return null;
+    }
+
+    public Section getSection(String path) {
+        return sections.getOrDefault(path, getSection0(path));
+    }
+
+    private Section getSection0(String path) {
+        DYModule module = getModule(path);
+        if (module != null && !module.getChildModules().isEmpty()) {
+            sections.put(path, new Section(module));
+        } else {
+            sections.put(path, null);
+        }
+        return sections.get(path);
     }
 
     public boolean isSection(String path) {
-        return sections.getOrDefault(path, isSection0(path));
-    }
-
-    private boolean isSection0(String path) {
-        DYModule module = getModule(path);
-        if (module != null && !module.getChildModules().isEmpty()) {
-            sections.put(path, true);
-            return true;
-        } else {
-            sections.put(path, false);
-            return false;
-        }
+        return getSection(path) != null;
     }
 
     public List<String> getKeys() {
-        return keys;
+        return getKeys(false);
+    }
+
+    public List<String> getKeys(boolean deep) {
+        return deep ? deepKeys : keys;
     }
 
     public List<String> getKeys(String path) {
-        DYModule module = getModule(path);
-        if (module != null && !module.getChildModules().isEmpty()) {
-            return module.getKeys();
+        return getKeys(path, false);
+    }
+
+    public List<String> getKeys(String path, boolean deep) {
+        if (isSection(path)) {
+            return sections.get(path).getKeys(deep);
         } else {
             return Collections.emptyList();
         }
@@ -232,27 +273,28 @@ public class Settings extends DreamYaml {
     @NotNull
     @SuppressWarnings("unchecked")
     public List<String> getStringList(@NotNull String path) {
-        return (List<String>) cache.getOrDefault(path, cache(path, getStringList0(path)));
+        Object obj = cache.getOrDefault(path, cache(path, getStringList0(path)));
+        if (obj instanceof List) {
+            return (List<String>) obj;
+        } else {
+            return Collections.singletonList(String.valueOf(obj));
+        }
     }
 
     private Object getStringList0(String path) {
         DYModule module = getModule(path);
         if (module == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         } else {
             List<String> list = module.asStringList();
             if (list == null) {
+                list = new ArrayList<>();
                 String s = module.asString();
-                if (s == null) {
-                    return Collections.emptyList();
-                } else {
-                    return Collections.singleton(s);
+                if (s != null) {
+                    list.add(s);
                 }
-            } else if (list.isEmpty()) {
-                return Collections.emptyList();
-            } else {
-                return list;
             }
+            return list;
         }
     }
 
@@ -293,5 +335,28 @@ public class Settings extends DreamYaml {
     private Object cache(String path, Object obj) {
         cache.put(path, obj);
         return obj;
+    }
+
+    public static final class Section {
+
+        private final List<String> keys = new ArrayList<>();
+        private final List<String> deepKeys = new ArrayList<>();
+
+        public Section(DYModule module) {
+            module.getChildModules().forEach(m -> {
+                List<String> path = m.getKeys();
+                path = path.subList(module.getKeys().size(), path.size());
+                keys.add(path.get(0));
+                deepKeys.add(String.join(".", path));
+            });
+        }
+
+        public List<String> getKeys() {
+            return getKeys(false);
+        }
+
+        public List<String> getKeys(boolean deep) {
+            return deep ? deepKeys : keys;
+        }
     }
 }

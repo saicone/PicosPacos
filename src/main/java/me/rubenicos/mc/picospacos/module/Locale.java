@@ -290,7 +290,7 @@ public class Locale {
     public static List<String> replaceArgs(List<String> list, String... args) {
         if (args.length < 1 && list.isEmpty()) return list;
         List<String> l0 = new ArrayList<>();
-        list.forEach(s -> list.add(replaceArgs0(s, args)));
+        list.forEach(s -> l0.add(replaceArgs0(s, args)));
         return l0;
     }
 

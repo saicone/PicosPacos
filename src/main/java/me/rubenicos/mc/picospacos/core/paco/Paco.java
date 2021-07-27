@@ -46,6 +46,8 @@ public class Paco implements Listener {
     }
 
     public void onRulesReload() {
+        deathRules.clear();
+        dropRules.clear();
         if (!file.reload()) {
             pl.getLogger().severe("Cannot reload rules.yml file");
         } else {
@@ -91,7 +93,7 @@ public class Paco implements Listener {
                     Locale.sendToConsole("Paco.Error.Section", key);
                 }
             });
-            Locale.sendToConsole("Paco.Loaded", String.valueOf(deathRules.size() + dropRules.size()));
+            Locale.sendToConsole("Paco.Loaded", String.valueOf(dropRules.size()), String.valueOf(deathRules.size()));
         }
     }
 

@@ -15,7 +15,7 @@ Paco:
     #   text: '&c&lDrop again the item to confirm'
     # Messages without type be displayed on chat
     Warning: '&c&lAre you sure to drop this item? &f&lDrop again to confirm'
-  Loaded: '&6Picos&ePacos &8» &aPaco loaded &f{0} &aitem rules'
+  Loaded: '&6Picos&ePacos &8» &aPaco loaded &f{0} &adrop rules and &f{1} &adeath rules'
   Error:
     Section: '&6Picos&ePacos &8» &cPath "{0}" isn''t a section!'
     Rule-Type: '&6Picos&ePacos &8» &cUnknown rule type "{0}", check rule {1} on rules.yml'
@@ -34,7 +34,7 @@ Command:
   Saves:
     Usage: '&6Picos&ePacos &8» &eUsage: &f/picospacos saves <give/take/set> <player> <amount>'
     Invalid-Amount: '&6Picos&ePacos &8» &c"{0}" is not a valid number!'
-    Give: '&6Picos&ePacos &8» &aThe player &f{0} received &f{1} &ainventory saves'
+    Give: '&6Picos&ePacos &8» &aThe player &f{0} &areceived &f{1} &ainventory saves'
     Take: '&6Picos&ePacos &8» &f{0} &cinventory saves have been removed from player &f{1}'
     Set: '&6Picos&ePacos &8» &9The player &f{0} &9now has &f{1} &9inventory saves'
 

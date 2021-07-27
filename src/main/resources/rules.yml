@@ -1,3 +1,8 @@
+# Set to true if you want to apply changes in real-time
+# For example, when file is edited the plugin load the changes
+# WARNING: This a experimental system
+File-Listener: false
+
 exampleRule1:
   # Rule types can be:
   # DEATH - Items who match be protected after death

@@ -35,6 +35,7 @@ public class PicosPacos extends JavaPlugin {
         CommandLoader.unload();
         HookLoader.unload();
         Database.Instance.unload();
+        settings.removeListener();
     }
 
     public void reload() {

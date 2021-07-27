@@ -27,9 +27,9 @@ public class Parameter {
 
     public static TagType tagOf(Settings settings, String path, String name) {
         String string = "<" + PicosPacos.getSettings().getString("Hook.PlayerholderAPI.rule", "allowPapi") + ">";
-        boolean papi = name.contains("<" + PicosPacos.getSettings().getString("Hook.PlayerholderAPI.rule", "allowPapi") + ">");
+        boolean papi = name.contains(string);
         String[] split = name.replace(string, "").split(":");
-        String comparator = split.length > 1 ? split[1] : "equal";
+        String comparator = split.length > 1 ? split[1].toLowerCase() : "equal";
         switch (split[0].toLowerCase()) {
             case "material":
             case "mat":
