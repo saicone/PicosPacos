@@ -75,21 +75,18 @@ public class PlayerData {
         saves = saves - amount;
     }
 
-    public void reduceSaves(int amount) {
-        edited = true;
-        saves = saves - amount;
-    }
-
     public List<ItemStack> getItems() {
         return items;
     }
 
     public String items() {
-        return ItemUtils.itemArrayToBase64(items.toArray(new ItemStack[0]));
+        return !items.isEmpty() ? ItemUtils.itemArrayToBase64(items.toArray(new ItemStack[0])) : "nothing";
     }
 
     public void addItems(String items) {
-        this.items.addAll(Arrays.asList(ItemUtils.itemArrayFromBase64(items)));
+        if (!items.equals("nothing")) {
+            this.items.addAll(Arrays.asList(ItemUtils.itemArrayFromBase64(items)));
+        }
     }
 
     public void addItems(List<ItemStack> items) {

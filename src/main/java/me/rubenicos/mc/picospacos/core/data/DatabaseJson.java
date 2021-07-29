@@ -16,10 +16,8 @@ public class DatabaseJson extends Database {
     @Override
     void enable() {
         super.enable();
-        if (!players.isDirectory()) players.delete();
-
         if (!players.exists()) {
-            players.mkdir();
+            players.mkdirs();
         }
     }
 
@@ -64,7 +62,7 @@ public class DatabaseJson extends Database {
                 JsonObject json = gson.fromJson(out.toString(StandardCharsets.UTF_8), JsonObject.class);
                 PlayerData data = new PlayerData(name, uuid, json.get("saves").getAsInt());
                 data.setOnDB(true);
-                data.addItems(json.get("items").toString());
+                data.addItems(json.get("items").getAsString());
                 return data;
             } catch (IOException e) {
                 e.printStackTrace();

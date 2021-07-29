@@ -102,8 +102,8 @@ public class ItemNBT {
 
                 Class<?> itemStack = Class.forName("net.minecraft.server." + Server.version + ".ItemStack");
                 LookupUtils.addConstructor("stack", itemStack, void.class, c1);
-                LookupUtils.addMethod("hasTag", itemStack, "hasTag", Boolean.class);
-                LookupUtils.addMethod("setTag", itemStack, "getTag", c1);
+                LookupUtils.addMethod("hasTag", itemStack, "hasTag", boolean.class);
+                LookupUtils.addMethod("getTag", itemStack, "getTag", c1);
 
                 Class<?> streamTools = Class.forName("net.minecraft.server." + Server.version + ".NBTCompressedStreamTools");
                 LookupUtils.addStaticMethod("write", streamTools, "a", void.class, c1, DataOutput.class);

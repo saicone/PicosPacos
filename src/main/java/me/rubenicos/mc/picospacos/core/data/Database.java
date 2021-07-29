@@ -41,7 +41,7 @@ public abstract class Database {
             data = new PlayerData(name, uuid.toString(), 0);
         }
         players.put(uuid, data);
-        return data;
+        return players.get(uuid);
     }
 
     public void savePlayer(Player player) {

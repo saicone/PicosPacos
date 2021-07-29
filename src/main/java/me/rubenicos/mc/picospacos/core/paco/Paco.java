@@ -10,13 +10,11 @@ import me.rubenicos.mc.picospacos.core.paco.rule.Parameter;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -29,7 +27,7 @@ public class Paco implements Listener {
     private final List<PacoRule> deathRules = new ArrayList<>();
     private final List<PacoRule> dropRules = new ArrayList<>();
     private final Map<UUID, List<ItemStack>> players = new HashMap<>();
-    private final List<UUID> warnings = new ArrayList<>();
+    private final Map<UUID, ItemStack> warnings = new HashMap<>();
 
     public Paco(PicosPacos pl) {
         this.pl = pl;
@@ -46,6 +44,8 @@ public class Paco implements Listener {
     }
 
     public void onRulesReload() {
+        if (file.isLocked()) return;
+        file.setLocked(true);
         deathRules.clear();
         dropRules.clear();
         if (!file.reload()) {
@@ -90,11 +90,13 @@ public class Paco implements Listener {
                     }
                 } else {
                     // TODO: Do stuff with JSON formatted string
-                    Locale.sendToConsole("Paco.Error.Section", key);
+                    if (!key.equals("File-Listener")) Locale.sendToConsole("Paco.Error.Section", key);
                 }
             });
             Locale.sendToConsole("Paco.Loaded", String.valueOf(dropRules.size()), String.valueOf(deathRules.size()));
         }
+        file.setLocked(false);
+        file.resolveListener();
     }
 
     @EventHandler
@@ -107,7 +109,7 @@ public class Paco implements Listener {
             pl.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 e.setKeepInventory(true);
-                player.reduceSaves(1);
+                player.takeSaves(1);
                 return;
             }
         }
@@ -158,15 +160,16 @@ public class Paco implements Listener {
     public void onDrop(PlayerDropItemEvent e) {
         if (e.isCancelled() || !PicosPacos.getSettings().getBoolean("Config.Drop.Enabled") || PicosPacos.getSettings().getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName()) || !e.getPlayer().hasPermission(PicosPacos.getSettings().getString("Config.Drop.Permission", "picospacos.drop.protection"))) return;
 
-        if (warnings.contains(e.getPlayer().getUniqueId())) {
-            warnings.remove(e.getPlayer().getUniqueId());
+        UUID uuid = e.getPlayer().getUniqueId();
+        if (warnings.containsKey(uuid) && e.getItemDrop().getItemStack().equals(warnings.get(uuid))) {
+            warnings.remove(uuid);
             return;
         }
 
         dropRules.forEach(rule -> {
             if (rule.match(e.getItemDrop().getItemStack(), e.getPlayer())) {
                 e.setCancelled(true);
-                warnings.add(e.getPlayer().getUniqueId());
+                warnings.put(uuid, e.getItemDrop().getItemStack());
                 Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
             }
         });
@@ -200,12 +203,25 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
+        removePlayer(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onKick(PlayerKickEvent e) {
+        if (!e.isCancelled()) {
+            removePlayer(e.getPlayer());
+        }
+    }
+
+    private void removePlayer(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-            if (players.containsKey(e.getPlayer().getUniqueId())) {
-                PicosPacosAPI.getPlayerOrLoad(e.getPlayer()).addItems(players.get(e.getPlayer().getUniqueId()));
-                players.remove(e.getPlayer().getUniqueId());
+            UUID uuid = player.getUniqueId();
+            warnings.remove(uuid);
+            if (players.containsKey(uuid)) {
+                PicosPacosAPI.getPlayerOrLoad(player).addItems(players.get(uuid));
+                players.remove(uuid);
             }
-            PicosPacosAPI.savePlayer(e.getPlayer());
+            PicosPacosAPI.savePlayer(player);
         });
     }
 }

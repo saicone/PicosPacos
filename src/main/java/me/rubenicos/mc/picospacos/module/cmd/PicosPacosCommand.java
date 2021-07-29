@@ -19,7 +19,8 @@ import java.util.UUID;
 public class PicosPacosCommand extends Command {
 
     private final PicosPacos pl = PicosPacos.get();
-    private final List<String> savesTab = Arrays.asList("give", "take", "set");
+    private final List<String> helpTab = Arrays.asList("help", "reload", "saves");
+    private final List<String> savesTab = Arrays.asList("give", "take", "set", "info");
     private String permAll = "picospacos.*";
     private String permReload = "picospacos.command.reload";
     private String permSaves = "picospacos.command.saves";
@@ -51,27 +52,42 @@ public class PicosPacosCommand extends Command {
             }
         } else if (args[0].equalsIgnoreCase("saves")) {
             if (hasPerm(sender, permSaves)) {
-                if (args.length > 3) {
-                    Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-                        int amount = TextUtils.asInt(args[3], 0);
-                        if (amount == 0) {
+                if (args.length > 2) {
+                    if (args[1].equalsIgnoreCase("info")) {
+                        Bukkit.getScheduler().runTaskAsynchronously(pl, () -> Locale.sendTo(sender, "Command.Saves.Info", args[2], String.valueOf(PicosPacosAPI.getPlayerOrLoad(player(args[2])).getSaves())));
+                        return true;
+                    } else if (args.length > 3) {
+                        int amount = TextUtils.asInt(args[3], -1);
+                        if (amount < 0) {
                             Locale.sendTo(sender, "Command.Saves.Invalid-Amount", args[3]);
-                        } else if (args[1].equalsIgnoreCase("give")) {
-                            PicosPacosAPI.getPlayerOrLoad(player(args[2])).addSaves(amount);
-                            Locale.sendTo(sender, "Command.Saves.Give", args[2], args[3]);
-                        } else if (args[1].equalsIgnoreCase("take")) {
-                            PicosPacosAPI.getPlayerOrLoad(player(args[2])).takeSaves(amount);
-                            Locale.sendTo(sender, "Command.Saves.Take", args[2], args[3]);
-                        } else if (args[1].equalsIgnoreCase("set")) {
-                            PicosPacosAPI.getPlayerOrLoad(player(args[2])).setSaves(amount);
-                            Locale.sendTo(sender, "Command.Saves.Set", args[3], args[2]);
+                            return true;
                         } else {
-                            Locale.sendTo(sender, "Command.Saves.Usage");
+                            switch (args[1].toLowerCase()) {
+                                case "give":
+                                case "add":
+                                    Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+                                        PicosPacosAPI.getPlayerOrLoad(player(args[2])).addSaves(amount);
+                                        Locale.sendTo(sender, "Command.Saves.Give", args[2], args[3]);
+                                    });
+                                    return true;
+                                case "take":
+                                case "remove":
+                                    Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+                                        PicosPacosAPI.getPlayerOrLoad(player(args[2])).takeSaves(amount);
+                                        Locale.sendTo(sender, "Command.Saves.Take", args[3], args[2]);
+                                    });
+                                    return true;
+                                case "set":
+                                    Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+                                        PicosPacosAPI.getPlayerOrLoad(player(args[2])).setSaves(amount);
+                                        Locale.sendTo(sender, "Command.Saves.Set", args[2], args[3]);
+                                    });
+                                    return true;
+                            }
                         }
-                    });
-                } else {
-                    Locale.sendTo(sender, "Command.Saves.Usage");
+                    }
                 }
+                Locale.sendTo(sender, "Command.Saves.Usage");
             }
         } else {
             Locale.sendTo(sender, "Command.Help");
@@ -81,12 +97,22 @@ public class PicosPacosCommand extends Command {
 
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, @Nullable Location location) throws IllegalArgumentException {
-        if (args.length == 1 && args[0].equalsIgnoreCase("saves")) {
-            return savesTab;
+        switch (args.length) {
+            case 0:
+                return helpTab;
+            case 1:
+                if (args[0].equalsIgnoreCase("saves")) {
+                    return savesTab;
+                } else {
+                    return new ArrayList<>();
+                }
+            case 2:
+                List<String> list = new ArrayList<>();
+                Bukkit.getOnlinePlayers().forEach(player -> list.add(player.getName()));
+                return list;
+            default:
+                return new ArrayList<>();
         }
-        List<String> list = new ArrayList<>();
-        Bukkit.getOnlinePlayers().forEach(player -> list.add(player.getName()));
-        return list;
     }
 
     @Override

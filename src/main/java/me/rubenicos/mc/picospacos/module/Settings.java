@@ -40,6 +40,8 @@ public class Settings extends DreamYaml {
 
     private DreamYaml defYaml;
     private DYFileEventListener<DYFileEvent> listener;
+    private boolean fileListener = false;
+    private boolean locked = false;
 
     /**
      * Create a {@link Settings} object from Bukkit plugin.
@@ -122,6 +124,14 @@ public class Settings extends DreamYaml {
         return path;
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
     public boolean reload() {
         sections.clear();
         keys.clear();
@@ -182,8 +192,21 @@ public class Settings extends DreamYaml {
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
             }
         };
+        resolveListener();
+    }
+
+    public void resolveListener() {
+        if (listener == null) return;
         if (getBoolean("File-Listener")) {
-            addListener();
+            if (!fileListener) {
+                fileListener = true;
+                addListener();
+            }
+        } else {
+            if (fileListener) {
+                fileListener = false;
+                removeListener();
+            }
         }
     }
 

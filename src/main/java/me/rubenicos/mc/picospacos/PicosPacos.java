@@ -40,10 +40,13 @@ public class PicosPacos extends JavaPlugin {
 
     public void reload() {
         onSettingsReload();
+        settings.resolveListener();
         paco.onRulesReload();
     }
 
     private void onSettingsReload() {
+        if (settings.isLocked()) return;
+        settings.setLocked(true);
         if (!settings.reload()) {
             getLogger().severe("Cannot reload settings.yml file");
         }
@@ -51,6 +54,7 @@ public class PicosPacos extends JavaPlugin {
         Database.Instance.reload();
         HookLoader.reload();
         CommandLoader.reload();
+        settings.setLocked(false);
     }
 
     @NotNull

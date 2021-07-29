@@ -28,15 +28,16 @@ Command:
     - '&e/picospacos &7- &fView info about plugin'
     - '&e/picospacos help &7- &fDisplay this information'
     - '&e/picospacos reload &7- &fReload the plugin'
-    - '&e/picospacos saves <give/take/set> <player> <amount> &7- &fEdit player saves'
+    - '&e/picospacos saves <give/take/set/info> <player> [amount] &7- &fEdit player saves'
     - '&6---------------------------------'
   Reload: '&6Picos&ePacos &8» &aPlugin reloaded successfully &a[&f{0} &ams]'
   Saves:
-    Usage: '&6Picos&ePacos &8» &eUsage: &f/picospacos saves <give/take/set> <player> <amount>'
+    Usage: '&6Picos&ePacos &8» &eUsage: &f/picospacos saves <give/take/set/info> <player> [amount]'
     Invalid-Amount: '&6Picos&ePacos &8» &c"{0}" is not a valid number!'
     Give: '&6Picos&ePacos &8» &aThe player &f{0} &areceived &f{1} &ainventory saves'
     Take: '&6Picos&ePacos &8» &f{0} &cinventory saves have been removed from player &f{1}'
     Set: '&6Picos&ePacos &8» &9The player &f{0} &9now has &f{1} &9inventory saves'
+    Info: '&6Picos&ePacos &8» &9The player &f{0} &9have &f{1} &9inventory saves'
 
 Log:
   Locale:

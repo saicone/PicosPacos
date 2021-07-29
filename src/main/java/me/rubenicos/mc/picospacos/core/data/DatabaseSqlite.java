@@ -4,6 +4,7 @@ import me.rubenicos.mc.picospacos.PicosPacos;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
 import me.rubenicos.mc.picospacos.module.Locale;
 
+import java.io.File;
 import java.sql.*;
 
 public class DatabaseSqlite extends Database {
@@ -18,6 +19,9 @@ public class DatabaseSqlite extends Database {
             } catch (ClassNotFoundException e) {
                 Locale.log(2, "");
             }
+
+            File folder = new File(PicosPacos.get().getDataFolder() + "/database");
+            if (!folder.exists()) folder.mkdirs();
 
             try {
                 con = DriverManager.getConnection("jdbc:sqlite:" + PicosPacos.get().getDataFolder().getAbsolutePath() + "/database/players.db");
