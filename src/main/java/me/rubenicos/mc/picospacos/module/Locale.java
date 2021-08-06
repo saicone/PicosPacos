@@ -104,7 +104,7 @@ public class Locale {
             if (user instanceof Player) {
                 String type = lang.getString(path + ".type").toLowerCase();
                 if (type.equals("title")) {
-                    sendTitle((Player) user, lang.getString(path + ".title"), lang.getString(path + ".subtitle"), lang.getInt(path + ".fadeIn", 10), lang.getInt(path + ".stay", 70), lang.getInt(path + ".fadeOut", 20), args);
+                    sendTitle((Player) user, path, args);
                 } else if (type.equals("actionbar")) {
                     sendActionbar((Player) user, lang.getString(path + ".text"), args);
                 } else {
@@ -155,7 +155,7 @@ public class Locale {
     }
 
     public static void sendTitle(Player player, String path, String... args) {
-        player.sendTitle(replaceArgs(lang.getString(path + ".title"), args), replaceArgs(lang.getString(path + ".subtitle"), args), lang.getInt(path + ".fadeIn"), lang.getInt(path + ".stay"), lang.getInt(path + ".fadeOut"));
+        player.sendTitle(replaceArgs(lang.getString(path + ".title"), args), replaceArgs(lang.getString(path + ".subtitle"), args), lang.getInt(path + ".fadeIn", 10), lang.getInt(path + ".stay", 70), lang.getInt(path + ".fadeOut", 20));
     }
 
     public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut, String... args) {
@@ -165,9 +165,9 @@ public class Locale {
     public static void broadcastTitle(String path, String... args) {
         String title = replaceArgs(lang.getString(path + ".title"), args);
         String subtitle = replaceArgs(lang.getString(path + ".subtitle"), args);
-        int fadeIn = lang.getInt(path + ".fadeIn");
-        int stay = lang.getInt(path + ".stay");
-        int fadeOut = lang.getInt(path + ".fadeOut");
+        int fadeIn = lang.getInt(path + ".fadeIn", 10);
+        int stay = lang.getInt(path + ".stay", 70);
+        int fadeOut = lang.getInt(path + ".fadeOut", 20);
         Bukkit.getOnlinePlayers().forEach(player -> player.sendTitle(title, subtitle, fadeIn, stay, fadeOut));
     }
 

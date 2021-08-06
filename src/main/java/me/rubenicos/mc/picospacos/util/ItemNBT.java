@@ -68,12 +68,7 @@ public class ItemNBT {
     }
 
     public void writeNBT(ItemStack item, DataOutput dataOutput) throws Throwable {
-        net.minecraft.world.item.ItemStack stack = null;
-        try {
-            stack = (net.minecraft.world.item.ItemStack) LookupUtils.get("asNMSCopy").invoke(item);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        net.minecraft.world.item.ItemStack stack = (net.minecraft.world.item.ItemStack) LookupUtils.get("asNMSCopy").invoke(item);
         if (stack != null && stack.getTag() != null) {
             NBTCompressedStreamTools.a(stack.getTag(), dataOutput);
         }
@@ -164,14 +159,14 @@ public class ItemNBT {
 
             Object base = LookupUtils.get("getTag").invokeExact(stack);
             if (base != null) {
-                LookupUtils.get("write").invoke(base, dataOutput);
+                LookupUtils.get("write").invoke(tagCompound.cast(base), dataOutput);
             }
         }
 
         @Override
         public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
             Object compound = LookupUtils.get("read").invoke(dataInput);
-            return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(LookupUtils.get("stack").invoke(compound));
+            return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(LookupUtils.get("stack").invoke(tagCompound.cast(compound)));
         }
     }
 

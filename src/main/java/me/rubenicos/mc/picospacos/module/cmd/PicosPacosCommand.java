@@ -117,12 +117,12 @@ public class PicosPacosCommand extends Command {
 
     @Override
     public boolean testPermission(@NotNull CommandSender sender) {
-        return testPermissionSilent(sender);
+        return hasPerm(sender, getPermission());
     }
 
     @Override
     public boolean testPermissionSilent(@NotNull CommandSender sender) {
-        return hasPerm(sender, getPermission());
+        return sender.hasPermission(permAll) && sender.hasPermission(getPermission());
     }
 
     private boolean hasPerm(CommandSender sender, String perm) {

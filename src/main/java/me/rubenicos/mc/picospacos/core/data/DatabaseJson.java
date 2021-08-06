@@ -24,17 +24,12 @@ public class DatabaseJson extends Database {
     @Override
     void save(PlayerData data) {
         File file = new File(players, (useID ? data.getUuid() : data.getName()) + ".json");
-        if (file.exists()) {
-            if (data.isTrash()) {
-                file.delete();
-                return;
-            }
-        } else {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        file.delete();
+        if (data.isTrash()) return;
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         JsonObject json = new JsonObject();
@@ -62,7 +57,7 @@ public class DatabaseJson extends Database {
                 JsonObject json = gson.fromJson(out.toString(StandardCharsets.UTF_8), JsonObject.class);
                 PlayerData data = new PlayerData(name, uuid, json.get("saves").getAsInt());
                 data.setOnDB(true);
-                data.addItems(json.get("items").getAsString());
+                data.addItemsBase64(json.get("items").getAsString());
                 return data;
             } catch (IOException e) {
                 e.printStackTrace();

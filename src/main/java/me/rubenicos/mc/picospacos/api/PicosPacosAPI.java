@@ -50,4 +50,8 @@ public class PicosPacosAPI {
     public static void savePlayer(Player player) {
         getDatabase().savePlayer(player);
     }
+
+    public static void savePlayer(PlayerData data) {
+        getDatabase().savePlayer(data);
+    }
 }

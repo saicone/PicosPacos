@@ -45,7 +45,10 @@ public abstract class Database {
     }
 
     public void savePlayer(Player player) {
-        PlayerData data = players.get(player.getUniqueId());
+        savePlayer(players.get(player.getUniqueId()));
+    }
+
+    public void savePlayer(PlayerData data) {
         if (data != null && data.hasEdited()) {
             save(data);
         }

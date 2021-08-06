@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -77,8 +78,7 @@ public class LookupUtils {
     }
 
     public static void addField(String name, Class<?> clazz, String field) throws NoSuchFieldException, IllegalAccessException {
-        Field f = getField(clazz, field);
-        methods.put(name, lookup.unreflectGetter(f));
+        methods.put(name, lookup.unreflectGetter(getField(clazz, field)));
     }
 
     public static Field getField(Class<?> clazz, String field) throws NoSuchFieldException {
@@ -88,7 +88,13 @@ public class LookupUtils {
     }
 
     public static void addConstructor(String name, Class<?> clazz, Class<?>... classes) throws NoSuchMethodException, IllegalAccessException {
-        methods.put(name, lookup.findConstructor(clazz, typeFrom(classes)));
+        methods.put(name, lookup.unreflectConstructor(getConstructor(clazz, classes)));
+    }
+
+    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... classes) throws NoSuchMethodException {
+        Constructor<?> c = clazz.getDeclaredConstructor(classes);
+        c.setAccessible(true);
+        return c;
     }
 
     private static MethodType typeFrom(Class<?>... classes) {

@@ -79,7 +79,7 @@ public class DatabaseSql extends Database {
 
     @Override
     void save(PlayerData data) {
-        if (data.isTrash()) {
+        if (data.isOnDatabase() && data.isTrash()) {
             try (PreparedStatement stmt = con.prepareStatement(DELETE)) {
                 stmt.setString(1, useID ? data.getUuid() : data.getName());
                 stmt.executeUpdate();
@@ -108,7 +108,7 @@ public class DatabaseSql extends Database {
             if (result.next()) {
                 PlayerData data = new PlayerData(name, uuid, result.getInt("saves"));
                 data.setOnDB(true);
-                data.addItems(result.getString("items"));
+                data.addItemsBase64(result.getString("items"));
                 return data;
             }
         } catch (SQLException e) {

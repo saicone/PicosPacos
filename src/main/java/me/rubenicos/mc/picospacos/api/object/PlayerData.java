@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class PlayerData {
 
@@ -83,18 +84,24 @@ public class PlayerData {
         return !items.isEmpty() ? ItemUtils.itemArrayToBase64(items.toArray(new ItemStack[0])) : "nothing";
     }
 
-    public void addItems(String items) {
+    public void addItemsBase64(String items) {
         if (!items.equals("nothing")) {
-            this.items.addAll(Arrays.asList(ItemUtils.itemArrayFromBase64(items)));
+            for (ItemStack item : ItemUtils.itemArrayFromBase64(items)) {
+                if (item != null) this.items.add(item);
+            }
         }
     }
 
-    public void addItems(List<ItemStack> items) {
+    public void addItemsList(List<ItemStack> items) {
         edited = true;
         this.items.addAll(items);
     }
 
+    public boolean isOnDatabase() {
+        return onDatabase;
+    }
+
     public boolean isTrash() {
-        return onDatabase && items.isEmpty() && saves == 0;
+        return items.isEmpty() && saves == 0;
     }
 }

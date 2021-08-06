@@ -10,7 +10,6 @@ import me.rubenicos.mc.picospacos.core.paco.rule.Parameter;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -37,7 +36,7 @@ public class Paco implements Listener {
     }
 
     public void disable() {
-        players.forEach((player, items) -> PicosPacosAPI.getPlayerOrLoad(player).addItems(items));
+        players.forEach((player, items) -> PicosPacosAPI.getPlayerOrLoad(player).addItemsList(items));
         players.clear();
         deathRules.clear();
         dropRules.clear();
@@ -203,25 +202,15 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        removePlayer(e.getPlayer());
-    }
-
-    @EventHandler
-    public void onKick(PlayerKickEvent e) {
-        if (!e.isCancelled()) {
-            removePlayer(e.getPlayer());
-        }
-    }
-
-    private void removePlayer(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-            UUID uuid = player.getUniqueId();
+            UUID uuid = e.getPlayer().getUniqueId();
             warnings.remove(uuid);
+            PlayerData data = PicosPacosAPI.getPlayerOrLoad(e.getPlayer());
             if (players.containsKey(uuid)) {
-                PicosPacosAPI.getPlayerOrLoad(player).addItems(players.get(uuid));
+                data.addItemsList(players.get(uuid));
                 players.remove(uuid);
             }
-            PicosPacosAPI.savePlayer(player);
+            PicosPacosAPI.savePlayer(data);
         });
     }
 }
