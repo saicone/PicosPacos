@@ -54,7 +54,7 @@ public class DatabaseSqlite extends Database {
 
     @Override
     void save(PlayerData data) {
-        if (data.isOnDatabase() && data.isTrash()) {
+        if (data.isOnDatabase() && data.getItems().isEmpty() && data.getSaves() < 1) {
             try (Statement stmt = con.createStatement()) {
                 stmt.executeUpdate(Locale.replaceArgs("DELETE FROM players WHERE player = {0};", useID ? data.getUuid() : data.getName()));
             } catch (SQLException e) {

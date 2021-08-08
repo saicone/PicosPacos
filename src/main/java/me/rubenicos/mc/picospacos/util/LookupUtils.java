@@ -30,8 +30,8 @@ public class LookupUtils {
             Class<?> craft = Class.forName("org.bukkit.craftbukkit." + Server.version + ".inventory.CraftItemStack");
             Class<?> stack;
             if (Server.verNumber >= 17) {
-                addConstructor("chatComponent", ChatComponentText.class, void.class, String.class);
-                addConstructor("chatPacket", PacketPlayOutChat.class, void.class, IChatBaseComponent.class, ChatMessageType.class, UUID.class);
+                addConstructor("chatComponent", ChatComponentText.class, String.class);
+                addConstructor("chatPacket", PacketPlayOutChat.class, IChatBaseComponent.class, ChatMessageType.class, UUID.class);
                 addStaticMethod("chatType", ChatMessageType.class, "a", ChatMessageType.class, byte.class);
 
                 addMethod("playerHandle", craftPlayer, "getHandle", EntityPlayer.class);
@@ -40,13 +40,13 @@ public class LookupUtils {
 
                 stack = net.minecraft.world.item.ItemStack.class;
             } else {
-                addConstructor("chatComponent", Class.forName("net.minecraft.server." + Server.version + ".ChatComponentText"), void.class, String.class);
+                addConstructor("chatComponent", Class.forName("net.minecraft.server." + Server.version + ".ChatComponentText"), String.class);
                 Class<?> chatMessageType = Class.forName("net.minecraft.server." + Server.version + ".ChatMessageType");
                 Class<?> packetPlayOutChat = Class.forName("net.minecraft.server." + Server.version + ".PacketPlayOutChat");
                 if (Server.verNumber < 14) {
-                    addConstructor("chatPacket", packetPlayOutChat, void.class, Class.forName("net.minecraft.server." + Server.version + ".IChatBaseComponent"), chatMessageType);
+                    addConstructor("chatPacket", packetPlayOutChat, Class.forName("net.minecraft.server." + Server.version + ".IChatBaseComponent"), chatMessageType);
                 } else {
-                    addConstructor("chatPacket", packetPlayOutChat, void.class, Class.forName("net.minecraft.server." + Server.version + ".IChatBaseComponent"), chatMessageType, UUID.class);
+                    addConstructor("chatPacket", packetPlayOutChat, Class.forName("net.minecraft.server." + Server.version + ".IChatBaseComponent"), chatMessageType, UUID.class);
                 }
                 addStaticMethod("chatType", chatMessageType, "a", chatMessageType, byte.class);
 
@@ -58,8 +58,8 @@ public class LookupUtils {
                 stack = Class.forName("net.minecraft.server." + Server.version + ".ItemStack");
             }
             addStaticMethod("asNMSCopy", craft, "asNMSCopy", stack, ItemStack.class);
-            addStaticMethod("asBukkitCopy", craft, "asBukkitCopy", ItemStack.class, stack);
-
+            addStaticMethod("asCraftMirror", craft, "asCraftMirror", craft, stack);
+            addField("itemHandle", craft, "handle");
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -67,6 +67,16 @@ public class LookupUtils {
 
     public static MethodHandle get(String name) {
         return methods.get(name);
+    }
+
+    public static Class<?> getClass(String name) {
+        Class<?> c = null;
+        try {
+            c = Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return c;
     }
 
     public static void addMethod(String name, Class<?> clazz, String method, Class<?>... classes) throws NoSuchMethodException, IllegalAccessException {

@@ -154,26 +154,7 @@ public class Settings extends DreamYaml {
             return false;
         }
 
-        if (defaultExists && update) {
-            List<List<String>> paths = new ArrayList<>();
-            getAllLoaded().forEach(module -> {
-                paths.add(module.getKeys());
-                getAllInEdit().add(module);
-            });
-            defYaml.getAllLoaded().forEach(module -> {
-                if (!paths.contains(module.getKeys())) {
-                    getAllLoaded().add(module);
-                    getAllInEdit().add(module);
-                }
-            });
-            try {
-                save(true);
-                load();
-            } catch (IllegalListException | IOException | DYWriterException | DuplicateKeyException | DYReaderException e) {
-                plugin.getLogger().severe("Cannot update " + this.path + " file on plugin folder!");
-                e.printStackTrace();
-            }
-        }
+        if (update) update();
 
         getAllLoaded().forEach(module -> {
             List<String> k = module.getKeys();
@@ -183,6 +164,29 @@ public class Settings extends DreamYaml {
             deepKeys.add(String.join(".", k));
         });
         return true;
+    }
+
+    public void update() {
+        if (!defaultExists) return;
+        List<List<String>> paths = new ArrayList<>();
+        getAllLoaded().forEach(module -> {
+            paths.add(module.getKeys());
+            getAllInEdit().add(module);
+        });
+        defYaml.getAllLoaded().forEach(module -> {
+            if (!paths.contains(module.getKeys())) {
+                getAllLoaded().add(module);
+                getAllInEdit().add(module);
+            }
+        });
+        try {
+            save(true);
+            load();
+        } catch (IllegalListException | IOException | DYWriterException | DuplicateKeyException | DYReaderException e) {
+            plugin.getLogger().severe("Cannot update " + this.path + " file on plugin folder!");
+            e.printStackTrace();
+        }
+        getAllInEdit().clear();
     }
 
     public void listener(Runnable runnable) {

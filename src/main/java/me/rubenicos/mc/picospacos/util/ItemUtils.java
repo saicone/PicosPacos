@@ -34,28 +34,6 @@ public class ItemUtils {
         return data;
     }
 
-    public static ItemStack[] itemArrayFromBase64(String data) {
-        ItemStack[] items = null;
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data)); BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
-            ItemStack[] stacks = new ItemStack[dataInput.readInt()];
-
-            for (int Index = 0; Index < stacks.length; Index++) {
-                byte[] stack = (byte[]) dataInput.readObject();
-
-                if (stack != null) {
-                    stacks[Index] = itemFromBytes(stack);
-                } else {
-                    stacks[Index] = null;
-                }
-            }
-
-            items = stacks;
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-        }
-        return items;
-    }
-
     private static byte[] itemToBytes(ItemStack it) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(out)))) {
@@ -64,6 +42,28 @@ public class ItemUtils {
             e.printStackTrace();
         }
         return out.toByteArray();
+    }
+
+    public static ItemStack[] itemArrayFromBase64(String data) {
+        ItemStack[] items = null;
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data)); BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
+            ItemStack[] stacks = new ItemStack[dataInput.readInt()];
+
+            for (int i = 0; i < stacks.length; i++) {
+                byte[] stack = (byte[]) dataInput.readObject();
+
+                if (stack != null) {
+                    stacks[i] = itemFromBytes(stack);
+                } else {
+                    stacks[i] = null;
+                }
+            }
+
+            items = stacks;
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+        return items;
     }
 
     private static ItemStack itemFromBytes(byte[] data) {

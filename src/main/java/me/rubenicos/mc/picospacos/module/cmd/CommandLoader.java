@@ -28,8 +28,7 @@ public class CommandLoader {
 
     @SuppressWarnings("unchecked")
     public static void reload() {
-        cmd.setPermission(PicosPacos.getSettings().getString("Command.permission.use", "picospacos.use"));
-        cmd.setPerms(PicosPacos.getSettings().getString("Command.permission.all", "picospacos.*"), PicosPacos.getSettings().getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.getSettings().getString("Command.permission.saves", "picospacos.command.saves"));
+        cmd.setPerms(PicosPacos.getSettings().getString("Command.permission.all", "picospacos.*"), PicosPacos.getSettings().getString("Command.permission.use", "picospacos.use"), PicosPacos.getSettings().getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.getSettings().getString("Command.permission.saves", "picospacos.command.saves"));
 
         Map<String, Command> commands;
         try {

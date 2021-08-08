@@ -5,9 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class PlayerData {
 
@@ -99,9 +97,5 @@ public class PlayerData {
 
     public boolean isOnDatabase() {
         return onDatabase;
-    }
-
-    public boolean isTrash() {
-        return items.isEmpty() && saves == 0;
     }
 }

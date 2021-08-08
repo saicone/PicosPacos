@@ -17,8 +17,8 @@ processResources {
 }
 
 repositories {
-    // Spigot
-    maven { url 'https://repo.codemc.org/repository/nms/' }
+    // MC
+    maven { url 'https://repo2s.ptms.ink/repository/maven-releases/' }
     // PlaceholderAPI
     maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
     // Vault
@@ -28,7 +28,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot:1.17-R0.1-SNAPSHOT'
+    compileOnly 'ink.ptms.core:v11701:11701:mapped'
+    compileOnly 'ink.ptms.core:v11701:11701:universal'
     compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly ('com.github.MilkBowl:VaultAPI:1.7') {
         exclude group: 'org.bukkit', module: 'bukkit'

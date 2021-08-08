@@ -79,7 +79,7 @@ public class DatabaseSql extends Database {
 
     @Override
     void save(PlayerData data) {
-        if (data.isOnDatabase() && data.isTrash()) {
+        if (data.isOnDatabase() && data.getItems().isEmpty() && data.getSaves() < 1) {
             try (PreparedStatement stmt = con.prepareStatement(DELETE)) {
                 stmt.setString(1, useID ? data.getUuid() : data.getName());
                 stmt.executeUpdate();

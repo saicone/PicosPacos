@@ -11,9 +11,11 @@ import java.util.*;
 /**
  * Item NBT utils for simple methods
  * @author Rubenicos
- * @version 0.2
+ * @version 0.3
  */
 public class ItemNBT {
+
+    final Class<?> craftItemStack = LookupUtils.getClass("org.bukkit.craftbukkit." + Server.version + ".inventory.CraftItemStack");
 
     /**
      * Get ItemStack NBTBase by provided path and convert into String. <br>
@@ -68,15 +70,13 @@ public class ItemNBT {
     }
 
     public void writeNBT(ItemStack item, DataOutput dataOutput) throws Throwable {
-        net.minecraft.world.item.ItemStack stack = (net.minecraft.world.item.ItemStack) LookupUtils.get("asNMSCopy").invoke(item);
-        if (stack != null && stack.getTag() != null) {
-            NBTCompressedStreamTools.a(stack.getTag(), dataOutput);
-        }
+        net.minecraft.world.item.ItemStack stack = (net.minecraft.world.item.ItemStack) (craftItemStack.isInstance(item) ? LookupUtils.get("itemHandle").invoke(item) : LookupUtils.get("asNMSCopy").invoke(item));
+        NBTCompressedStreamTools.a(stack.save(new NBTTagCompound()), dataOutput);
     }
 
     public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
         NBTTagCompound compound = NBTCompressedStreamTools.a((DataInput) dataInput);
-        return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(net.minecraft.world.item.ItemStack.a(compound));
+        return (ItemStack) LookupUtils.get("asCraftMirror").invoke(net.minecraft.world.item.ItemStack.a(compound));
     }
 
     // Class instance for old server versions
@@ -90,15 +90,17 @@ public class ItemNBT {
             Class<?> c2 = null;
             try {
                 c1 = Class.forName("net.minecraft.server." + Server.version + ".NBTTagCompound");
+                LookupUtils.addConstructor("tagCompound", c1);
                 LookupUtils.addMethod("get", c1, "get", Class.forName("net.minecraft.server." + Server.version + ".NBTBase"), String.class);
 
                 c2 = Class.forName("net.minecraft.server." + Server.version + ".NBTTagList");
                 LookupUtils.addField("list", c2, "list");
 
                 Class<?> itemStack = Class.forName("net.minecraft.server." + Server.version + ".ItemStack");
-                LookupUtils.addConstructor("stack", itemStack, void.class, c1);
+                LookupUtils.addConstructor("stack", itemStack, c1);
                 LookupUtils.addMethod("hasTag", itemStack, "hasTag", boolean.class);
                 LookupUtils.addMethod("getTag", itemStack, "getTag", c1);
+                LookupUtils.addMethod("save", itemStack, "save", c1, c1);
 
                 Class<?> streamTools = Class.forName("net.minecraft.server." + Server.version + ".NBTCompressedStreamTools");
                 LookupUtils.addStaticMethod("write", streamTools, "a", void.class, c1, DataOutput.class);
@@ -114,12 +116,12 @@ public class ItemNBT {
         public List<String> of(ItemStack item, String... path) {
             try {
                 Object stack = LookupUtils.get("asNMSCopy").invoke(item);
-                if (stack == null || LookupUtils.get("hasTag").invokeExact(stack).equals(false)) return Collections.emptyList();
+                if (stack == null || LookupUtils.get("hasTag").invoke(stack).equals(false)) return Collections.emptyList();
 
-                Object compound = LookupUtils.get("getTag").invokeExact(stack);
+                Object compound = LookupUtils.get("getTag").invoke(stack);
                 for (String s : path) {
                     if (tagCompound.isInstance(compound)) {
-                        compound = LookupUtils.get("get").invokeExact(stack, s);
+                        compound = LookupUtils.get("get").invoke(stack, s);
                     } else if (tagList.isInstance(compound)) {
                         int i;
                         try {
@@ -127,7 +129,7 @@ public class ItemNBT {
                         } catch (NumberFormatException e) {
                             return Collections.emptyList();
                         }
-                        compound = ((List<?>) LookupUtils.get("list").invokeExact(compound)).get(i);
+                        compound = ((List<?>) LookupUtils.get("list").invoke(compound)).get(i);
                     } else {
                         if (compound == null) {
                             return Collections.emptyList();
@@ -138,7 +140,7 @@ public class ItemNBT {
                 }
                 if (tagList.isInstance(compound)) {
                     List<String> list = new ArrayList<>();
-                    ((List<?>) LookupUtils.get("list").invokeExact(compound)).forEach(base -> {
+                    ((List<?>) LookupUtils.get("list").invoke(compound)).forEach(base -> {
                         if (!tagCompound.isInstance(base) && !tagList.isInstance(base)) {
                             list.add(base.toString());
                         }
@@ -153,20 +155,14 @@ public class ItemNBT {
 
         @Override
         public void writeNBT(ItemStack item, DataOutput dataOutput) throws Throwable {
-            Object stack = LookupUtils.get("asNMSCopy").invoke(item);
-
-            if (stack == null) return;
-
-            Object base = LookupUtils.get("getTag").invokeExact(stack);
-            if (base != null) {
-                LookupUtils.get("write").invoke(tagCompound.cast(base), dataOutput);
-            }
+            Object stack = craftItemStack.isInstance(item) ? LookupUtils.get("itemHandle").invoke(item) : LookupUtils.get("asNMSCopy").invoke(item);
+            LookupUtils.get("write").invoke(tagCompound.cast(LookupUtils.get("save").invoke(stack, LookupUtils.get("tagCompound").invoke())), dataOutput);
         }
 
         @Override
         public ItemStack readNBT(DataInputStream dataInput) throws Throwable {
             Object compound = LookupUtils.get("read").invoke(dataInput);
-            return (ItemStack) LookupUtils.get("asBukkitCopy").invoke(LookupUtils.get("stack").invoke(tagCompound.cast(compound)));
+            return (ItemStack) LookupUtils.get("asCraftMirror").invoke(LookupUtils.get("stack").invoke(tagCompound.cast(compound)));
         }
     }
 

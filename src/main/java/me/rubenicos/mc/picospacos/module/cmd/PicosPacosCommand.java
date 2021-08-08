@@ -27,11 +27,12 @@ public class PicosPacosCommand extends Command {
 
     PicosPacosCommand() {
         super("picospacos");
-        setPermission("picospacos.use");
+        setPermission("picospacos.*;picospacos.use");
     }
 
-    public void setPerms(String permAll, String permReload, String permSaves) {
+    public void setPerms(String permAll, String permUse, String permReload, String permSaves) {
         this.permAll = permAll;
+        setPermission(permAll + ";" + permUse);
         this.permReload = permReload;
         this.permSaves = permSaves;
     }
@@ -98,15 +99,15 @@ public class PicosPacosCommand extends Command {
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, @Nullable Location location) throws IllegalArgumentException {
         switch (args.length) {
-            case 0:
-                return helpTab;
             case 1:
-                if (args[0].equalsIgnoreCase("saves")) {
+                return helpTab;
+            case 2:
+                if (args[1].equalsIgnoreCase("saves")) {
                     return savesTab;
                 } else {
                     return new ArrayList<>();
                 }
-            case 2:
+            case 3:
                 List<String> list = new ArrayList<>();
                 Bukkit.getOnlinePlayers().forEach(player -> list.add(player.getName()));
                 return list;
@@ -117,12 +118,12 @@ public class PicosPacosCommand extends Command {
 
     @Override
     public boolean testPermission(@NotNull CommandSender sender) {
-        return hasPerm(sender, getPermission());
-    }
-
-    @Override
-    public boolean testPermissionSilent(@NotNull CommandSender sender) {
-        return sender.hasPermission(permAll) && sender.hasPermission(getPermission());
+        if (testPermissionSilent(sender)) {
+            return true;
+        } else {
+            Locale.sendTo(sender, "Command.NoPerm");
+            return false;
+        }
     }
 
     private boolean hasPerm(CommandSender sender, String perm) {

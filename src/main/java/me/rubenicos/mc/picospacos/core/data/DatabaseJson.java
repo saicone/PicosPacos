@@ -1,6 +1,7 @@
 package me.rubenicos.mc.picospacos.core.data;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.rubenicos.mc.picospacos.PicosPacos;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
@@ -25,7 +26,7 @@ public class DatabaseJson extends Database {
     void save(PlayerData data) {
         File file = new File(players, (useID ? data.getUuid() : data.getName()) + ".json");
         file.delete();
-        if (data.isTrash()) return;
+        if (data.getItems().isEmpty() && data.getSaves() < 1) return;
         try {
             file.createNewFile();
         } catch (IOException e) {
@@ -34,7 +35,9 @@ public class DatabaseJson extends Database {
 
         JsonObject json = new JsonObject();
         json.addProperty("saves", data.getSaves());
-        json.addProperty("items", data.items());
+        if (!data.getItems().isEmpty()) {
+            json.addProperty("items", data.items());
+        }
 
         try (FileWriter fw = new FileWriter(file); BufferedWriter writer = new BufferedWriter(fw)) {
             writer.write(json.toString());
@@ -57,7 +60,10 @@ public class DatabaseJson extends Database {
                 JsonObject json = gson.fromJson(out.toString(StandardCharsets.UTF_8), JsonObject.class);
                 PlayerData data = new PlayerData(name, uuid, json.get("saves").getAsInt());
                 data.setOnDB(true);
-                data.addItemsBase64(json.get("items").getAsString());
+                JsonElement items = json.get("items");
+                if (items != null) {
+                    data.addItemsBase64(items.getAsString());
+                }
                 return data;
             } catch (IOException e) {
                 e.printStackTrace();
