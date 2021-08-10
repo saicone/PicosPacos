@@ -79,15 +79,11 @@ public class PlayerData {
     }
 
     public String items() {
-        return !items.isEmpty() ? ItemUtils.itemArrayToBase64(items.toArray(new ItemStack[0])) : "nothing";
+        return !items.isEmpty() ? ItemUtils.itemsToBase64(items) : "";
     }
 
     public void addItemsBase64(String items) {
-        if (!items.equals("nothing")) {
-            for (ItemStack item : ItemUtils.itemArrayFromBase64(items)) {
-                if (item != null) this.items.add(item);
-            }
-        }
+        this.items.addAll(ItemUtils.itemsFromBase64(items));
     }
 
     public void addItemsList(List<ItemStack> items) {

@@ -1,5 +1,6 @@
 package me.rubenicos.mc.picospacos.util;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -9,24 +10,25 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class ItemUtils {
 
-    public static String itemArrayToBase64(ItemStack[] items) {
+    public static boolean itemExists(ItemStack item) {
+        return item != null && item.getType() != Material.AIR;
+    }
+
+    public static String itemsToBase64(List<ItemStack> items) {
+        items = items.stream().filter(ItemUtils::itemExists).collect(Collectors.toList());
         String data = "";
+        if (items.isEmpty()) return data;
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream)) {
-            dataOutput.writeInt(items.length);
-
+            dataOutput.writeInt(items.size());
             for (ItemStack item : items) {
-                if (item != null) {
-                    dataOutput.writeObject(itemToBytes(item));
-                } else {
-                    dataOutput.writeObject(null);
-                }
+                dataOutput.writeObject(itemToBytes(item));
             }
-
             data = Base64Coder.encodeLines(outputStream.toByteArray());
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,22 +46,20 @@ public class ItemUtils {
         return out.toByteArray();
     }
 
-    public static ItemStack[] itemArrayFromBase64(String data) {
-        ItemStack[] items = null;
+    public static List<ItemStack> itemsFromBase64(String data) {
+        List<ItemStack> items = new ArrayList<>();
+        if (data.isBlank()) return items;
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data)); BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
-            ItemStack[] stacks = new ItemStack[dataInput.readInt()];
-
-            for (int i = 0; i < stacks.length; i++) {
+            int size = dataInput.readInt();
+            for (int i = 0; i < size; i++) {
                 byte[] stack = (byte[]) dataInput.readObject();
-
                 if (stack != null) {
-                    stacks[i] = itemFromBytes(stack);
-                } else {
-                    stacks[i] = null;
+                    ItemStack item = itemFromBytes(stack);
+                    if (item != null) {
+                        items.add(item);
+                    }
                 }
             }
-
-            items = stacks;
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
