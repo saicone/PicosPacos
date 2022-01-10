@@ -7,6 +7,7 @@ import me.rubenicos.mc.picospacos.api.event.ItemsPacoEvent;
 import me.rubenicos.mc.picospacos.core.paco.rule.PacoRule;
 import me.rubenicos.mc.picospacos.api.object.PlayerData;
 import me.rubenicos.mc.picospacos.core.paco.rule.Parameter;
+import me.rubenicos.mc.picospacos.core.paco.rule.RuleType;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
@@ -54,38 +55,24 @@ public class Paco implements Listener {
                 if (file.isSection(key)) {
                     String type = file.getString(key + ".type");
                     if (!type.equals("null") || !type.isBlank()) {
-                        String[] types = type.split(",");
-                        PacoRule rule = null;
-                        boolean invalid = false;
-                        for (String s : types) {
-                            if (invalid) break;
-                            s = s.trim();
-                            if (s.equalsIgnoreCase("DEATH")) {
-                                if (rule == null) {
-                                    rule = Parameter.ruleOf(file, key);
-                                }
-                                if (rule == null) {
-                                    invalid = true;
-                                    Locale.sendToConsole("Paco.Error.Tags", key);
-                                } else {
+                        List<RuleType> rules = new ArrayList<>();
+                        for (String s : type.split(",")) {
+                            rules.add(RuleType.of(s.trim()));
+                        }
+                        if (!rules.isEmpty() && !rules.contains(RuleType.DISABLED)) {
+                            PacoRule rule = Parameter.ruleOf(file, key, rules);
+                            if (rule == null) {
+                                Locale.sendToConsole("Paco.Error.Tags", key);
+                            } else {
+                                if (rules.contains(RuleType.DEATH)) {
                                     deathRules.add(rule);
-                                }
-                            } else if (s.equalsIgnoreCase("DROP")) {
-                                if (rule == null) {
-                                    rule = Parameter.ruleOf(file, key);
-                                }
-                                if (rule == null) {
-                                    invalid = true;
-                                    Locale.sendToConsole("Paco.Error.Tags", key);
-                                } else {
+                                } else if (rules.contains(RuleType.DROP) || rules.contains(RuleType.NODROP)) {
                                     dropRules.add(rule);
                                 }
-                            } else if (!s.equalsIgnoreCase("DISABLED")) {
-                                Locale.sendToConsole("Paco.Error.Rule-Type", s, key);
                             }
                         }
                     } else {
-                        Locale.sendToConsole("Paco.Error.Rule-Type", type, key);
+                        Locale.sendToConsole("Paco.Error.Rule-Type", type);
                     }
                 } else {
                     // TODO: Do stuff with JSON formatted string
@@ -168,8 +155,12 @@ public class Paco implements Listener {
         dropRules.forEach(rule -> {
             if (rule.match(e.getItemDrop().getItemStack(), e.getPlayer())) {
                 e.setCancelled(true);
-                warnings.put(uuid, e.getItemDrop().getItemStack());
-                Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
+                if (rule.containsRule(RuleType.NODROP)) {
+                    Locale.sendTo(e.getPlayer(), "Paco.Drop.Error");
+                } else if (rule.containsRule(RuleType.DROP)) {
+                    warnings.put(uuid, e.getItemDrop().getItemStack());
+                    Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
+                }
             }
         });
     }

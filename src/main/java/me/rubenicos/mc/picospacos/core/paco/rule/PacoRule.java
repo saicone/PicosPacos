@@ -7,10 +7,16 @@ import java.util.List;
 
 public final class PacoRule {
 
+    private final List<RuleType> rules;
     private final List<TagType> tags;
 
-    public PacoRule(List<TagType> tags) {
+    public PacoRule(List<RuleType> rules, List<TagType> tags) {
+        this.rules = rules;
         this.tags = tags;
+    }
+
+    public boolean containsRule(RuleType rule) {
+        return rules.contains(rule);
     }
 
     public boolean match(ItemStack item, Player player) {

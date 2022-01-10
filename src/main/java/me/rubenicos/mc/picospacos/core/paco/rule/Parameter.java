@@ -68,7 +68,7 @@ public class Parameter {
         }
     }
 
-    public static PacoRule ruleOf(Settings settings, String name) {
+    public static PacoRule ruleOf(Settings settings, String name, List<RuleType> rules) {
         List<TagType> tags = new ArrayList<>();
         settings.getKeys(name).forEach(key -> {
             TagType tag = tagOf(settings, name + "." + key, key);
@@ -77,7 +77,7 @@ public class Parameter {
             }
         });
         if (!tags.isEmpty()) {
-            return new PacoRule(tags);
+            return new PacoRule(rules, tags);
         } else {
             return null;
         }
