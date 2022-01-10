@@ -66,7 +66,8 @@ public class Paco implements Listener {
                             } else {
                                 if (rules.contains(RuleType.DEATH)) {
                                     deathRules.add(rule);
-                                } else if (rules.contains(RuleType.DROP) || rules.contains(RuleType.NODROP)) {
+                                }
+                                if (rules.contains(RuleType.DROP) || rules.contains(RuleType.NODROP)) {
                                     dropRules.add(rule);
                                 }
                             }
@@ -157,7 +158,7 @@ public class Paco implements Listener {
                 e.setCancelled(true);
                 if (rule.containsRule(RuleType.NODROP)) {
                     Locale.sendTo(e.getPlayer(), "Paco.Drop.Error");
-                } else if (rule.containsRule(RuleType.DROP)) {
+                } else {
                     warnings.put(uuid, e.getItemDrop().getItemStack());
                     Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
                 }
