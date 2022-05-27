@@ -10,8 +10,9 @@ exampleRule1:
   # Rule types can be:
   # DEATH - Items who match be protected after death
   # DROP - Items who match will display a warning when player try to drop
+  # NODROP - Items who match will be impossible to drop
   # DISABLED - Disable the rule
-  type: DEATH, DROP
+  type: DISABLED
   # All before ":" are arguments separated by ":"
   # In this case the argument of material tag is "contains"
   # Argument matching type for strings:
@@ -34,7 +35,7 @@ exampleRule1:
   amount:less: '60'
 
 exampleRule2:
-  type: DEATH
+  type: DISABLED
   material: 'IRON_PICKAXE'
   name:regex: '&eCool Pick(axe)?'
   lore:contains:
@@ -42,7 +43,7 @@ exampleRule2:
     - 'Second chance'
 
 exampleRule3:
-  type: DROP
+  type: DISABLED
   material: 'IRON_BLOCK'
   customModelData: 43
   nbt:
@@ -61,7 +62,7 @@ exampleRule3:
       - 'protected'
 
 exampleRule4:
-  type: DEATH, DROP
+  type: DISABLED
   material: 'DIAMOND_SHOVEL'
   name: '&cThe Best Shovel'
   # If tou want the rule tag parse PlaceholderAPI placeholders just add the text configured in settings.yml at final

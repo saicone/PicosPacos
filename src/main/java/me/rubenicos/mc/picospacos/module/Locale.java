@@ -2,8 +2,7 @@ package me.rubenicos.mc.picospacos.module;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.rubenicos.mc.picospacos.PicosPacos;
-import me.rubenicos.mc.picospacos.util.LookupUtils;
-import me.rubenicos.mc.picospacos.util.Server;
+import me.rubenicos.mc.picospacos.util.ServerInstance;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,31 +20,13 @@ import java.util.List;
  */
 public class Locale {
 
-    // Options depending server type and version
-    private static final boolean useSpigot;
-    private static final boolean useRGB;
-    private static final boolean newPacket;
-    public static boolean allowPAPI = false;
+    private static final boolean useRGB = ServerInstance.verNumber >= 16;
 
-    // Reflected ChatMessageType
-    private static Object ACTIONBAR_TYPE;
+    public static boolean allowPAPI = false;
 
     // Locale options
     private static Settings lang;
     private static int logLevel = -1;
-
-    static {
-        useSpigot = Server.isSpigot;
-        useRGB = Server.verNumber >= 16;
-        newPacket = Server.verNumber >= 14;
-        if (!useSpigot) {
-            try {
-                ACTIONBAR_TYPE = LookupUtils.get("chatType").invoke((byte) 2);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /**
      * Reload locale options. <br>
@@ -187,30 +168,8 @@ public class Locale {
     }
 
     private static void actionbar(Player player, String text) {
-        if (useSpigot) {
+        if (ServerInstance.isSpigot) {
             player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(text));
-        } else {
-            try {
-                packetActionbar(player, text);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-    }
-
-    private static void packetActionbar(Player player, String text) throws Throwable {
-        Object packet;
-        if (newPacket) {
-            packet = LookupUtils.get("chatPacket").invoke(LookupUtils.get("chatComponent").invoke(text), ACTIONBAR_TYPE, player.getUniqueId());
-        } else {
-            packet = LookupUtils.get("chatPacket").invoke(LookupUtils.get("chatComponent").invoke(text), ACTIONBAR_TYPE);
-        }
-
-        if (packet != null) {
-            Object con = LookupUtils.get("playerConnection").invoke(LookupUtils.get("playerHandle").invoke(player));
-            if (con != null) {
-                LookupUtils.get("sendPacket").invoke(con, packet);
-            }
         }
     }
 
@@ -255,12 +214,14 @@ public class Locale {
             for (int i = 0; i < chars.length; i++) {
                 if (i + 7 < chars.length && chars[i] == '&' && chars[i + 1] == '#') {
                     StringBuilder color = new StringBuilder();
-                    for (int c = i + 2; c < chars.length && c < 7; c++) {
+                    for (int c = i + 2; c < chars.length && c <= 7; c++) {
                         color.append(chars[c]);
                     }
                     if (color.length() == 6) {
                         builder.append(rgb(color.toString()));
-                        i += 8;
+                        i += color.length() + 2;
+                    } else {
+                        builder.append(chars[i]);
                     }
                 } else {
                     builder.append(chars[i]);

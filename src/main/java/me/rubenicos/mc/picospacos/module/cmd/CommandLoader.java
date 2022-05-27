@@ -1,29 +1,33 @@
 package me.rubenicos.mc.picospacos.module.cmd;
 
+import com.saicone.rtag.util.EasyLookup;
 import me.rubenicos.mc.picospacos.PicosPacos;
-import me.rubenicos.mc.picospacos.util.LookupUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 
+import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.Map;
 
 public class CommandLoader {
 
     private static final PicosPacosCommand cmd = new PicosPacosCommand();
-    private static final CommandMap map;
+    private static final CommandMap commandMap;
+    private static final MethodHandle knownCommands;
 
     static {
-        CommandMap m = null;
+        CommandMap mapObject = null;
+        MethodHandle get$knownCommands = null;
         try {
-            m = (CommandMap) LookupUtils.getField(Bukkit.getServer().getClass(), "commandMap").get(Bukkit.getServer());
-            Class<? extends CommandMap> c1 = m.getClass();
-            LookupUtils.addField("commands", c1.getSimpleName().equals("CraftCommandMap") ? c1.getSuperclass() : c1, "knownCommands");
+            mapObject = (CommandMap) EasyLookup.unreflectGetter(Bukkit.getServer().getClass(), "commandMap").invoke(Bukkit.getServer());
+            Class<? extends CommandMap> mapClass = mapObject.getClass();
+            get$knownCommands = EasyLookup.unreflectGetter(mapClass.getSimpleName().equals("CraftCommandMap") ? mapClass.getSuperclass() : mapClass, "knownCommands");
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        map = m;
+        commandMap = mapObject;
+        knownCommands = get$knownCommands;
     }
 
     @SuppressWarnings("unchecked")
@@ -32,14 +36,14 @@ public class CommandLoader {
 
         Map<String, Command> commands;
         try {
-            commands = (Map<String, Command>) LookupUtils.get("commands").invoke(map);
+            commands = (Map<String, Command>) knownCommands.invoke(commandMap);
         } catch (Throwable e) {
             e.printStackTrace();
             return;
         }
         if (!cmd.isRegistered()) {
             commands.put("picospacos", cmd);
-            cmd.register(map);
+            cmd.register(commandMap);
         }
         List<String> aliases = PicosPacos.getSettings().getStringList("Command.aliases");
         cmd.getAliases().forEach(alias -> {
@@ -60,7 +64,7 @@ public class CommandLoader {
         if (!cmd.isRegistered()) return;
         Map<String, Command> commands;
         try {
-            commands = (Map<String, Command>) LookupUtils.get("commands").invoke(map);
+            commands = (Map<String, Command>) knownCommands.invoke(commandMap);
         } catch (Throwable e) {
             e.printStackTrace();
             return;
@@ -71,6 +75,6 @@ public class CommandLoader {
                 commands.remove(alias);
             }
         });
-        cmd.unregister(map);
+        cmd.unregister(commandMap);
     }
 }

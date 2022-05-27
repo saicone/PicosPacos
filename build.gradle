@@ -12,14 +12,11 @@ processResources {
 }
 
 repositories {
-    // MC
     maven {
         url 'http://ptms.ink:8081/repository/releases/'
         allowInsecureProtocol true
     }
-    // PlaceholderAPI
     maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
-    // DreamYaml
     maven { url 'https://jitpack.io' }
     mavenCentral()
 }
@@ -33,6 +30,8 @@ dependencies {
 
     // Shaded Dependencies
     implementation 'com.github.Osiris-Team:Dream-Yaml:6.8'
+    implementation 'com.saicone.rtag:rtag:1.1.0'
+    implementation 'com.saicone.rtag:rtag-item:1.1.0'
 
     compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
 }
@@ -44,6 +43,7 @@ compileJava {
 
 shadowJar {
     relocate 'com.osiris.dyml', project.group + '.lib.dyml'
+    relocate 'com.saicone.rtag', project.group + '.lib.rtag'
     minimize()
 }
 
