@@ -77,7 +77,7 @@ public class Parameter {
             }
         });
         if (!tags.isEmpty()) {
-            return new PacoRule(rules, tags);
+            return new PacoRule(name, rules, tags);
         } else {
             return null;
         }

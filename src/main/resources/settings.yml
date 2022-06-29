@@ -48,6 +48,13 @@ Config:
     # Permission to have this feature
     Permission: 'picospacos.drop'
 
+# Event executors
+# Compatible with placeholders from PlaceholderAPI
+# So you can use {player} from player name and {rule} for rule ID
+Execute:
+  # Commands to execute when an item is removed by "DELETE" rule
+  onDelete:
+    - 'warn {player} Illegal item detected (id: {rule})'
 
 # Database configuration
 Database:

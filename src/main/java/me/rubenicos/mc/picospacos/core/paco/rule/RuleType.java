@@ -4,7 +4,7 @@ import me.rubenicos.mc.picospacos.module.Locale;
 
 public enum RuleType {
 
-    DEATH, DROP, NODROP, DISABLED;
+    DEATH, DROP, NODROP, DELETE, DISABLED;
 
     public static RuleType of(String s) {
         for (RuleType value : values()) {

@@ -11,6 +11,7 @@ exampleRule1:
   # DEATH - Items who match be protected after death
   # DROP - Items who match will display a warning when player try to drop
   # NODROP - Items who match will be impossible to drop
+  # DELETE - Items who match will be deleted from inventory
   # DISABLED - Disable the rule
   type: DISABLED
   # All before ":" are arguments separated by ":"

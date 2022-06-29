@@ -11,9 +11,13 @@ import me.rubenicos.mc.picospacos.core.paco.rule.RuleType;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,6 +30,7 @@ public class Paco implements Listener {
 
     private final List<PacoRule> deathRules = new ArrayList<>();
     private final List<PacoRule> dropRules = new ArrayList<>();
+    private final List<PacoRule> deleteRules = new ArrayList<>();
     private final Map<UUID, List<ItemStack>> players = new HashMap<>();
     private final Map<UUID, ItemStack> warnings = new HashMap<>();
 
@@ -69,6 +74,9 @@ public class Paco implements Listener {
                                 }
                                 if (rules.contains(RuleType.DROP) || rules.contains(RuleType.NODROP)) {
                                     dropRules.add(rule);
+                                }
+                                if (rules.contains(RuleType.DELETE)) {
+                                    deleteRules.add(rule);
                                 }
                             }
                         }
@@ -164,6 +172,30 @@ public class Paco implements Listener {
                 }
             }
         });
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onClick(InventoryClickEvent e) {
+        ItemStack item = e.getCurrentItem();
+        if (item == null) {
+            return;
+        }
+        for (PacoRule rule : deleteRules) {
+            if (rule.match(item, (Player) e.getWhoClicked())) {
+                e.setCancelled(true);
+                item.setType(Material.AIR);
+                e.setCurrentItem(item);
+                Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+                    for (String s : PicosPacos.getSettings().getStringList("Execute.onDelete")) {
+                        String cmd = Locale.parsePlaceholders(
+                                (Player) e.getWhoClicked(),
+                                s.replace("{player}", e.getWhoClicked().getName()).replace("{rule}", rule.getName()));
+                        Bukkit.getScheduler().runTask(pl, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+                    }
+                });
+                return;
+            }
+        }
     }
 
     @EventHandler
