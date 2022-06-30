@@ -2,6 +2,7 @@ package me.rubenicos.mc.picospacos;
 
 import me.rubenicos.mc.picospacos.core.data.Database;
 import me.rubenicos.mc.picospacos.core.paco.Paco;
+import me.rubenicos.mc.picospacos.module.LibraryLoader;
 import me.rubenicos.mc.picospacos.module.Locale;
 import me.rubenicos.mc.picospacos.module.Settings;
 import me.rubenicos.mc.picospacos.module.cmd.CommandLoader;
@@ -20,10 +21,17 @@ public class PicosPacos extends JavaPlugin {
         return instance;
     }
 
+    public PicosPacos() {
+        instance = this;
+    }
+
+    @Override
+    public void onLoad() {
+        LibraryLoader.load(this);
+    }
+
     @Override
     public void onEnable() {
-        instance = this;
-
         settings = new Settings(this, "settings.yml");
         settings.listener(this::onSettingsReload);
         paco = new Paco(this);

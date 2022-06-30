@@ -27,11 +27,12 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.10.9'
 
     compileOnly 'org.jetbrains:annotations:21.0.0'
+    compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
+    compileOnly 'com.saicone.rtag:rtag:1.2.0'
+    compileOnly 'com.saicone.rtag:rtag-item:1.2.0'
 
     // Shaded Dependencies
-    implementation 'com.github.Osiris-Team:Dream-Yaml:6.8'
-    implementation 'com.saicone.rtag:rtag:1.1.0'
-    implementation 'com.saicone.rtag:rtag-item:1.1.0'
+    implementation 'com.saicone.ezlib:ezlib:1.1'
 
     compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
 }
@@ -42,9 +43,9 @@ compileJava {
 }
 
 shadowJar {
-    relocate 'com.osiris.dyml', project.group + '.lib.dyml'
-    relocate 'com.saicone.rtag', project.group + '.lib.rtag'
-    minimize()
+    relocate 'com.sacone.ezlib', project.group + '.lib.ezlib'
+    relocate 'com.osiris.dyml', 'dyml68'
+    relocate 'com.saicone.rtag', 'rtag12'
 }
 
 jar.dependsOn (shadowJar)
