@@ -29,9 +29,10 @@ public class ItemUtils {
         return list;
     }
 
+    @SuppressWarnings("deprecation")
     public static Set<Map.Entry<String, Integer>> enchantsToSet(Map<Enchantment, Integer> enchants) {
         Map<String, Integer> map = new HashMap<>();
-        enchants.forEach((enchant, level) -> map.put(enchant.toString(), level));
+        enchants.forEach((enchant, level) -> map.put(enchant.getName(), level));
         return map.entrySet();
     }
 

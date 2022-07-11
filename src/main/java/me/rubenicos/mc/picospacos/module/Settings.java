@@ -170,6 +170,13 @@ public class Settings extends DreamYaml {
         if (!defaultExists) return;
         List<List<String>> paths = new ArrayList<>();
         getAllLoaded().forEach(module -> {
+            if (module.getComments().size() > 0) {
+                List<String> comments = new ArrayList<>();
+                for (String s : module.getComments()) {
+                    comments.add(s.trim());
+                }
+                module.setComments(comments);
+            }
             paths.add(module.getKeys());
             getAllInEdit().add(module);
         });
