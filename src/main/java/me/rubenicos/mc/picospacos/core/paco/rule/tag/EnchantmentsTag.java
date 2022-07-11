@@ -27,8 +27,10 @@ public final class EnchantmentsTag extends TagType {
         if (!item.getEnchantments().isEmpty()) {
             Set<Map.Entry<String, Integer>> enchants = ItemUtils.enchantsToSet(item.getEnchantments());
             for (Map.Entry<String, Integer> enchant : enchants) {
-                if (valid(enchant.getKey(), enchant.getValue(), player) && !all) {
-                    return true;
+                if (valid(enchant.getKey(), enchant.getValue(), player)) {
+                    if (!all) {
+                        return true;
+                    }
                 } else if (all) {
                     return false;
                 }

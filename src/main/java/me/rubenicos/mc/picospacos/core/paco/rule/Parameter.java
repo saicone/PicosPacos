@@ -57,6 +57,9 @@ public class Parameter {
                         enchants.put(s[0], TextUtils.rangeInt(s[1]));
                     }
                 });
+                if (enchants.isEmpty()) {
+                    return null;
+                }
                 boolean all = split[split.length - 1].equalsIgnoreCase("all");
                 return new EnchantmentsTag(enchants, all, papi, comparator, comparatorOf(split.length > 2 ? (all ? (split.length > 3 ? split[3] : "equal") : split[2]) : "equal"));
             case "flags":
