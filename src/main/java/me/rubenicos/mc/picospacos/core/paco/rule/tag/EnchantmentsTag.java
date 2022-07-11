@@ -35,7 +35,7 @@ public final class EnchantmentsTag extends TagType {
                     return false;
                 }
             }
-            return true;
+            return all;
         }
         return false;
     }
