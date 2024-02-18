@@ -1,51 +1,61 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from(sourceSets.main.resources.srcDirs) {
-        include '**/*.yml'
-        expand(project.properties)
+        include 'plugin.yml'
+        expand(rootProject.properties)
     }
 }
 
 repositories {
-    maven {
-        url 'http://ptms.ink:8081/repository/releases/'
-        allowInsecureProtocol true
-    }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://oss.sonatype.org/content/repositories/central' }
     maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
     maven { url 'https://jitpack.io' }
     mavenCentral()
 }
 
 dependencies {
-    compileOnly 'ink.ptms.core:v11802:11802:universal'
-    compileOnly 'ink.ptms.core:v11701:11701:universal'
-    compileOnly 'me.clip:placeholderapi:2.10.9'
+    compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
+    compileOnly 'me.clip:placeholderapi:2.11.5'
 
-    compileOnly 'org.jetbrains:annotations:21.0.0'
     compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
-    compileOnly 'com.saicone.rtag:rtag:1.2.0'
-    compileOnly 'com.saicone.rtag:rtag-item:1.2.0'
+    compileOnly 'com.saicone.rtag:rtag:1.4.4'
+    compileOnly 'com.saicone.rtag:rtag-item:1.4.4'
 
-    // Shaded Dependencies
-    implementation 'com.saicone.ezlib:ezlib:1.1'
+    // Library loader
+    implementation 'com.saicone.ezlib:ezlib:1.2.3'
+    implementation 'com.saicone.ezlib:loader:1.2.3'
+    compileOnly 'com.saicone.ezlib:annotations:1.2.3'
+    annotationProcessor 'com.saicone.ezlib:annotations:1.2.3'
+
+    compileOnly 'org.jetbrains:annotations:24.0.1'
 
     compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
 }
 
 compileJava {
-    options.release = 11
     options.encoding = 'UTF-8'
 }
 
-shadowJar {
-    relocate 'com.sacone.ezlib', project.group + '.lib.ezlib'
-    relocate 'com.osiris.dyml', 'dyml68'
-    relocate 'com.saicone.rtag', 'rtag12'
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
-jar.dependsOn (shadowJar)
+jar {
+    enabled = false
+    dependsOn (shadowJar)
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'com.sacone.ezlib', project.group + '.ezlib'
+    relocate 'com.osiris.dyml', project.group + '.libs.dyml'
+    relocate 'com.saicone.rtag', project.group + '.libs.rtag'
+}
