@@ -3,8 +3,6 @@ package com.saicone.picospacos.core.paco.rule;
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.core.paco.rule.comparator.*;
 import com.saicone.picospacos.core.paco.rule.tag.*;
-import me.rubenicos.mc.picospacos.core.paco.rule.comparator.*;
-import me.rubenicos.mc.picospacos.core.paco.rule.tag.*;
 import com.saicone.picospacos.module.Settings;
 import com.saicone.picospacos.util.TextUtils;
 
