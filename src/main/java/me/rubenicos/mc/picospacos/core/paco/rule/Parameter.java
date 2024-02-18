@@ -71,16 +71,16 @@ public class Parameter {
         }
     }
 
-    public static PacoRule ruleOf(Settings settings, String name, List<RuleType> rules) {
+    public static PacoRule ruleOf(Settings settings, String id, List<RuleType> rules) {
         List<TagType> tags = new ArrayList<>();
-        settings.getKeys(name).forEach(key -> {
-            TagType tag = tagOf(settings, name + "." + key, key);
+        settings.getKeys(id).forEach(key -> {
+            TagType tag = tagOf(settings, id + "." + key, key);
             if (tag != null) {
                 tags.add(tag);
             }
         });
         if (!tags.isEmpty()) {
-            return new PacoRule(name, rules, tags);
+            return new PacoRule(id, rules, tags);
         } else {
             return null;
         }

@@ -185,11 +185,12 @@ public class Paco implements Listener {
                 e.setCancelled(true);
                 item.setType(Material.AIR);
                 e.setCurrentItem(item);
+                final String ruleID = rule.getId();
                 Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
                     for (String s : PicosPacos.getSettings().getStringList("Execute.onDelete")) {
                         String cmd = Locale.parsePlaceholders(
                                 (Player) e.getWhoClicked(),
-                                s.replace("{player}", e.getWhoClicked().getName()).replace("{rule}", rule.getName()));
+                                s.replace("{player}", e.getWhoClicked().getName()).replace("{rule}", ruleID));
                         Bukkit.getScheduler().runTask(pl, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
                     }
                 });

@@ -7,18 +7,18 @@ import java.util.List;
 
 public final class PacoRule {
 
-    private final String name;
+    private final String id;
     private final List<RuleType> rules;
     private final List<TagType> tags;
 
-    public PacoRule(String name, List<RuleType> rules, List<TagType> tags) {
-        this.name = name;
+    public PacoRule(String id, List<RuleType> rules, List<TagType> tags) {
+        this.id = id;
         this.rules = rules;
         this.tags = tags;
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public boolean containsRule(RuleType rule) {
