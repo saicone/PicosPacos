@@ -13,8 +13,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 @Dependencies({
-        @Dependency(value = "com.github.Osiris-Team:Dream-Yaml:6.8", relocate = {"com.cryptomorin.xseries", "{package}.libs.dyml"}),
-        @Dependency(value = "com.saicone.rtag:rtag-item:1.4.4", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
+        @Dependency(value = "com.github.Osiris-Team:Dream-Yaml:6.8", relocate = {"com.osiris.dyml", "{package}.libs.dyml"}),
+        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.4", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
 })
 public class PicosPacos extends JavaPlugin {
 

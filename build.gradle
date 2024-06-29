@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'io.github.goooler.shadow' version '8.1.7'
 }
 
 processResources {
@@ -21,12 +21,12 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
-    compileOnly 'me.clip:placeholderapi:2.11.5'
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
 
     compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
-    compileOnly 'com.saicone.rtag:rtag:1.4.4'
-    compileOnly 'com.saicone.rtag:rtag-item:1.4.4'
+    compileOnly 'com.saicone.rtag:rtag:1.5.4'
+    compileOnly 'com.saicone.rtag:rtag-item:1.5.4'
 
     // Library loader
     implementation 'com.saicone.ezlib:ezlib:1.2.3'
@@ -34,7 +34,7 @@ dependencies {
     compileOnly 'com.saicone.ezlib:annotations:1.2.3'
     annotationProcessor 'com.saicone.ezlib:annotations:1.2.3'
 
-    compileOnly 'org.jetbrains:annotations:24.0.1'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
 
     compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
 }
