@@ -4,4 +4,5 @@ version: ${version}
 main: com.saicone.picospacos.PicosPacos
 authors: [Rubenicos]
 api-version: 1.13
-softdepend: [Vault, PlaceholderAPI]
+softdepend:
+  - PlaceholderAPI

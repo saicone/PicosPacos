@@ -92,23 +92,15 @@ Database:
 # Plugin hooks configuration
 Hook:
   # PlaceholderAPI hook
-  PlayerholderAPI:
+  PlaceholderAPI:
     # Enable or not this hook
     enabled: true
     # Identifiers to parse placeholder expansion
-    identifiers:
+    names:
       - 'picospacos'
       - 'pipa'
-    # Time in seconds to cache placeholder requests by default
-    # To cache a request you need to add "_cache" at final of placeholder
-    # or add "_cache:<seconds>" for custom time, for example %<identifier>_saves_cache:5%
-    cache: 20
     # Text to put in rule tags name to allow PlaceholderAPI
     rule: 'allowPapi'
-  # Vault hook
-  Vault:
-    # Enable or not this hook
-    enabled: true
 
 # Plugin command configuration
 Command:

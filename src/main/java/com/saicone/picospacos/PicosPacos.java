@@ -3,14 +3,17 @@ package com.saicone.picospacos;
 import com.saicone.ezlib.Dependencies;
 import com.saicone.ezlib.Dependency;
 import com.saicone.ezlib.EzlibLoader;
+import com.saicone.picospacos.api.PicosPacosAPI;
 import com.saicone.picospacos.core.data.Database;
 import com.saicone.picospacos.core.paco.Paco;
 import com.saicone.picospacos.module.Locale;
 import com.saicone.picospacos.module.Settings;
 import com.saicone.picospacos.module.cmd.CommandLoader;
-import com.saicone.picospacos.module.hook.HookLoader;
+import com.saicone.picospacos.module.hook.Placeholders;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @Dependencies({
         @Dependency(value = "com.github.Osiris-Team:Dream-Yaml:6.8", relocate = {"com.osiris.dyml", "{package}.libs.dyml"}),
@@ -22,6 +25,8 @@ public class PicosPacos extends JavaPlugin {
 
     private static Settings settings;
     private Paco paco;
+
+    private List<String> placeholderNames;
 
     public static PicosPacos get() {
         return instance;
@@ -61,7 +66,10 @@ public class PicosPacos extends JavaPlugin {
     public void onDisable() {
         if (paco != null) paco.disable();
         CommandLoader.unload();
-        HookLoader.unload();
+        if (placeholderNames != null) {
+            Placeholders.unregister(placeholderNames);
+            placeholderNames = null;
+        }
         Database.Instance.unload();
         settings.removeListener();
     }
@@ -80,7 +88,18 @@ public class PicosPacos extends JavaPlugin {
         }
         Locale.reload();
         Database.Instance.reload();
-        HookLoader.reload();
+        if (placeholderNames != null) {
+            Placeholders.unregister(placeholderNames);
+            placeholderNames = null;
+        }
+        if (settings.getBoolean("Hook.PlaceholderAPI.enabled")) {
+            placeholderNames = Placeholders.register(this, settings.getStringList("Hook.PlaceholderAPI.names"), (player, params) -> {
+                if (params.equalsIgnoreCase("saves")) {
+                    return String.valueOf(PicosPacosAPI.getPlayer(player).getSaves());
+                }
+                return "Invalid placeholder";
+            });
+        }
         CommandLoader.reload();
         settings.setLocked(false);
     }
