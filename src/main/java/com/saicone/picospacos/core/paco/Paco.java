@@ -65,7 +65,7 @@ public class Paco implements Listener {
                             rules.add(RuleType.of(s.trim()));
                         }
                         if (!rules.isEmpty() && !rules.contains(RuleType.DISABLED)) {
-                            PacoRule rule = Parameter.ruleOf(file, key, rules);
+                            PacoRule rule = Parameter.ruleOf(file, key, rules, file.getStringList(key + ".commands"));
                             if (rule == null) {
                                 Locale.sendToConsole("Paco.Error.Tags", key);
                             } else {

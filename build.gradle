@@ -1,6 +1,14 @@
 plugins {
     id 'java'
+    id 'idea'
     id 'io.github.goooler.shadow' version '8.1.7'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
 processResources {
@@ -24,6 +32,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.6'
 
+    // Implementation
     compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
     compileOnly 'com.saicone.rtag:rtag:1.5.4'
     compileOnly 'com.saicone.rtag:rtag-item:1.5.4'
