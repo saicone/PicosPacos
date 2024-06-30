@@ -9,7 +9,9 @@ import com.saicone.picospacos.core.paco.Paco;
 import com.saicone.picospacos.module.Locale;
 import com.saicone.picospacos.module.Settings;
 import com.saicone.picospacos.module.cmd.CommandLoader;
+import com.saicone.picospacos.module.hook.DeluxeCombatHook;
 import com.saicone.picospacos.module.hook.Placeholders;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,6 +62,9 @@ public class PicosPacos extends JavaPlugin {
         settings = new Settings(this, "settings.yml");
         settings.listener(this::onSettingsReload);
         paco = new Paco(this);
+        if (Bukkit.getPluginManager().isPluginEnabled("DeluxeCombat")) {
+            new DeluxeCombatHook(paco).load();
+        }
     }
 
     @Override

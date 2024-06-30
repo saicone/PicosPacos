@@ -101,6 +101,10 @@ Hook:
       - 'pipa'
     # Text to put in rule tags name to allow PlaceholderAPI
     rule: 'allowPapi'
+  # DeluxeCombat hook
+  DeluxeCombat:
+    # Enable or not this hook
+    enabled: true
 
 # Plugin command configuration
 Command:

@@ -20,6 +20,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -39,6 +41,34 @@ public class Paco implements Listener {
         file = new Settings(pl, "rules.yml", null, false, false);
         file.listener(this::onRulesReload);
         pl.getServer().getPluginManager().registerEvents(this, pl);
+    }
+
+    @NotNull
+    public List<PacoRule> getRules(@NotNull RuleType type) {
+        switch (type) {
+            case DEATH:
+                return deathRules;
+            case DROP:
+            case NODROP:
+                return dropRules;
+            case DELETE:
+                return deleteRules;
+            default:
+                return List.of();
+        }
+    }
+
+    @Nullable
+    public PacoRule ruleMatches(@NotNull RuleType type, @Nullable ItemStack item, @NotNull Player player) {
+        if (item == null || item.getType() == Material.AIR) {
+            return null;
+        }
+        for (PacoRule rule : getRules(type)) {
+            if (rule.match(item, player)) {
+                return rule;
+            }
+        }
+        return null;
     }
 
     public void disable() {

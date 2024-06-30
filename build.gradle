@@ -31,6 +31,7 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'com.github.timderspieler:DeluxeCombat-API:1.5.0'
 
     // Implementation
     compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
