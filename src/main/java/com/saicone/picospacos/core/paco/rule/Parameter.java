@@ -17,7 +17,7 @@ import com.saicone.picospacos.core.paco.rule.tag.MaterialTag;
 import com.saicone.picospacos.core.paco.rule.tag.NameTag;
 import com.saicone.picospacos.core.paco.rule.tag.NbtTag;
 import com.saicone.picospacos.module.settings.BukkitSettings;
-import com.saicone.picospacos.util.TextUtils;
+import com.saicone.picospacos.util.Strings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class Parameter {
                 settings.getStringList(path).forEach(enchant -> {
                     String[] s = enchant.split("=", 2);
                     if (s.length == 2) {
-                        enchants.put(s[0], TextUtils.rangeInt(s[1]));
+                        enchants.put(s[0], Strings.rangeInt(s[1]));
                     }
                 });
                 if (enchants.isEmpty()) {

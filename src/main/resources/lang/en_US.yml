@@ -1,29 +1,26 @@
+Prefix: '&6Picos&ePacos &8» '
+
 Paco:
   Drop:
     # You can change message types, for example
     # To send a title use "title" type and add parameters
     # Warning:
-    #   type: 'title'
+    #   type: title
     #   title: '&cAre you sure to drop this item?'
     #   subtitle: '&fDrop again to confirm'
     #   fadeIn: 10
     #   stay: 70
     #   fadeOut: 20
-    # To send a actionbar use "actionbar" type and add parameters
+    # To send an actionbar use "actionbar" type and add parameters
     # Warning:
     #   type: actionbar
     #   text: '&c&lDrop again the item to confirm'
     # Messages without type be displayed on chat
     Warning: '&c&lAre you sure to drop this item? &f&lDrop again to confirm'
     Error: '&c&lYou can''t drop this item!'
-  Loaded: '&6Picos&ePacos &8» &aPaco loaded &f{0} &adrop rules and &f{1} &adeath rules'
-  Error:
-    Section: '&6Picos&ePacos &8» &cPath "{0}" isn''t a section!'
-    Rule-Type: '&6Picos&ePacos &8» &cUnknown rule type "{0}", check rules.yml'
-    Tags: '&6Picos&ePacos &8» &cRule {0} has not tags to parse!'
 
 Command:
-  NoPerm: '&6Picos&ePacos &8» &cYou don''t have permission to execute this command!'
+  NoPerm: '{prefix}&cYou don''t have permission to execute this command!'
   Help:
     - '&6----------[PicosPacos]------------'
     - '&e/picospacos &7- &fView info about plugin'
@@ -31,17 +28,11 @@ Command:
     - '&e/picospacos reload &7- &fReload the plugin'
     - '&e/picospacos saves <give/take/set/info> <player> [amount] &7- &fEdit player saves'
     - '&6---------------------------------'
-  Reload: '&6Picos&ePacos &8» &aPlugin reloaded successfully &a[&f{0} &ams]'
+  Reload: '{prefix}&aPlugin reloaded successfully &a[&f{0} &ams]'
   Saves:
-    Usage: '&6Picos&ePacos &8» &eUsage: &f/picospacos saves <give/take/set/info> <player> [amount]'
-    Invalid-Amount: '&6Picos&ePacos &8» &c"{0}" is not a valid number!'
-    Give: '&6Picos&ePacos &8» &aThe player &f{0} &areceived &f{1} &ainventory saves'
-    Take: '&6Picos&ePacos &8» &f{0} &cinventory saves have been removed from player &f{1}'
-    Set: '&6Picos&ePacos &8» &9The player &f{0} &9now has &f{1} &9inventory saves'
-    Info: '&6Picos&ePacos &8» &9The player &f{0} &9have &f{1} &9inventory saves'
-
-Log:
-  Locale:
-    Invalid-Hex: '&6Invalid HEX color "{0}"'
-    Invalid-Type: '&cMessage type "{0}" is invalid! Path {1}'
-    Unsupported-Sender: '&cCannot send complex message type to console! Path: {0}'
+    Usage: '{prefix}&eUsage: &f/picospacos saves <give/take/set/info> <player> [amount]'
+    Invalid-Amount: '{prefix}&c"{0}" is not a valid number!'
+    Give: '{prefix}&aThe player &f{0} &areceived &f{1} &ainventory saves'
+    Take: '{prefix}&f{0} &cinventory saves have been removed from player &f{1}'
+    Set: '{prefix}&9The player &f{0} &9now has &f{1} &9inventory saves'
+    Info: '{prefix}&9The player &f{0} &9have &f{1} &9inventory saves'

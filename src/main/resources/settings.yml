@@ -18,6 +18,26 @@ Locale:
   PlayerProvider: AUTO
 
 
+# Lang configuration
+Lang:
+  # Default player language
+  Default: 'en_US'
+  # Language aliases
+  Aliases:
+    en_US:
+      - 'en_AU'
+      - 'en_CA'
+      - 'en_GB'
+      - 'en_NZ'
+    es_ES:
+      - 'es_AR'
+      - 'es_CL'
+      - 'es_EC'
+      - 'es_MX'
+      - 'es_UY'
+      - 'es_VE'
+
+
 # Plugin configuration
 Config:
   # Give saved items on player respawn

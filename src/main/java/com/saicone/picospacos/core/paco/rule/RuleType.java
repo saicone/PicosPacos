@@ -1,6 +1,6 @@
 package com.saicone.picospacos.core.paco.rule;
 
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.PicosPacos;
 
 public enum RuleType {
 
@@ -16,7 +16,7 @@ public enum RuleType {
                 return value;
             }
         }
-        Locale.sendToConsole("Paco.Error.Rule-Type", s);
+        PicosPacos.log(2, "Unknown rule type '" + s + "', check rules.yml");
         return RuleType.DISABLED;
     }
 }

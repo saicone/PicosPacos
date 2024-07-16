@@ -1,7 +1,7 @@
 package com.saicone.picospacos.core.paco.rule.tag;
 
 import com.saicone.picospacos.core.paco.rule.TagType;
-import com.saicone.picospacos.util.TextUtils;
+import com.saicone.picospacos.util.Strings;
 import com.saicone.types.Types;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +11,7 @@ public final class DurabilityTag extends TagType {
 
     public DurabilityTag(String durability, boolean papi, String comparator) {
         super(papi, comparator);
-        d = TextUtils.rangeShort(durability);
+        d = Strings.rangeShort(durability);
     }
 
     @SuppressWarnings("deprecation")

@@ -35,7 +35,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -56,6 +58,18 @@ public class Placeholders {
         return s;
     }
 
+    @NotNull
+    public static List<String> parse(@NotNull OfflinePlayer player, @NotNull Collection<String> collection) {
+        if (!collection.isEmpty() && isEnabled()) {
+            final List<String> list = new ArrayList<>();
+            for (String s : collection) {
+                list.add(PlaceholderAPI.setPlaceholders(player, s));
+            }
+            return list;
+        }
+        return new ArrayList<>(collection);
+    }
+
     @Nullable
     @Contract("_, !null -> !null")
     public static String parseBracket(@NotNull OfflinePlayer player, @Nullable String s) {
@@ -63,6 +77,18 @@ public class Placeholders {
             return PlaceholderAPI.setBracketPlaceholders(player, s);
         }
         return s;
+    }
+
+    @NotNull
+    public static List<String> parseBracket(@NotNull OfflinePlayer player, @NotNull Collection<String> collection) {
+        if (!collection.isEmpty() && isEnabled()) {
+            final List<String> list = new ArrayList<>();
+            for (String s : collection) {
+                list.add(PlaceholderAPI.setBracketPlaceholders(player, s));
+            }
+            return list;
+        }
+        return new ArrayList<>(collection);
     }
 
     public static <T extends Collection<String>> T register(@NotNull Plugin plugin, @NotNull T names, @NotNull BiFunction<Player, String, Object> onPlaceholderRequest) {

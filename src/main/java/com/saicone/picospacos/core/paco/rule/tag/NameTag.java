@@ -1,7 +1,7 @@
 package com.saicone.picospacos.core.paco.rule.tag;
 
 import com.saicone.picospacos.core.paco.rule.TagType;
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.util.MStrings;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,7 +10,7 @@ public final class NameTag extends TagType {
 
     public NameTag(String name, boolean papi, String comparator) {
         super(papi, comparator);
-        this.name = Locale.color(name);
+        this.name = MStrings.color(name);
     }
 
     @SuppressWarnings("all")

@@ -62,6 +62,6 @@ public class ItemUtils {
     public static boolean nbtRegex(ItemStack item, String text, String[] path) {
         RtagItem tag = new RtagItem(item);
         String s = tag.get(path);
-        return s != null && TextUtils.regexMatch(text, s);
+        return s != null && Strings.regexMatch(text, s);
     }
 }

@@ -5,10 +5,11 @@ import com.saicone.picospacos.api.PicosPacosAPI;
 import com.saicone.picospacos.api.event.InventoryPacoEvent;
 import com.saicone.picospacos.api.event.ItemsPacoEvent;
 import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.paco.rule.PacoRule;
 import com.saicone.picospacos.core.paco.rule.Parameter;
 import com.saicone.picospacos.core.paco.rule.RuleType;
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.module.settings.SettingsFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -104,7 +105,7 @@ public class Paco implements Listener {
                     if (!rules.isEmpty() && !rules.contains(RuleType.DISABLED)) {
                         PacoRule rule = Parameter.ruleOf(file, key, rules, file.getStringList(key + ".commands"));
                         if (rule == null) {
-                            Locale.sendToConsole("Paco.Error.Tags", key);
+                            PicosPacos.log(2, "Rule '" + key + "' has not tags to parse!");
                         } else {
                             if (rules.contains(RuleType.DEATH)) {
                                 deathRules.add(rule);
@@ -118,14 +119,14 @@ public class Paco implements Listener {
                         }
                     }
                 } else {
-                    Locale.sendToConsole("Paco.Error.Rule-Type", type);
+                    PicosPacos.log(2, "Unknown rule type '" + type + "', check rules.yml");
                 }
             } else {
                 // TODO: Do stuff with JSON formatted string
-                if (!key.equals("File-Listener")) Locale.sendToConsole("Paco.Error.Section", key);
+                PicosPacos.log(2, "Path '" + key + "' isn''t a section!");
             }
         });
-        Locale.sendToConsole("Paco.Loaded", String.valueOf(dropRules.size()), String.valueOf(deathRules.size()));
+        PicosPacos.log(3, "Paco loaded " + dropRules.size() + " drop rules and " + deathRules.size() + " death rules");
     }
 
     @EventHandler
@@ -199,10 +200,10 @@ public class Paco implements Listener {
             if (rule.match(e.getItemDrop().getItemStack(), e.getPlayer())) {
                 e.setCancelled(true);
                 if (rule.containsRule(RuleType.NODROP)) {
-                    Locale.sendTo(e.getPlayer(), "Paco.Drop.Error");
+                    Lang.PACO_DROP_ERROR.sendTo(e.getPlayer(), s -> Placeholders.parse(e.getPlayer(), s));
                 } else {
                     warnings.put(uuid, e.getItemDrop().getItemStack());
-                    Locale.sendTo(e.getPlayer(), "Paco.Drop.Warning");
+                    Lang.PACO_DROP_WARNING.sendTo(e.getPlayer(), s -> Placeholders.parse(e.getPlayer(), s));
                 }
             }
         });
@@ -222,7 +223,7 @@ public class Paco implements Listener {
                 final String ruleID = rule.getId();
                 Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
                     for (String s : PicosPacos.settings().getStringList("Execute.onDelete")) {
-                        String cmd = Locale.parsePlaceholders(
+                        String cmd = Placeholders.parse(
                                 (Player) e.getWhoClicked(),
                                 s.replace("{player}", e.getWhoClicked().getName()).replace("{rule}", ruleID));
                         Bukkit.getScheduler().runTask(pl, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));

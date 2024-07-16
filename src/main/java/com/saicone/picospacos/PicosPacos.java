@@ -3,9 +3,9 @@ package com.saicone.picospacos;
 import com.saicone.ezlib.Dependencies;
 import com.saicone.ezlib.Dependency;
 import com.saicone.ezlib.EzlibLoader;
+import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.data.Database;
 import com.saicone.picospacos.core.paco.Paco;
-import com.saicone.picospacos.module.Locale;
 import com.saicone.picospacos.module.cmd.CommandLoader;
 import com.saicone.picospacos.module.hook.DeluxeCombatHook;
 import com.saicone.picospacos.module.hook.Placeholders;
@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 public class PicosPacos extends JavaPlugin {
 
     private static PicosPacos instance;
-    private static final SettingsFile settings = new SettingsFile("settings.yml", true);
 
     @NotNull
     public static PicosPacos get() {
@@ -35,43 +34,39 @@ public class PicosPacos extends JavaPlugin {
 
     @NotNull
     public static SettingsFile settings() {
-        return settings;
+        return instance.getSettings();
     }
 
     public static void log(int level, @NotNull Supplier<String> msg, @Nullable Object... args) {
-        Locale.log(level, msg.get(), (String[]) args);
+        instance.getLang().sendLog(level, msg, args);
     }
 
     public static void log(int level, @NotNull String msg, @Nullable Object... args) {
-        Locale.log(level, msg, (String[]) args);
+        instance.getLang().sendLog(level, msg, args);
     }
 
     public static void logException(int level, @NotNull Throwable throwable) {
-        if (level >= Locale.logLevel) {
-            throwable.printStackTrace();
-        }
+        instance.getLang().printStackTrace(level, throwable);
     }
 
     public static void logException(int level, @NotNull Throwable throwable, @NotNull Supplier<String> msg, @Nullable Object... args) {
-        Locale.log(level, msg.get(), (String[]) args);
-        if (level >= Locale.logLevel) {
-            throwable.printStackTrace();
-        }
+        instance.getLang().printStackTrace(level, throwable, msg, args);
     }
 
     public static void logException(int level, @NotNull Throwable throwable, @NotNull String msg, @Nullable Object... args) {
-        Locale.log(level, msg, (String[]) args);
-        if (level >= Locale.logLevel) {
-            throwable.printStackTrace();
-        }
+        instance.getLang().printStackTrace(level, throwable, msg, args);
     }
 
+    private final SettingsFile settings;
+    private final Lang lang;
     private final Database database;
     private final Paco paco;
 
     private List<String> placeholderNames;
 
     public PicosPacos() {
+        this.settings = new SettingsFile("settings.yml", true);
+        lang = new Lang(this);
         this.database = new Database(this);
         this.paco = new Paco(this);
 
@@ -96,8 +91,8 @@ public class PicosPacos extends JavaPlugin {
     public void onLoad() {
         instance = this;
         settings.loadFrom(getDataFolder(), true);
+        lang.load();
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
-        Locale.reload();
         this.database.onLoad();
         this.paco.onLoad();
     }
@@ -126,13 +121,23 @@ public class PicosPacos extends JavaPlugin {
 
     public void onReload() {
         settings.loadFrom(getDataFolder(), true);
+        lang.load();
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
-        Locale.reload();
         this.database.onReload();
         this.paco.onReload();
         unregisterPlaceholders();
         registerPlaceholders();
         CommandLoader.reload();
+    }
+
+    @NotNull
+    public SettingsFile getSettings() {
+        return settings;
+    }
+
+    @NotNull
+    public Lang getLang() {
+        return lang;
     }
 
     @NotNull

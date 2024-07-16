@@ -1,6 +1,6 @@
 package com.saicone.picospacos.core.paco.rule;
 
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.module.hook.Placeholders;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +18,7 @@ public abstract class TagType {
 
     protected String format(String s, Player p) {
         if (papi) {
-            return Locale.parsePlaceholders(p, s);
+            return Placeholders.parse(p, s);
         } else {
             return s;
         }
@@ -26,7 +26,7 @@ public abstract class TagType {
 
     protected List<String> format(List<String> l, Player p) {
         if (papi) {
-            return Locale.parsePlaceholders(p, l);
+            return Placeholders.parse(p, l);
         } else {
             return l;
         }

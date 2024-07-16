@@ -1,7 +1,7 @@
 package com.saicone.picospacos.core.paco.rule.tag;
 
 import com.saicone.picospacos.core.paco.rule.TagType;
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.util.MStrings;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,7 +13,7 @@ public final class LoreTag extends TagType {
 
     public LoreTag(List<String> lore, boolean all, boolean papi, String comparator) {
         super(papi, comparator);
-        this.lore = Locale.color(lore);
+        this.lore = MStrings.color(lore);
         this.all = all;
     }
 
