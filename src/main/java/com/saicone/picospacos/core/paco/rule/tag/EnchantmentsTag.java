@@ -3,7 +3,7 @@ package com.saicone.picospacos.core.paco.rule.tag;
 import com.saicone.picospacos.core.paco.rule.ComparatorType;
 import com.saicone.picospacos.core.paco.rule.TagType;
 import com.saicone.picospacos.util.ItemUtils;
-import com.saicone.picospacos.util.TextUtils;
+import com.saicone.types.Types;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,7 +43,7 @@ public final class EnchantmentsTag extends TagType {
     private boolean valid(String enchant, int level, Player player) {
         for (Map.Entry<String, Object[]> entry : enchantments) {
             if (comparator.compareString(format(entry.getKey(), player), enchant) &&
-                    lvlComparator.compareInt(level, entry.getValue()[0] instanceof String ? TextUtils.asInt(format((String) entry.getValue()[0], player), 0) : (int) entry.getValue()[0], entry.getValue()[1] instanceof String ? TextUtils.asInt(format((String) entry.getValue()[1], player), 0) : (int) entry.getValue()[1])) {
+                    lvlComparator.compareInt(level, entry.getValue()[0] instanceof String ? Types.INTEGER.parse(format((String) entry.getValue()[0], player), 0) : (int) entry.getValue()[0], entry.getValue()[1] instanceof String ? Types.INTEGER.parse(format((String) entry.getValue()[1], player), 0) : (int) entry.getValue()[1])) {
                 return true;
             }
         }

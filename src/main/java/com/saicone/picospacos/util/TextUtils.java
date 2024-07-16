@@ -18,30 +18,6 @@ public class TextUtils {
         return pattern;
     }
 
-    public static short asShort(String s, short def) {
-        try {
-            return Short.parseShort(s);
-        } catch (NumberFormatException e){
-            return def;
-        }
-    }
-
-    public static int asInt(String s, int def) {
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e){
-            return def;
-        }
-    }
-
-    public static double asDouble(String s, double def) {
-        try {
-            return Double.parseDouble(s);
-        } catch (NullPointerException | NumberFormatException e){
-            return def;
-        }
-    }
-
     public static Object[] rangeShort(String string) {
         Object[] a = new Object[2];
         String[] s = string.split("\\|");

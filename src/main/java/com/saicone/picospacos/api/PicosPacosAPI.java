@@ -1,57 +1,43 @@
 package com.saicone.picospacos.api;
 
+import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.object.PlayerData;
-import com.saicone.picospacos.core.data.Database;
-import org.bukkit.entity.Player;
+import com.saicone.picospacos.module.hook.PlayerProvider;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class PicosPacosAPI {
 
-    public static Database getDatabase() {
-        return Database.Instance.get();
-    }
-
-    public static void registerDataType(String name, Class<? extends Database> type) {
-        Database.Instance.addType(name.toUpperCase(), type);
-    }
-
-    public static void unregisterDataType(String name) {
-        Database.Instance.removeType(name.toUpperCase());
-    }
-
-    @Nullable
-    public static PlayerData getPlayer(Player player) {
-        return getDatabase().getPlayer(player);
+    @NotNull
+    public static CompletableFuture<PlayerData> getPlayerData(@NotNull OfflinePlayer player) {
+        return PicosPacos.get().getDatabase().getPlayerData(player);
     }
 
     @NotNull
-    public static PlayerData getPlayerOrLoad(Player player) {
-        return getDatabase().getPlayer(player, true);
-    }
-
-    @Nullable
-    public static PlayerData getPlayer(UUID player) {
-        return getDatabase().getPlayer(player);
-    }
-
-    @NotNull
-    public static PlayerData getPlayerOrLoad(UUID player) {
-        return getDatabase().getPlayer(player, true);
+    public static CompletableFuture<PlayerData> getPlayerData(@NotNull String name) {
+        if (name.contains("-")) {
+            return getPlayerData(UUID.fromString(name));
+        }
+        return PicosPacos.get().getDatabase().getPlayerData(name, PlayerProvider.getUniqueId(name));
     }
 
     @NotNull
-    public static PlayerData loadPlayer(Player player) {
-        return getDatabase().loadPlayer(player);
+    public static CompletableFuture<PlayerData> getPlayerData(@NotNull UUID uniqueId) {
+        return PicosPacos.get().getDatabase().getPlayerData(PlayerProvider.getName(uniqueId), uniqueId);
     }
 
-    public static void savePlayer(Player player) {
-        getDatabase().savePlayer(player);
+    public static void editPlayerData(@NotNull String name, @NotNull Consumer<PlayerData> consumer) {
+        if (name.contains("-")) {
+            editPlayerData(UUID.fromString(name), consumer);
+        }
+        PicosPacos.get().getDatabase().editPlayerData(name, PlayerProvider.getUniqueId(name), consumer);
     }
 
-    public static void savePlayer(PlayerData data) {
-        getDatabase().savePlayer(data);
+    public static void editPlayerData(@NotNull UUID uniqueId, @NotNull Consumer<PlayerData> consumer) {
+        PicosPacos.get().getDatabase().editPlayerData(PlayerProvider.getName(uniqueId), uniqueId, consumer);
     }
 }

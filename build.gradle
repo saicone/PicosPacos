@@ -32,9 +32,10 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'com.github.timderspieler:DeluxeCombat-API:1.5.0'
+    compileOnly 'net.luckperms:api:5.4'
 
     // Implementation
-    compileOnly 'com.github.Osiris-Team:Dream-Yaml:6.8'
+    compileOnly 'com.saicone:types:1.1'
     compileOnly 'com.saicone.rtag:rtag:1.5.4'
     compileOnly 'com.saicone.rtag:rtag-item:1.5.4'
 
@@ -66,6 +67,6 @@ jar {
 shadowJar {
     archiveClassifier.set('')
     relocate 'com.sacone.ezlib', project.group + '.ezlib'
-    relocate 'com.osiris.dyml', project.group + '.libs.dyml'
+    relocate 'com.saicone.types', project.group + '.libs.types'
     relocate 'com.saicone.rtag', project.group + '.libs.rtag'
 }

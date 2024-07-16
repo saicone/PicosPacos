@@ -1,8 +1,3 @@
-# Set to true if you want to apply changes in real-time
-# For example, when file is edited the plugin load the changes
-# WARNING: This is a experimental system
-File-Listener: false
-
 # Locale configuration
 Locale:
   # Language file to use
@@ -16,6 +11,11 @@ Locale:
   # 3 = Errors, warnings and information
   # 4 = Errors, warnings, information and debug messages
   LogLevel: 2
+  # Player information provider:
+  # AUTO      = Choose automatically the best available option
+  # LUCKPERMS = Use LuckPerms plugin.
+  # BUKKIT    = Use the default Bukkit offline player methods (it also acts like fallback value)
+  PlayerProvider: AUTO
 
 
 # Plugin configuration
@@ -59,34 +59,36 @@ Execute:
 # Database configuration
 Database:
   # Available types:
-  # * JSON - Save player data locally in .json file
-  # * SQLITE - Save player data locally in one .db file (Recommended for local database)
-  # * SQL - Save player data externally in sql database, you can configure this below
+  #
+  # JSON   = Save player data locally in .json file
+  # SQLITE = Save player data locally in one .db file (Recommended for local database)
+  # MYSQL  = Save player data externally in sql database, you can configure this below
   Type: 'SQLITE'
   # Available types:
-  # * UUID - Use player uuid to recognize him on database
-  # * NAME - Use player name to recognize him on database (Recommended for cracked/offline servers)
+  # UUID = Use player uuid to recognize him on database
+  # NAME = Use player name to recognize him on database (Recommended for cracked/offline servers)
   Method: 'UUID'
-  # SQL database configuration (Only touch on use)
+  # SQL database configuration
   Sql:
-    # Class driver to use, mysql by default
-    class: 'com.mysql.jdbc.Driver'
-    # Connection url, change "localhost:3306" and "database" with your own info
-    # If you know about sql flags change them if needed
-    url: 'jdbc:mysql://localhost:3306/database?autoReconnect=true&useSSL=false&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8'
+    # Database host
+    host: localhost
+    # Database port
+    port: 3306
+    # Database name
+    database: 'database'
     # Database user
     user: 'username'
     # Database password
     password: 'password'
     # Database timeout to check if had valid connection
     timeout: 1000
-    # Database queries configuration, touch only if you know what you are doing
-    query:
-      create: 'CREATE TABLE IF NOT EXISTS picospacos_players (player VARCHAR(255) NOT NULL, saves INT, items MEDIUMTEXT, PRIMARY KEY(player))'
-      insert: 'INSERT INTO picospacos_players (player, saves, items) VALUES (?, ?, ?)'
-      delete: 'DELETE FROM picospacos_players WHERE player = ?'
-      update: 'UPDATE picospacos_players SET saves = ?, items = ? WHERE player = ?'
-      select: 'SELECT * FROM picospacos_players WHERE player = ?'
+    # Database flags
+    flags:
+      - 'autoReconnect=true'
+      - 'useSSL=false'
+      - 'allowMultiQueries=true'
+      - 'useUnicode=true'
+      - 'characterEncoding=UTF-8'
 
 
 # Plugin hooks configuration

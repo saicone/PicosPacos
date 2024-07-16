@@ -2,159 +2,151 @@ package com.saicone.picospacos.core.data;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.object.PlayerData;
-import com.saicone.picospacos.module.Locale;
+import com.saicone.picospacos.module.data.DataClient;
+import com.saicone.picospacos.module.data.DataMethod;
+import com.saicone.picospacos.module.data.client.JsonClient;
+import com.saicone.picospacos.module.data.client.MySQLClient;
+import com.saicone.picospacos.module.data.client.SqliteClient;
+import com.saicone.picospacos.module.hook.PlayerProvider;
+import com.saicone.picospacos.module.settings.BukkitSettings;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
-public abstract class Database {
+public class Database implements Listener {
+
+    private final Executor executor;
 
     private final Map<UUID, PlayerData> players = new HashMap<>();
+    private DataMethod method = DataMethod.UUID;
+    private DataClient client;
 
-    boolean useID = true;
-
-    boolean init() {
-        return true;
+    public Database(@NotNull Plugin plugin) {
+        this.executor = (runnable) -> Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
 
-    void enable() {
-        useID = PicosPacos.getSettings().getString("Database.Method").equalsIgnoreCase("UUID");
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJoin(PlayerJoinEvent event) {
+        async(() -> loadPlayerData(event.getPlayer().getName(), event.getPlayer().getUniqueId()));
     }
 
-    void disable() { }
-
-    abstract void save(PlayerData data);
-
-    abstract PlayerData get(String name, String uuid);
-
-    public PlayerData loadPlayer(Player player) {
-        return loadPlayer(player.getName(), player.getUniqueId());
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        async(() -> savePlayerData(event.getPlayer().getUniqueId()));
     }
 
-    public PlayerData loadPlayer(String name, UUID uuid) {
-        PlayerData data = get(name, uuid.toString());
-        if (data == null) {
-            data = new PlayerData(name, uuid.toString(), 0);
-        }
-        players.put(uuid, data);
-        return players.get(uuid);
-    }
-
-    public void savePlayer(Player player) {
-        savePlayer(players.get(player.getUniqueId()));
-    }
-
-    public void savePlayer(PlayerData data) {
-        if (data != null && data.hasEdited()) {
-            save(data);
-        }
-    }
-
-    void saveAll() {
-        players.values().forEach(this::save);
-    }
-
-    void saveAllAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> players.values().forEach(this::save));
-    }
-
-    public PlayerData getPlayer(Player player) {
-        return getPlayer(player.getUniqueId(), false);
-    }
-
-    public PlayerData getPlayer(Player player, boolean load) {
-        return getPlayer(player.getUniqueId(), load);
-    }
-
-    public PlayerData getPlayer(UUID uuid) {
-        return getPlayer(uuid, false);
-    }
-
-    public PlayerData getPlayer(UUID uuid, boolean load) {
-        if (players.containsKey(uuid)) {
-            return players.get(uuid);
-        } else if (load) {
-            return loadPlayer(Bukkit.getOfflinePlayer(uuid).getName(), uuid);
-        } else {
-            return null;
-        }
-    }
-
-    public static class Instance {
-        private static Database instance;
-        private static String current = "";
-
-        private static final Map<String, Class<? extends Database>> types = new HashMap<>();
-
-        static {
-            types.put("JSON", DatabaseJson.class);
-            types.put("SQL", DatabaseSql.class);
-            types.put("SQLITE", DatabaseSqlite.class);
-        }
-
-        public static Database get() {
-            return instance;
-        }
-
-        public static void reload() {
-            String type = PicosPacos.getSettings().getString("Database.Type").toUpperCase();
-            if (type.equals(current)) {
-                if (instance.init()) {
-                    instance.enable();
-                } else {
-                    Locale.log(1, "");
-                }
+    public void onLoad() {
+        this.method = PicosPacos.settings().getIgnoreCase("database", "method").asString("UUID").equalsIgnoreCase("NAME") ? DataMethod.NAME : DataMethod.UUID;
+        final String type = PicosPacos.settings().getIgnoreCase("database", "type").asString("SQLITE").toUpperCase();
+        switch (type) {
+            case "JSON":
+                this.client = new JsonClient();
+                break;
+            case "SQLITE":
+                this.client = new SqliteClient();
+                break;
+            case "MYSQL":
+                this.client = new MySQLClient();
+                break;
+            default:
+                PicosPacos.log(2, "The database type '" + type + "' doesn't exist");
                 return;
+        }
+        final BukkitSettings config = PicosPacos.settings().getConfigurationSection(settings -> {
+            if (type.equalsIgnoreCase("JSON")) {
+                return settings.getRegex("(?i)database", "(?i)json|file");
             } else {
-                current = type;
+                return settings.getRegex("(?i)database", "(?i)sql|" + type);
             }
+        });
+        this.client.onLoad(config != null ? config : new BukkitSettings());
+    }
 
-            unload();
+    public void onEnable() {
+        this.client.onEnable();
+    }
 
-            try {
-                if (types.containsKey(type)) {
-                    instance = types.get(type).getDeclaredConstructor().newInstance();
-                } else {
-                    Locale.log(1, "The {0} database type does'nt exist, using SQLITE type instead...", current);
-                    instance = new DatabaseSqlite();
-                }
-            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                e.printStackTrace();
-                Locale.log(1, "Failed to initialize {0} database type, using SQLITE type instead...", current);
-                instance = new DatabaseSqlite();
-            }
-            if (!instance.init()) {
-                instance = null;
-                Locale.log(1, "Failed to setup {0} database type, using JSON type instead...", current);
-                instance = new DatabaseJson();
-            }
-            instance.enable();
-            Bukkit.getScheduler().runTaskAsynchronously(PicosPacos.get(), () -> Bukkit.getOnlinePlayers().forEach(player -> instance.loadPlayer(player)));
+    public void onDisable() {
+        saveAllPlayers();
+        this.players.clear();
+        this.client.onDisable();
+    }
+
+    public void onReload() {
+        onDisable();
+        onLoad();
+        onEnable();
+    }
+
+    @NotNull
+    protected PlayerData loadPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
+        PlayerData data = this.client.loadPlayerData(this.method, name, uniqueId);
+        if (data == null) {
+            data = new PlayerData(name, uniqueId, 0);
         }
+        this.players.put(uniqueId, data);
+        return data;
+    }
 
-        public static void unload() {
-            if (instance != null) {
-                instance.saveAll();
-                instance.disable();
-            }
+    @NotNull
+    public CompletableFuture<PlayerData> getPlayerData(@NotNull OfflinePlayer player) {
+        return getPlayerData(player.getName() != null ? player.getName() : PlayerProvider.getName(player.getUniqueId()), player.getUniqueId());
+    }
+
+    @NotNull
+    public CompletableFuture<PlayerData> getPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
+        final PlayerData data = this.players.get(uniqueId);
+        if (data != null) {
+            return CompletableFuture.completedFuture(data);
+        } else {
+            return CompletableFuture.supplyAsync(() -> loadPlayerData(name, uniqueId), this.executor);
         }
+    }
 
-        public static void addType(String name, Class<? extends Database> type) {
-            if (!types.containsKey(name)) types.put(name, type);
+    public void savePlayerData(@NotNull UUID uniqueId) {
+        final PlayerData data = this.players.get(uniqueId);
+        if (data != null && data.isEdited()) {
+            this.client.savePlayerData(this.method, data);
+            this.players.remove(uniqueId);
         }
+    }
 
-        public static void removeType(String name) {
-            if (!name.equalsIgnoreCase("JSON") && !name.equalsIgnoreCase("SQL") && !name.equalsIgnoreCase("SQLITE")) {
-                types.remove(name);
-            }
+    public void editPlayerData(@NotNull String name, @NotNull UUID uniqueId, @NotNull Consumer<PlayerData> consumer) {
+        if (this.players.containsKey(uniqueId)) {
+            consumer.accept(this.players.get(uniqueId));
+        } else {
+            async(() -> {
+                final PlayerData data = loadPlayerData(name, uniqueId);
+                consumer.accept(data);
+                savePlayerData(uniqueId);
+            });
         }
+    }
 
-        public static String getCurrent() {
-            return current;
+    public void saveAllPlayers() {
+        for (Map.Entry<UUID, PlayerData> entry : this.players.entrySet()) {
+            this.client.savePlayerData(this.method, entry.getValue());
+        }
+    }
+
+    private void async(@NotNull Runnable runnable) {
+        if (Bukkit.isPrimaryThread()) {
+            executor.execute(runnable);
+        } else {
+            runnable.run();
         }
     }
 }

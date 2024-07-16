@@ -45,9 +45,8 @@ public class DeluxeCombatHook implements Listener {
         }
 
         if (!savedItems.isEmpty()) {
-            PlayerData data = PicosPacosAPI.getPlayerOrLoad(player);
+            PlayerData data = PicosPacosAPI.getPlayerData(player).join();
             data.addItemsList(savedItems);
-            PicosPacosAPI.savePlayer(data);
         }
     }
 }

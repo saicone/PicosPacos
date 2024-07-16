@@ -1,9 +1,22 @@
 package com.saicone.picospacos.core.paco.rule;
 
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.core.paco.rule.comparator.*;
-import com.saicone.picospacos.core.paco.rule.tag.*;
-import com.saicone.picospacos.module.Settings;
+import com.saicone.picospacos.core.paco.rule.comparator.BetweenComparator;
+import com.saicone.picospacos.core.paco.rule.comparator.ContainsComparator;
+import com.saicone.picospacos.core.paco.rule.comparator.EqualComparator;
+import com.saicone.picospacos.core.paco.rule.comparator.LessComparator;
+import com.saicone.picospacos.core.paco.rule.comparator.MoreComparator;
+import com.saicone.picospacos.core.paco.rule.comparator.RegexComparator;
+import com.saicone.picospacos.core.paco.rule.tag.AmountTag;
+import com.saicone.picospacos.core.paco.rule.tag.CustomModelDataTag;
+import com.saicone.picospacos.core.paco.rule.tag.DurabilityTag;
+import com.saicone.picospacos.core.paco.rule.tag.EnchantmentsTag;
+import com.saicone.picospacos.core.paco.rule.tag.FlagsTag;
+import com.saicone.picospacos.core.paco.rule.tag.LoreTag;
+import com.saicone.picospacos.core.paco.rule.tag.MaterialTag;
+import com.saicone.picospacos.core.paco.rule.tag.NameTag;
+import com.saicone.picospacos.core.paco.rule.tag.NbtTag;
+import com.saicone.picospacos.module.settings.BukkitSettings;
 import com.saicone.picospacos.util.TextUtils;
 
 import java.util.ArrayList;
@@ -25,8 +38,8 @@ public class Parameter {
         return comparators.getOrDefault(name, comparators.get("equal"));
     }
 
-    public static TagType tagOf(Settings settings, String path, String name) {
-        String string = "<" + PicosPacos.getSettings().getString("Hook.PlayerholderAPI.rule", "allowPapi") + ">";
+    public static TagType tagOf(BukkitSettings settings, String path, String name) {
+        String string = "<" + PicosPacos.settings().getString("Hook.PlayerholderAPI.rule", "allowPapi") + ">";
         boolean papi = name.contains(string);
         String[] split = name.replace(string, "").split(":");
         String comparator = split.length > 1 ? split[1].toLowerCase() : "equal";
@@ -71,9 +84,9 @@ public class Parameter {
         }
     }
 
-    public static PacoRule ruleOf(Settings settings, String id, List<RuleType> rules, List<String> commands) {
+    public static PacoRule ruleOf(BukkitSettings settings, String id, List<RuleType> rules, List<String> commands) {
         List<TagType> tags = new ArrayList<>();
-        settings.getKeys(id).forEach(key -> {
+        settings.getConfigurationSection(id).getKeys(false).forEach(key -> {
             TagType tag = tagOf(settings, id + "." + key, key);
             if (tag != null) {
                 tags.add(tag);

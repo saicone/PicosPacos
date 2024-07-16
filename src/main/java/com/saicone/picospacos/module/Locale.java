@@ -1,8 +1,9 @@
 package com.saicone.picospacos.module;
 
+import com.saicone.picospacos.PicosPacos;
+import com.saicone.picospacos.module.settings.SettingsFile;
 import com.saicone.picospacos.util.ServerInstance;
 import me.clip.placeholderapi.PlaceholderAPI;
-import com.saicone.picospacos.PicosPacos;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -25,8 +26,8 @@ public class Locale {
     public static boolean allowPAPI = false;
 
     // Locale options
-    private static Settings lang;
-    private static int logLevel = -1;
+    private static SettingsFile lang;
+    public static int logLevel = -1;
 
     /**
      * Reload locale options. <br>
@@ -35,21 +36,17 @@ public class Locale {
      * the updater will use en_US language to put the changes.
      */
     public static void reload() {
-        String path = "lang/" + PicosPacos.getSettings().getString("Locale.Language") + ".yml";
+        String path = "lang/" + PicosPacos.settings().getString("Locale.Language") + ".yml";
         if (lang == null) {
-            lang = new Settings(PicosPacos.get(), path, "lang/en_US.yml", false, true);
-            lang.reload();
+            lang = new SettingsFile("lang/en_US.yml");
+            lang.loadFrom(PicosPacos.get().getDataFolder(), true);
         }
 
         if (!lang.getPath().equals(path)) {
-            lang = new Settings(PicosPacos.get(), path, "lang/en_US.yml", false, true);
-            if (lang.reload()) {
-                sendToConsole("");
-            } else {
-                PicosPacos.get().getLogger().severe("Cannot reload " + path + " file! Check console.");
-            }
+            lang = new SettingsFile("lang/en_US.yml");
+            lang.loadFrom(PicosPacos.get().getDataFolder(), true);
         }
-        logLevel = PicosPacos.getSettings().getInt("Locale.LogLevel");
+        logLevel = PicosPacos.settings().getInt("Locale.LogLevel");
     }
 
     /**
@@ -81,7 +78,7 @@ public class Locale {
      * @param args Arguments to replace via {@link #replaceArgs(String, String...)}.
      */
     public static void sendTo(CommandSender user, String path, String... args) {
-        if (lang.isSection(path)) {
+        if (lang.isConfigurationSection(path)) {
             if (user instanceof Player) {
                 String type = lang.getString(path + ".type").toLowerCase();
                 if (type.equals("title")) {

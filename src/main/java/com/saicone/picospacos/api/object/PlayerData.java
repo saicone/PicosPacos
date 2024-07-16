@@ -1,58 +1,65 @@
 package com.saicone.picospacos.api.object;
 
+import com.saicone.picospacos.module.hook.PlayerProvider;
 import com.saicone.picospacos.util.ItemUtils;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PlayerData {
 
     private final String name;
-    private final String uuid;
+    private final UUID uniqueId;
+
     private int saves;
     private final List<ItemStack> items = new ArrayList<>();
 
-    private boolean edited = false;
-    private boolean onDatabase = false;
+    private transient boolean edited = false;
+    private transient boolean saved = false;
 
-    public PlayerData(Player player) {
+    public PlayerData(@NotNull OfflinePlayer player) {
         this(player, 0);
     }
 
-    public PlayerData(Player player, int saves) {
-        this(player.getName(), player.getUniqueId().toString(), saves);
+    public PlayerData(@NotNull OfflinePlayer player, int saves) {
+        this(player.getName() != null ? player.getName() : PlayerProvider.getName(player.getUniqueId()), player.getUniqueId(), saves);
     }
 
-    public PlayerData(String name, String uuid, int saves) {
+    public PlayerData(@NotNull String name, @NotNull UUID uniqueId, int saves) {
         this.name = name;
-        this.uuid = uuid;
+        this.uniqueId = uniqueId;
         this.saves = saves;
     }
 
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    @NotNull
     public String getName() {
         return name;
     }
 
-    public String getUuid() {
-        return uuid;
+    @NotNull
+    public UUID getUniqueId() {
+        return uniqueId;
     }
 
-    public void setEdited(boolean edited) {
-        this.edited = edited;
+    @NotNull
+    public List<ItemStack> getItems() {
+        return items;
     }
 
-    public boolean hasEdited() {
-        return edited;
-    }
-
-    public void setOnDB(boolean onDatabase) {
-        this.onDatabase = onDatabase;
-    }
-
-    public boolean onDB() {
-        return onDatabase;
+    public String getItemsBase64() {
+        return !items.isEmpty() ? ItemUtils.itemsToBase64(items) : "";
     }
 
     public int getSaves() {
@@ -74,14 +81,6 @@ public class PlayerData {
         saves = saves - amount;
     }
 
-    public List<ItemStack> getItems() {
-        return items;
-    }
-
-    public String items() {
-        return !items.isEmpty() ? ItemUtils.itemsToBase64(items) : "";
-    }
-
     public void addItemsBase64(String items) {
         this.items.addAll(ItemUtils.itemsFromBase64(items));
     }
@@ -91,7 +90,16 @@ public class PlayerData {
         this.items.addAll(items);
     }
 
-    public boolean isOnDatabase() {
-        return onDatabase;
+    public void clearItems() {
+        edited = true;
+        this.items.clear();
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
     }
 }
