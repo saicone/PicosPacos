@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 public class PicosPacosAPI {
 
     @NotNull
-    public static CompletableFuture<PlayerData> getPlayerData(@NotNull OfflinePlayer player) {
+    public static PlayerData getPlayerData(@NotNull OfflinePlayer player) {
         return PicosPacos.get().getDatabase().getPlayerData(player);
     }
 
     @NotNull
-    public static CompletableFuture<PlayerData> getPlayerData(@NotNull String name) {
+    public static PlayerData getPlayerData(@NotNull String name) {
         if (name.contains("-")) {
             return getPlayerData(UUID.fromString(name));
         }
@@ -26,8 +26,26 @@ public class PicosPacosAPI {
     }
 
     @NotNull
-    public static CompletableFuture<PlayerData> getPlayerData(@NotNull UUID uniqueId) {
+    public static PlayerData getPlayerData(@NotNull UUID uniqueId) {
         return PicosPacos.get().getDatabase().getPlayerData(PlayerProvider.getName(uniqueId), uniqueId);
+    }
+
+    @NotNull
+    public static CompletableFuture<PlayerData> getPlayerDataAsync(@NotNull OfflinePlayer player) {
+        return PicosPacos.get().getDatabase().getPlayerDataAsync(player);
+    }
+
+    @NotNull
+    public static CompletableFuture<PlayerData> getPlayerDataAsync(@NotNull String name) {
+        if (name.contains("-")) {
+            return getPlayerDataAsync(UUID.fromString(name));
+        }
+        return PicosPacos.get().getDatabase().getPlayerDataAsync(name, PlayerProvider.getUniqueId(name));
+    }
+
+    @NotNull
+    public static CompletableFuture<PlayerData> getPlayerDataAsync(@NotNull UUID uniqueId) {
+        return PicosPacos.get().getDatabase().getPlayerDataAsync(PlayerProvider.getName(uniqueId), uniqueId);
     }
 
     public static void editPlayerData(@NotNull String name, @NotNull Consumer<PlayerData> consumer) {

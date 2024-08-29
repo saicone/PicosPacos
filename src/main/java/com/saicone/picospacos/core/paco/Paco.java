@@ -129,11 +129,11 @@ public class Paco implements Listener {
         PicosPacos.log(3, "Paco loaded " + dropRules.size() + " drop rules and " + deathRules.size() + " death rules");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent e) {
         if (e.getKeepInventory()) return;
 
-        final PlayerData data = PicosPacosAPI.getPlayerData(e.getEntity()).join();
+        final PlayerData data = PicosPacosAPI.getPlayerData(e.getEntity());
         if (data.getSaves() > 0) {
             InventoryPacoEvent event = new InventoryPacoEvent(e.getEntity(), e.getDrops());
             pl.getServer().getPluginManager().callEvent(event);
@@ -168,22 +168,25 @@ public class Paco implements Listener {
                 || PicosPacos.settings().getStringList("Config.Respawn.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
             return;
         }
-        final PlayerData data = PicosPacosAPI.getPlayerData(e.getPlayer()).join();
-        if (!data.getItems().isEmpty()) {
-            if (PicosPacos.settings().getInt("Config.Respawn-Delay", 0) > 0) {
-                Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
-                    if (e.getPlayer().isOnline()) {
-                        e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
+        final Player player = e.getPlayer();
+        Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+            final PlayerData data = PicosPacosAPI.getPlayerDataAsync(player).join();
+            if (!data.getItems().isEmpty()) {
+                if (PicosPacos.settings().getInt("Config.Respawn-Delay", 0) > 0) {
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
+                        if (player.isOnline()) {
+                            player.getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
+                            data.clearItems();
+                        }
+                    }, PicosPacos.settings().getInt("Config.Respawn-Delay", 0) * 20L);
+                } else {
+                    if (player.isOnline()) {
+                        player.getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
                         data.clearItems();
                     }
-                }, PicosPacos.settings().getInt("Config.Respawn-Delay", 0) * 20L);
-            } else {
-                if (e.getPlayer().isOnline()) {
-                    e.getPlayer().getInventory().addItem(data.getItems().toArray(new ItemStack[0]));
-                    data.clearItems();
                 }
             }
-        }
+        });
     }
 
     @EventHandler
@@ -237,7 +240,7 @@ public class Paco implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-            PlayerData data = PicosPacosAPI.getPlayerData(e.getPlayer()).join();
+            PlayerData data = PicosPacosAPI.getPlayerDataAsync(e.getPlayer()).join();
             if (PicosPacos.settings().getBoolean("Config.Join.Enabled") && !PicosPacos.settings().getStringList("Config.Join.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
                 if (!data.getItems().isEmpty()) {
                     if (PicosPacos.settings().getInt("Config.Join.Delay", 10) > 0) {

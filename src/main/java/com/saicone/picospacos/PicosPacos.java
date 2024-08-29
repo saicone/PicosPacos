@@ -154,7 +154,7 @@ public class PicosPacos extends JavaPlugin {
         if (settings.getBoolean("Hook.PlaceholderAPI.enabled", true)) {
             this.placeholderNames = Placeholders.register(this, settings.getStringList("Hook.PlaceholderAPI.names"), (player, params) -> {
                 if (params.equalsIgnoreCase("saves")) {
-                    return String.valueOf(this.database.getPlayerData(player).join().getSaves());
+                    return String.valueOf(this.database.getPlayerDataAsync(player).join().getSaves());
                 }
                 return "Invalid placeholder";
             });

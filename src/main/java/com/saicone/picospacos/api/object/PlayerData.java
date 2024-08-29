@@ -35,6 +35,14 @@ public class PlayerData {
         this.saves = saves;
     }
 
+    public void load(@NotNull PlayerData data) {
+        if (data.saved && !this.saved) {
+            this.saved = true;
+            this.saves = this.saves + data.saves;
+            this.items.addAll(data.items);
+        }
+    }
+
     public boolean isEdited() {
         return edited;
     }

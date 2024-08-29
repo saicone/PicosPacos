@@ -92,22 +92,44 @@ public class Database implements Listener {
     }
 
     @NotNull
-    protected PlayerData loadPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
+    protected synchronized PlayerData loadPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
         PlayerData data = this.client.loadPlayerData(this.method, name, uniqueId);
         if (data == null) {
             data = new PlayerData(name, uniqueId, 0);
         }
-        this.players.put(uniqueId, data);
+        final PlayerData existing = this.players.get(uniqueId);
+        if (existing == null) {
+            this.players.put(uniqueId, data);
+        } else {
+            existing.load(data);
+            data = existing;
+        }
         return data;
     }
 
     @NotNull
-    public CompletableFuture<PlayerData> getPlayerData(@NotNull OfflinePlayer player) {
+    public PlayerData getPlayerData(@NotNull OfflinePlayer player) {
         return getPlayerData(player.getName() != null ? player.getName() : PlayerProvider.getName(player.getUniqueId()), player.getUniqueId());
     }
 
     @NotNull
-    public CompletableFuture<PlayerData> getPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
+    public PlayerData getPlayerData(@NotNull String name, @NotNull UUID uniqueId) {
+        PlayerData data = this.players.get(uniqueId);
+        if (data == null) {
+            data = new PlayerData(name, uniqueId, 0);
+            async(() -> loadPlayerData(name, uniqueId));
+            this.players.put(uniqueId, data);
+        }
+        return data;
+    }
+
+    @NotNull
+    public CompletableFuture<PlayerData> getPlayerDataAsync(@NotNull OfflinePlayer player) {
+        return getPlayerDataAsync(player.getName() != null ? player.getName() : PlayerProvider.getName(player.getUniqueId()), player.getUniqueId());
+    }
+
+    @NotNull
+    public CompletableFuture<PlayerData> getPlayerDataAsync(@NotNull String name, @NotNull UUID uniqueId) {
         final PlayerData data = this.players.get(uniqueId);
         if (data != null) {
             return CompletableFuture.completedFuture(data);
