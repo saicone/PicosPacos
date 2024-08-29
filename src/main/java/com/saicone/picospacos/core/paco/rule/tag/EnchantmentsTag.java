@@ -2,8 +2,8 @@ package com.saicone.picospacos.core.paco.rule.tag;
 
 import com.saicone.picospacos.core.paco.rule.ComparatorType;
 import com.saicone.picospacos.core.paco.rule.TagType;
-import com.saicone.picospacos.util.ItemUtils;
 import com.saicone.types.Types;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,11 +23,11 @@ public final class EnchantmentsTag extends TagType {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean valid(ItemStack item, Player player) {
         if (!item.getEnchantments().isEmpty()) {
-            Set<Map.Entry<String, Integer>> enchants = ItemUtils.enchantsToSet(item.getEnchantments());
-            for (Map.Entry<String, Integer> enchant : enchants) {
-                if (valid(enchant.getKey(), enchant.getValue(), player)) {
+            for (Map.Entry<Enchantment, Integer> enchant : item.getEnchantments().entrySet()) {
+                if (valid(enchant.getKey().getName(), enchant.getValue(), player)) {
                     if (!all) {
                         return true;
                     }

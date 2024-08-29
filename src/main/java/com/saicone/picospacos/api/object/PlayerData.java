@@ -1,7 +1,7 @@
 package com.saicone.picospacos.api.object;
 
 import com.saicone.picospacos.module.hook.PlayerProvider;
-import com.saicone.picospacos.util.ItemUtils;
+import com.saicone.rtag.item.ItemTagStream;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +67,7 @@ public class PlayerData {
     }
 
     public String getItemsBase64() {
-        return !items.isEmpty() ? ItemUtils.itemsToBase64(items) : "";
+        return !items.isEmpty() ? ItemTagStream.INSTANCE.listToBase64(items) : "";
     }
 
     public int getSaves() {
@@ -90,7 +90,7 @@ public class PlayerData {
     }
 
     public void addItemsBase64(String items) {
-        this.items.addAll(ItemUtils.itemsFromBase64(items));
+        this.items.addAll(ItemTagStream.INSTANCE.listFromBase64(items));
     }
 
     public void addItemsList(List<ItemStack> items) {

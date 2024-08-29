@@ -2,7 +2,7 @@ package com.saicone.picospacos.core.paco.rule.comparator;
 
 import com.saicone.picospacos.core.paco.rule.ComparatorType;
 
-import java.util.List;
+import java.util.Collection;
 
 public final class ContainsComparator implements ComparatorType {
     @Override
@@ -11,7 +11,7 @@ public final class ContainsComparator implements ComparatorType {
     }
 
     @Override
-    public boolean compareList(List<String> base, List<String> variable) {
+    public boolean compareList(Collection<String> base, Collection<String> variable) {
         for (String s : variable) {
             for (String s1 : base) {
                 if (s.contains(s1)) return true;
@@ -21,7 +21,7 @@ public final class ContainsComparator implements ComparatorType {
     }
 
     @Override
-    public boolean compareListAll(List<String> base, List<String> variable) {
+    public boolean compareListAll(Collection<String> base, Collection<String> variable) {
         for (String s : base) {
             for (String s1 : variable) {
                 if (!s1.contains(s)) return false;

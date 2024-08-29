@@ -1,6 +1,6 @@
 package com.saicone.picospacos.core.paco.rule;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface ComparatorType {
 
@@ -20,14 +20,14 @@ public interface ComparatorType {
         return base[0] == variable;
     }
 
-    default boolean compareList(List<String> base, List<String> variable) {
+    default boolean compareList(Collection<String> base, Collection<String> variable) {
         for (String s : variable) {
             if (base.contains(s)) return true;
         }
         return false;
     }
 
-    default boolean compareListAll(List<String> base, List<String> variable) {
+    default boolean compareListAll(Collection<String> base, Collection<String> variable) {
         return variable.containsAll(base);
     }
 
