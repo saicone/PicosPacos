@@ -93,6 +93,7 @@ public class Paco implements Listener {
     public void onReload() {
         deathRules.clear();
         dropRules.clear();
+        deleteRules.clear();
         file.loadFrom(pl.getDataFolder(), true);
         file.getKeys(false).forEach(key -> {
             if (file.isConfigurationSection(key)) {
