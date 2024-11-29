@@ -83,6 +83,9 @@ public final class PacoRule {
     @NotNull
     private static String getItemData(@NotNull ItemStack item) {
         final Object base = ItemObject.save(ItemObject.asNMSCopy(item));
+        if (ServerInstance.Release.LEGACY) {
+            return base.toString();
+        }
         if (TagCompound.hasKey(base, "tag")) {
             final Map<String, Object> tag = TagCompound.getValue(TagCompound.get(base, "tag"));
             tag.entrySet().removeIf(entry -> !ALLOWED_TAGS.contains(entry.getKey()));
