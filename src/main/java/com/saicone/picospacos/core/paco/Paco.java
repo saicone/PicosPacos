@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -190,9 +191,13 @@ public class Paco implements Listener {
         });
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDrop(PlayerDropItemEvent e) {
-        if (e.isCancelled() || !PicosPacos.settings().getBoolean("Config.Drop.Enabled") || PicosPacos.settings().getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName()) || !e.getPlayer().hasPermission(PicosPacos.settings().getString("Config.Drop.Permission", "picospacos.drop.protection"))) return;
+        if (!PicosPacos.settings().getBoolean("Config.Drop.Enabled")
+                || PicosPacos.settings().getStringList("Config.Drop.Blacklist-Worlds").contains(e.getItemDrop().getWorld().getName())
+                || !e.getPlayer().hasPermission(PicosPacos.settings().getString("Config.Drop.Permission", "picospacos.drop.protection"))) {
+            return;
+        }
 
         UUID uuid = e.getPlayer().getUniqueId();
         if (warnings.containsKey(uuid) && e.getItemDrop().getItemStack().equals(warnings.get(uuid))) {
@@ -215,31 +220,26 @@ public class Paco implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onClick(InventoryClickEvent e) {
-        ItemStack item = e.getCurrentItem();
-        if (item == null) {
-            return;
-        }
-        for (PacoRule rule : deleteRules) {
-            if (rule.match(item, (Player) e.getWhoClicked())) {
-                e.setCancelled(true);
-                item.setType(Material.AIR);
-                e.setCurrentItem(item);
-                final String ruleID = rule.getId();
-                Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
-                    for (String s : PicosPacos.settings().getStringList("Execute.onDelete")) {
-                        String cmd = Placeholders.parse(
-                                (Player) e.getWhoClicked(),
-                                s.replace("{player}", e.getWhoClicked().getName()).replace("{rule}", ruleID));
-                        Bukkit.getScheduler().runTask(pl, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
-                    }
-                });
-                return;
-            }
+        final ItemStack item = e.getCurrentItem();
+        if (deleteItem((Player) e.getWhoClicked(), item)) {
+            e.setCancelled(true);
+            item.setType(Material.AIR);
+            e.setCurrentItem(item);
         }
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
+            final Inventory inventory = e.getPlayer().getInventory();
+            for (int i = 0; i < inventory.getContents().length; i++) {
+                final ItemStack item = inventory.getItem(i);
+                if (deleteItem(e.getPlayer(), item)) {
+                    item.setType(Material.AIR);
+                    inventory.setItem(i, item);
+                }
+            }
+        }, 100L);
         Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
             PlayerData data = PicosPacosAPI.getPlayerDataAsync(e.getPlayer()).join();
             if (PicosPacos.settings().getBoolean("Config.Join.Enabled") && !PicosPacos.settings().getStringList("Config.Join.Blacklist-Worlds").contains(e.getPlayer().getWorld().getName())) {
@@ -260,6 +260,27 @@ public class Paco implements Listener {
                 }
             }
         });
+    }
+
+    private boolean deleteItem(@NotNull Player player, @Nullable ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return false;
+        }
+        for (PacoRule rule : deleteRules) {
+            if (rule.match(item, player)) {
+                final String ruleID = rule.getId();
+                Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
+                    for (String s : PicosPacos.settings().getStringList("Execute.onDelete")) {
+                        String cmd = Placeholders.parse(
+                                player,
+                                s.replace("{player}", player.getName()).replace("{rule}", ruleID));
+                        Bukkit.getScheduler().runTask(pl, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+                    }
+                });
+                return true;
+            }
+        }
+        return false;
     }
 
     @EventHandler
