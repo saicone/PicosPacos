@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Dependencies({
-        @Dependency(value = "com.saicone:types:1.1", relocate = {"com.saicone.types", "{package}.libs.types"}),
-        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.4", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
+        @Dependency(value = "com.saicone:types:1.2", relocate = {"com.saicone.types", "{package}.libs.types"}),
+        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.8", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
 })
 public class PicosPacos extends JavaPlugin {
 
