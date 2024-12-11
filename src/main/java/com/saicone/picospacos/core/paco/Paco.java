@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -216,6 +217,17 @@ public class Paco implements Listener {
                 }
             }
         });
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onPickUp(EntityPickupItemEvent e) {
+        if (e.getEntity() instanceof Player) {
+            final ItemStack item = e.getItem().getItemStack();
+            if (deleteItem((Player) e.getEntity(), item)) {
+                e.setCancelled(true);
+                item.setType(Material.AIR);
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
