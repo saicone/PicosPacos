@@ -31,8 +31,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class Paco implements Listener {
@@ -44,6 +46,8 @@ public class Paco implements Listener {
     private final List<PacoRule> dropRules = new ArrayList<>();
     private final List<PacoRule> deleteRules = new ArrayList<>();
     private final Map<UUID, ItemStack> warnings = new HashMap<>();
+
+    private final Set<UUID> bypassed = new HashSet<>();
 
     public Paco(PicosPacos pl) {
         this.pl = pl;
@@ -242,6 +246,9 @@ public class Paco implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        if (e.getPlayer().hasPermission("picospacos.bypass")) {
+            bypassed.add(e.getPlayer().getUniqueId());
+        }
         Bukkit.getScheduler().runTaskLaterAsynchronously(pl, () -> {
             final Inventory inventory = e.getPlayer().getInventory();
             for (int i = 0; i < inventory.getContents().length; i++) {
@@ -275,7 +282,7 @@ public class Paco implements Listener {
     }
 
     private boolean deleteItem(@NotNull Player player, @Nullable ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) {
+        if (item == null || item.getType() == Material.AIR || bypassed.contains(player.getUniqueId())) {
             return false;
         }
         for (PacoRule rule : deleteRules) {
@@ -298,5 +305,6 @@ public class Paco implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         warnings.remove(e.getPlayer().getUniqueId());
+        bypassed.remove(e.getPlayer().getUniqueId());
     }
 }
