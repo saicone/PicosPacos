@@ -9,6 +9,7 @@ import com.saicone.picospacos.core.item.executor.ItemDropExecutor;
 import com.saicone.picospacos.core.item.executor.ItemPickupExecutor;
 import com.saicone.picospacos.core.item.executor.PlayerDeathExecutor;
 import com.saicone.picospacos.util.SimpleMultimap;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -132,21 +133,37 @@ public class ScriptRegistry implements Listener {
                 try {
                     final ItemHolder holder = executor.holder((E) event);
                     for (ItemScript script : scripts) {
-                        holder.next(script.id());
-                        executor.iterate((E) event, item -> {
-                            holder.next(item);
-                            if (script.predicate().test(holder)) {
-                                script.execution().apply(holder);
-                                if (holder.isCancelled() && event instanceof Cancellable) {
-                                    ((Cancellable) event).setCancelled(true);
-                                }
-                            }
-                            return holder.getEditedItem();
-                        });
+                        if (script.delay() > 0) {
+                            later(() -> execute(holder, script, (E) event), (long) (script.delay() * 0.02));
+                        } else {
+                            execute(holder, script, (E) event);
+                        }
                     }
                 } catch (Throwable t) {
                     throw new EventException(t);
                 }
+            }
+        }
+
+        private void execute(@NotNull ItemHolder holder, @NotNull ItemScript script, @NotNull E event) {
+            holder.next(script.id());
+            executor.iterate(event, item -> {
+                holder.next(item);
+                if (script.predicate().test(holder)) {
+                    script.execution().apply(holder);
+                    if (holder.isCancelled() && event instanceof Cancellable) {
+                        ((Cancellable) event).setCancelled(true);
+                    }
+                }
+                return holder.getEditedItem();
+            });
+        }
+
+        private static void later(@NotNull Runnable runnable, long ticks) {
+            if (Bukkit.isPrimaryThread()) {
+                Bukkit.getScheduler().runTaskLater(PicosPacos.get(), runnable, ticks);
+            } else {
+                Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), runnable, ticks);
             }
         }
     }
