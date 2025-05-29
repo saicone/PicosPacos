@@ -94,6 +94,16 @@ public class BukkitSettings extends YamlConfiguration {
     }
 
     @NotNull
+    @SuppressWarnings("unchecked")
+    Map<String, ?> internal() {
+        try {
+            return (Map<String, ?>) MAP.invoke(getMemorySection());
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+
+    @NotNull
     public ConfigurationSection getDelegate() {
         return delegate;
     }
@@ -161,16 +171,11 @@ public class BukkitSettings extends YamlConfiguration {
     }
 
     @Nullable
-    @SuppressWarnings("unchecked")
     protected Object getIf(@NotNull Predicate<String> condition) {
-        try {
-            for (var entry : ((Map<String, ?>) MAP.invoke(getMemorySection())).entrySet()) {
-                if (condition.test(entry.getKey())) {
-                    return get(entry.getKey());
-                }
+        for (var entry : internal().entrySet()) {
+            if (condition.test(entry.getKey())) {
+                return get(entry.getKey());
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
         }
         return null;
     }

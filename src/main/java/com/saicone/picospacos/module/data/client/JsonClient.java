@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.api.data.PlayerData;
 import com.saicone.picospacos.module.data.DataClient;
 import com.saicone.picospacos.module.data.DataMethod;
 import org.jetbrains.annotations.NotNull;

@@ -1,7 +1,7 @@
 package com.saicone.picospacos.core.data;
 
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.api.data.PlayerData;
 import com.saicone.picospacos.module.data.DataClient;
 import com.saicone.picospacos.module.data.DataMethod;
 import com.saicone.picospacos.module.data.client.JsonClient;

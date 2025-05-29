@@ -4,7 +4,7 @@ import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.PicosPacosAPI;
 import com.saicone.picospacos.api.event.InventoryPacoEvent;
 import com.saicone.picospacos.api.event.ItemsPacoEvent;
-import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.api.data.PlayerData;
 import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.paco.rule.PacoRule;
 import com.saicone.picospacos.core.paco.rule.Parameter;
@@ -63,6 +63,7 @@ public class Paco implements Listener {
             case NODROP:
                 return dropRules;
             case DELETE:
+            case DETECT:
                 return deleteRules;
             default:
                 return List.of();
@@ -120,7 +121,7 @@ public class Paco implements Listener {
                             if (rules.contains(RuleType.DROP) || rules.contains(RuleType.NODROP)) {
                                 dropRules.add(rule);
                             }
-                            if (rules.contains(RuleType.DELETE)) {
+                            if (rules.contains(RuleType.DELETE) || rules.contains(RuleType.DETECT)) {
                                 deleteRules.add(rule);
                             }
                         }
@@ -146,7 +147,7 @@ public class Paco implements Listener {
             pl.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 e.setKeepInventory(true);
-                data.takeSaves(1);
+                data.setSaves(saves -> saves - 1);
                 return;
             }
         }
@@ -287,6 +288,9 @@ public class Paco implements Listener {
         }
         for (PacoRule rule : deleteRules) {
             if (rule.match(item, player)) {
+                if (rule.containsRule(RuleType.DETECT)) {
+                    return false;
+                }
                 final String ruleID = rule.getId();
                 Bukkit.getScheduler().runTaskAsynchronously(pl, () -> {
                     for (String s : PicosPacos.settings().getStringList("Execute.onDelete")) {

@@ -5,6 +5,8 @@ import com.saicone.ezlib.Dependency;
 import com.saicone.ezlib.EzlibLoader;
 import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.data.Database;
+import com.saicone.picospacos.core.item.ActionRegistry;
+import com.saicone.picospacos.core.item.ScriptRegistry;
 import com.saicone.picospacos.core.paco.Paco;
 import com.saicone.picospacos.module.cmd.CommandLoader;
 import com.saicone.picospacos.module.hook.DeluxeCombatHook;
@@ -20,8 +22,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Dependencies({
-        @Dependency(value = "com.saicone:types:1.2", relocate = {"com.saicone.types", "{package}.libs.types"}),
-        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.8", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
+        @Dependency(value = "com.saicone:types:1.3.0", relocate = {"com.saicone.types", "{package}.libs.types"}),
+        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.10", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
 })
 public class PicosPacos extends JavaPlugin {
 
@@ -60,14 +62,18 @@ public class PicosPacos extends JavaPlugin {
     private final SettingsFile settings;
     private final Lang lang;
     private final Database database;
+    private final ActionRegistry actionRegistry;
+    private final ScriptRegistry scriptRegistry;
     private final Paco paco;
 
     private List<String> placeholderNames;
 
     public PicosPacos() {
         this.settings = new SettingsFile("settings.yml", true);
-        lang = new Lang(this);
+        this.lang = new Lang(this);
         this.database = new Database(this);
+        this.actionRegistry = new ActionRegistry();
+        this.scriptRegistry = new ScriptRegistry();
         this.paco = new Paco(this);
 
         new EzlibLoader().logger((level, msg) -> {
@@ -94,6 +100,8 @@ public class PicosPacos extends JavaPlugin {
         lang.load();
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
         this.database.onLoad();
+        this.actionRegistry.load();
+        this.scriptRegistry.load();
         this.paco.onLoad();
     }
 
@@ -105,7 +113,7 @@ public class PicosPacos extends JavaPlugin {
         // Register hooks
         registerPlaceholders();
         if (Bukkit.getPluginManager().isPluginEnabled("DeluxeCombat") && settings.getBoolean("Hook.DeluxeCombat.enabled", true)) {
-            new DeluxeCombatHook(paco).load();
+            new DeluxeCombatHook().load();
         }
 
         CommandLoader.reload();
@@ -116,6 +124,7 @@ public class PicosPacos extends JavaPlugin {
         CommandLoader.unload();
         unregisterPlaceholders();
         this.paco.onDisable();
+        this.scriptRegistry.disable();
         this.database.onDisable();
     }
 
@@ -124,6 +133,7 @@ public class PicosPacos extends JavaPlugin {
         lang.load();
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
         this.database.onReload();
+        this.scriptRegistry.reload();
         this.paco.onReload();
         unregisterPlaceholders();
         registerPlaceholders();
@@ -143,6 +153,16 @@ public class PicosPacos extends JavaPlugin {
     @NotNull
     public Database getDatabase() {
         return database;
+    }
+
+    @NotNull
+    public ActionRegistry actionRegistry() {
+        return actionRegistry;
+    }
+
+    @NotNull
+    public ScriptRegistry scriptRegistry() {
+        return scriptRegistry;
     }
 
     @NotNull

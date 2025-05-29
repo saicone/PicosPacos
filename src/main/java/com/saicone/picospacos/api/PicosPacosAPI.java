@@ -1,7 +1,8 @@
 package com.saicone.picospacos.api;
 
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.api.data.PlayerData;
+import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.module.hook.PlayerProvider;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class PicosPacosAPI {
+
+    public static boolean isParsable(@NotNull String s) {
+        return s.contains("{event}") || s.contains("{event_location}") || s.contains("{player}") || s.contains("{item}") || s.contains("{item_all}") || Placeholders.contains(s);
+    }
 
     @NotNull
     public static PlayerData getPlayerData(@NotNull OfflinePlayer player) {

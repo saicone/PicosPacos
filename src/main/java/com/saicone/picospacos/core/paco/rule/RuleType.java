@@ -8,6 +8,7 @@ public enum RuleType {
     DROP,
     NODROP,
     DELETE,
+    DETECT,
     DISABLED;
 
     public static RuleType of(String s) {

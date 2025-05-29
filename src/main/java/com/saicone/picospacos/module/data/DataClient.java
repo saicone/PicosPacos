@@ -1,6 +1,6 @@
 package com.saicone.picospacos.module.data;
 
-import com.saicone.picospacos.api.object.PlayerData;
+import com.saicone.picospacos.api.data.PlayerData;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

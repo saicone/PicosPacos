@@ -1,52 +1,39 @@
 package com.saicone.picospacos.module.hook;
 
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.api.PicosPacosAPI;
-import com.saicone.picospacos.api.object.PlayerData;
-import com.saicone.picospacos.core.paco.Paco;
-import com.saicone.picospacos.core.paco.rule.RuleType;
+import com.saicone.picospacos.api.item.ItemHolder;
+import com.saicone.picospacos.api.item.ScriptEvent;
+import com.saicone.picospacos.core.item.ScriptExecutor;
 import nl.marido.deluxecombat.events.CombatlogEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.UnaryOperator;
 
-public class DeluxeCombatHook implements Listener {
-
-    private final Paco paco;
-
-    public DeluxeCombatHook(@NotNull Paco paco) {
-        this.paco = paco;
-    }
+public class DeluxeCombatHook implements ScriptExecutor<CombatlogEvent> {
 
     public void load() {
-        Bukkit.getPluginManager().registerEvents(this, PicosPacos.get());
+        PicosPacos.get().scriptRegistry().register(ScriptEvent.ITEM_DROP, this);
     }
 
-    @EventHandler
-    public void onCombatLog(CombatlogEvent event) {
-        final Player player = event.getCombatlogger();
-        final Inventory inventory = player.getInventory();
+    @Override
+    public @NotNull Class<CombatlogEvent> eventType() {
+        return CombatlogEvent.class;
+    }
 
-        final List<ItemStack> savedItems = new ArrayList<>();
-        int slot = 0;
-        for (ItemStack item : inventory.getContents()) {
-            if (paco.ruleMatches(RuleType.DROP, item, player) != null) {
-                inventory.setItem(slot, null);
-                savedItems.add(item);
-            }
-            slot++;
-        }
+    @Override
+    public @NotNull HandlerList handlerList() {
+        return CombatlogEvent.getHandlerList();
+    }
 
-        if (!savedItems.isEmpty()) {
-            PlayerData data = PicosPacosAPI.getPlayerDataAsync(player).join();
-            data.addItemsList(savedItems);
-        }
+    @Override
+    public @NotNull ItemHolder holder(@NotNull CombatlogEvent event) {
+        return holder(event.getCombatlogger());
+    }
+
+    @Override
+    public void iterate(@NotNull CombatlogEvent event, @NotNull UnaryOperator<ItemStack> operator) {
+        iterate(event.getCombatlogger(), operator);
     }
 }

@@ -69,12 +69,12 @@ public class PicosPacosCommand extends Command {
                                 switch (args[1].toLowerCase()) {
                                     case "give":
                                     case "add":
-                                        data.addSaves(amount);
+                                        data.setSaves(saves -> saves + amount);
                                         Lang.COMMAND_SAVES_GIVE.sendTo(sender, args[2], args[3]);
                                         break;
                                     case "take":
                                     case "remove":
-                                        data.takeSaves(amount);
+                                        data.setSaves(saves -> saves - amount);
                                         Lang.COMMAND_SAVES_TAKE.sendTo(sender, args[3], args[2]);
                                         break;
                                     case "set":
