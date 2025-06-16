@@ -15,6 +15,11 @@ public class ActionList implements ItemAction {
         this.actions = actions;
     }
 
+    @NotNull
+    public List<ItemAction> getActions() {
+        return actions;
+    }
+
     @Override
     public @NotNull ActionResult apply(@NotNull ItemHolder holder) {
         ActionResult result = ActionResult.DONE;
