@@ -19,6 +19,30 @@ public class Strings {
     }
 
     @NotNull
+    public static String before(@NotNull String s, char before) {
+        final int index = s.indexOf(before);
+        return index < 0 ? s : s.substring(0, index);
+    }
+
+    public static int escapeIndexOf(@NotNull String s, char c) {
+        return escapeIndexOf(s, c, 0);
+    }
+
+    public static int escapeIndexOf(@NotNull String s, char c, int fromIndex) {
+        boolean escape = false;
+        for (int i = fromIndex; i < s.length(); i++) {
+            final char c1 = s.charAt(i);
+            if (c1 == c) {
+                if (escape) continue;
+                return i;
+            } else if (c1 == '\\') {
+                escape = true;
+            }
+        }
+        return -1;
+    }
+
+    @NotNull
     private static Pattern newPattern(@NotNull @Language("RegExp") String regex) {
         Pattern pattern = Pattern.compile(regex);
         regexCache.put(regex, pattern);

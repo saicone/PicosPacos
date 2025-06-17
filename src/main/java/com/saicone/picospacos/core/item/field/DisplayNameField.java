@@ -1,12 +1,19 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.function.AnyPredicate;
+import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DisplayNameField implements ItemField<String> {
+
+    @Override
+    public @NotNull AnyPredicate<?> predicate(@NotNull Object object, @NotNull String... args) {
+        return StringPredicate.valueOf(object);
+    }
 
     @Override
     public @Nullable String get(@NotNull ItemStack item) {

@@ -1,6 +1,8 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.function.AnyPredicate;
+import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,6 +16,11 @@ import java.util.function.Function;
 public class FlagsField implements ItemField.MappedIterable<ItemFlag, Set<ItemFlag>> {
 
     private static final Function<ItemFlag, Object> MAPPER = Enum::name;
+
+    @Override
+    public @NotNull AnyPredicate<?> elementPredicate(@NotNull Object object) {
+        return StringPredicate.valueOf(object);
+    }
 
     @Override
     public @NotNull Function<ItemFlag, Object> mapper() {

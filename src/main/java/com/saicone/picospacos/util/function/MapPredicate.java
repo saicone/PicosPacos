@@ -11,6 +11,17 @@ import java.util.function.Predicate;
 public abstract class MapPredicate<K, V> extends AnyPredicate<Map<K, V>> {
 
     @NotNull
+    public static <K, V> MapPredicate<K, V> valueOf(@NotNull String type, @NotNull Map<?, ?> map, @NotNull Function<Object, AnyPredicate<K>> keySupplier, @NotNull Function<Object, AnyPredicate<V>> valueSupplier) {
+        if (type.equalsIgnoreCase("any")) {
+            return any(map, keySupplier, valueSupplier);
+        } else if (type.equalsIgnoreCase("contains")) {
+            return contains(map, keySupplier, valueSupplier);
+        } else {
+            return exact(map, keySupplier, valueSupplier);
+        }
+    }
+
+    @NotNull
     private static <K, V> Map<Object, AnyPredicate<V>> build(@NotNull Map<?, ?> map, @NotNull Function<Object, AnyPredicate<K>> keySupplier, @NotNull Function<Object, AnyPredicate<V>> valueSupplier) {
         final Map<Object, AnyPredicate<V>> result = new HashMap<>();
         for (Map.Entry<?, ?> entry : map.entrySet()) {

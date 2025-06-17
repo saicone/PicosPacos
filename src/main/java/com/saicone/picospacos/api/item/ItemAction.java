@@ -15,6 +15,20 @@ import java.util.regex.Pattern;
 
 public interface ItemAction {
 
+    @NotNull
+    static ItemAction empty() {
+        return new ItemAction() {
+            @Override
+            public boolean isEmpty() {
+                return true;
+            }
+        };
+    }
+
+    default boolean isEmpty() {
+        return false;
+    }
+
     default void execute(@NotNull ItemHolder holder) {
         // empty default method
     }

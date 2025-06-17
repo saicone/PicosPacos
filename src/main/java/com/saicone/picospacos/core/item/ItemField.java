@@ -3,6 +3,7 @@ package com.saicone.picospacos.core.item;
 import com.saicone.picospacos.util.function.AnyPredicate;
 import com.saicone.picospacos.util.function.IterablePredicate;
 import com.saicone.picospacos.util.function.MapPredicate;
+import com.saicone.types.IterableType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,12 +27,24 @@ public interface ItemField<T> {
         return ((AnyPredicate<Object>) predicate).test(get(item), parser);
     }
 
+    @NotNull
+    AnyPredicate<?> predicate(@NotNull Object object, @NotNull String... args);
 
     interface Iterable<E, T extends java.lang.Iterable<E>> extends ItemField<T> {
 
+        @Override
+        default @NotNull IterablePredicate<?> predicate(@NotNull Object object, @NotNull String... args) {
+            if (args.length > 0) {
+                return IterablePredicate.valueOf(args[0], IterableType.of(object), this::elementPredicate);
+            }
+            return IterablePredicate.exact(IterableType.of(object), this::elementPredicate);
+        }
+
+        @NotNull
+        AnyPredicate<?> elementPredicate(@NotNull Object object);
     }
 
-    interface MappedIterable<E, T extends java.lang.Iterable<E>> extends ItemField<T> {
+    interface MappedIterable<E, T extends java.lang.Iterable<E>> extends Iterable<E, T> {
 
         @NotNull
         Function<E, Object> mapper();
@@ -41,7 +54,7 @@ public interface ItemField<T> {
             if (predicate instanceof IterablePredicate) {
                 return test(item, (IterablePredicate<?>) predicate);
             }
-            return ItemField.super.test(item, predicate);
+            return Iterable.super.test(item, predicate);
         }
 
         @Override
@@ -49,7 +62,7 @@ public interface ItemField<T> {
             if (predicate instanceof IterablePredicate) {
                 return test(item, (IterablePredicate<?>) predicate, parser);
             }
-            return ItemField.super.test(item, predicate, parser);
+            return Iterable.super.test(item, predicate, parser);
         }
 
         @SuppressWarnings("unchecked")
@@ -73,6 +86,23 @@ public interface ItemField<T> {
 
     interface Map<K, V, T extends java.util.Map<K, V>> extends ItemField<T> {
 
+        @Override
+        default @NotNull MapPredicate<?, ?> predicate(@NotNull Object object, @NotNull String... args) {
+            if (args.length > 0) {
+                return MapPredicate.valueOf(args[0], (java.util.Map<?, ?>) object, this::keyPredicate, this::valuePredicate);
+            }
+            return MapPredicate.exact((java.util.Map<?, ?>) object, this::keyPredicate, this::valuePredicate);
+        }
+
+        @NotNull
+        AnyPredicate<?> keyPredicate(@NotNull Object object);
+
+        @NotNull
+        AnyPredicate<?> valuePredicate(@NotNull Object object);
+    }
+
+    interface MappedMap<K, V, T extends java.util.Map<K, V>> extends Map<K, V, T> {
+
         @NotNull
         Function<K, Object> keyMapper();
 
@@ -84,7 +114,7 @@ public interface ItemField<T> {
             if (predicate instanceof MapPredicate) {
                 return test(item, (MapPredicate<?, ?>) predicate);
             }
-            return ItemField.super.test(item, predicate);
+            return Map.super.test(item, predicate);
         }
 
         @Override
@@ -92,7 +122,7 @@ public interface ItemField<T> {
             if (predicate instanceof MapPredicate) {
                 return test(item, (MapPredicate<?, ?>) predicate, parser);
             }
-            return ItemField.super.test(item, predicate, parser);
+            return Map.super.test(item, predicate, parser);
         }
 
         @SuppressWarnings("unchecked")

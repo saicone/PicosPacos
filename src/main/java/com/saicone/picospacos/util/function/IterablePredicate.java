@@ -11,6 +11,17 @@ import java.util.function.Predicate;
 public abstract class IterablePredicate<E> extends AnyPredicate<Iterable<E>> {
 
     @NotNull
+    public static <E> IterablePredicate<E> valueOf(@NotNull String type, @NotNull Iterable<?> iterable, @NotNull Function<Object, AnyPredicate<E>> supplier) {
+        if (type.equalsIgnoreCase("any")) {
+            return any(iterable, supplier);
+        } else if (type.equalsIgnoreCase("contains")) {
+            return contains(iterable, supplier);
+        } else {
+            return exact(iterable, supplier);
+        }
+    }
+
+    @NotNull
     private static <E> List<AnyPredicate<E>> build(@NotNull Iterable<?> iterable, @NotNull Function<Object, AnyPredicate<E>> supplier) {
         final List<AnyPredicate<E>> result = new ArrayList<>();
         for (Object element : iterable) {

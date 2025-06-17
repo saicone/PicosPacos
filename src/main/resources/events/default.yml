@@ -27,10 +27,9 @@ example-event:
     name:
       - 'contains=Thunder'
       - 'contains=thunder'
-    lore:
-      contains:
-        - '&7This item can''t be'
-        - '&7lose on death!'
+    lore(contains):
+      - '&7This item can''t be'
+      - '&7lose on death!'
   # Action types:
   # RESTORE = Return the item when player respawn or joins
   # SAVE    = Save the item to be claimed with /lostitems (Configure it on setting.yml)
@@ -45,7 +44,6 @@ example-event:
 protected-lore:
   when: ITEM_DROP
   item:
-    lore:
-      any: 'contains=PROTECTED ITEM'
+    lore(any): 'contains=PROTECTED ITEM'
   run:
     - 'cancel'

@@ -37,16 +37,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class BukkitSettings extends YamlConfiguration {
 
@@ -112,6 +115,20 @@ public class BukkitSettings extends YamlConfiguration {
     @Override
     public Set<String> getKeys(boolean deep) {
         return delegate == null ? super.getKeys(deep) : delegate.getKeys(deep);
+    }
+
+    @NotNull
+    public Set<String> getKeys(@NotNull Predicate<String> cut) {
+        return getKeys(true).stream().map(path -> {
+            final StringJoiner joiner = new StringJoiner(".");
+            for (String key : path.split("\\.")) {
+                joiner.add(key);
+                if (cut.test(key)) {
+                    break;
+                }
+            }
+            return joiner.toString();
+        }).collect(Collectors.toSet());
     }
 
     @NotNull
@@ -227,6 +244,21 @@ public class BukkitSettings extends YamlConfiguration {
     }
 
     @NotNull
+    protected <T> Map.Entry<String[], Object> getEntryIf(@NotNull Function<String, T> keyConversion, @NotNull BiPredicate<String, T> condition, @NotNull String... path) {
+        final List<String> list = new ArrayList<>();
+        Object object = getMemorySection();
+        for (String key : path) {
+            list.add(key);
+            if (object instanceof MemorySection) {
+                object = getIfType((MemorySection) object, condition, keyConversion.apply(key));
+                continue;
+            }
+            return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), null);
+        }
+        return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), object);
+    }
+
+    @NotNull
     public MemorySection getMemorySection() {
         return delegate instanceof MemorySection ? (MemorySection) delegate : this;
     }
@@ -299,6 +331,11 @@ public class BukkitSettings extends YamlConfiguration {
     @NotNull
     public ValueType<Object> getRegex(@NotNull @Language("RegExp") String... regexPath) {
         return ValueType.of(getIf(Pattern::compile, (s, pattern) -> pattern.matcher(s).matches(), regexPath));
+    }
+
+    @NotNull
+    public Map.Entry<String[], Object> getRegexEntry(@NotNull @Language("RegExp") String... regexPath) {
+        return getEntryIf(Pattern::compile, (s, pattern) -> pattern.matcher(s).matches(), regexPath);
     }
 
     public void set(@NotNull ConfigurationSection section) {

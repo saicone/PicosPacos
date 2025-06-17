@@ -9,6 +9,21 @@ import java.util.function.Predicate;
 
 public abstract class AnyPredicate<T> implements Predicate<T> {
 
+    @NotNull
+    public static <T> AnyPredicate<T> empty() {
+        return new AnyPredicate<T>() {
+            @Override
+            protected @NotNull Object getRaw() {
+                return null;
+            }
+
+            @Override
+            protected boolean compareAny(@NotNull T base, @NotNull T actual) {
+                return false;
+            }
+        };
+    }
+
     @Override
     public boolean test(@Nullable T t) {
         return t != null && testAny(t);

@@ -1,6 +1,8 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.function.AnyPredicate;
+import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class LoreField implements ItemField<List<String>> {
+public class LoreField implements ItemField.Iterable<String, List<String>> {
+
+    @Override
+    public @NotNull AnyPredicate<?> elementPredicate(@NotNull Object object) {
+        return StringPredicate.valueOf(object);
+    }
 
     @Override
     public @Nullable List<String> get(@NotNull ItemStack item) {

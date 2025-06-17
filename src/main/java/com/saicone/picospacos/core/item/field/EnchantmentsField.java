@@ -1,6 +1,9 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.function.AnyPredicate;
+import com.saicone.picospacos.util.function.NumberPredicate;
+import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -10,11 +13,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
-public class EnchantmentsField implements ItemField.Map<Enchantment, Integer, Map<Enchantment, Integer>> {
+public class EnchantmentsField implements ItemField.MappedMap<Enchantment, Integer, Map<Enchantment, Integer>> {
 
     @SuppressWarnings("deprecation")
     private static final Function<Enchantment, Object> KEY_MAPPER = Enchantment::getName;
     private static final Function<Integer, Object> VALUE_MAPPER = level -> level;
+
+    @Override
+    public @NotNull AnyPredicate<?> keyPredicate(@NotNull Object object) {
+        return StringPredicate.valueOf(object);
+    }
+
+    @Override
+    public @NotNull AnyPredicate<?> valuePredicate(@NotNull Object object) {
+        return NumberPredicate.valueOf(object);
+    }
 
     @Override
     public @NotNull Function<Enchantment, Object> keyMapper() {
