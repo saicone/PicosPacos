@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.AbstractMap;
@@ -82,6 +83,14 @@ public class BukkitSettings extends YamlConfiguration {
         } else if (object instanceof Map) {
             final BukkitSettings settings = new BukkitSettings();
             settings.set((Map<?, ?>) object);
+            return settings;
+        } else if (object instanceof File) {
+            final BukkitSettings settings = new BukkitSettings();
+            try {
+                settings.load((File) object);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
             return settings;
         } else {
             throw new IllegalArgumentException("The object type '" + object.getClass().getName() + "' cannot be converted to BukkitSettings instance");

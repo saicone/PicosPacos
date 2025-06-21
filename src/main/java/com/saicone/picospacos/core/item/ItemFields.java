@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -68,7 +69,7 @@ public class ItemFields {
     }
 
     @NotNull
-    public static ItemPredicate predicate(@NotNull BukkitSettings settings) {
+    public static Optional<ItemPredicate> predicate(@NotNull BukkitSettings settings) {
         final List<FieldPredicate> list = new ArrayList<>() {
             @Override
             public boolean contains(Object o) {
@@ -127,18 +128,18 @@ public class ItemFields {
         }
 
         if (list.isEmpty()) {
-            return ItemPredicate.empty();
+            return Optional.empty();
         } else if (list.size() == 1) {
-            return list.get(0);
+            return Optional.of(list.get(0));
         } else {
-            return holder -> {
+            return Optional.of(holder -> {
                 for (FieldPredicate predicate : list) {
                     if (!predicate.test(holder)) {
                         return false;
                     }
                 }
                 return true;
-            };
+            });
         }
     }
 

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ActionRegistry {
 
@@ -44,62 +45,51 @@ public class ActionRegistry {
     }
 
     @NotNull
-    public ItemAction read(@Nullable Object object) {
+    public Optional<ItemAction> readAction(@Nullable Object object) {
         if (object == null) {
-            return ItemAction.empty();
+            return Optional.empty();
         }
 
         final List<ItemAction> actions = new ArrayList<>();
         if (object instanceof ConfigurationSection) {
             for (String id : ((ConfigurationSection) object).getKeys(false)) {
-                final ItemAction action = read(id, ((ConfigurationSection) object).get(id));
-                if (action != null) {
-                    actions.add(action);
-                }
+                readAction(id, ((ConfigurationSection) object).get(id)).ifPresent(actions::add);
             }
         } else if (object instanceof Map) {
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
-                final ItemAction action = read(String.valueOf(entry.getKey()), entry.getValue());
-                if (action != null) {
-                    actions.add(action);
-                }
+                readAction(String.valueOf(entry.getKey()), entry.getValue()).ifPresent(actions::add);
             }
         } else if (object instanceof List) {
             for (Object o : (List<?>) object) {
-                final ItemAction action = read(o);
-                if (action.isEmpty()) {
-                    continue;
-                }
-                if (action instanceof ActionList) {
-                    actions.addAll(((ActionList) action).getActions());
-                } else {
-                    actions.add(action);
-                }
+                readAction(o).ifPresent(action -> {
+                    if (action instanceof ActionList) {
+                        actions.addAll(((ActionList) action).getActions());
+                    } else {
+                        actions.add(action);
+                    }
+                });
             }
         } else {
             final String[] split = String.valueOf(object).split(":", 2);
-            final ItemAction action = read(split[0].trim(), split.length > 1 ? split[1].trim() : null);
-            if (action != null) {
-                actions.add(action);
-            }
+            readAction(split[0].trim(), split.length > 1 ? split[1].trim() : null).ifPresent(actions::add);
         }
 
         if (actions.isEmpty()) {
-            return ItemAction.empty();
+            return Optional.empty();
         } else if (actions.size() == 1) {
-            return actions.get(0);
+            return Optional.of(actions.get(0));
         } else {
-            return new ActionList(actions);
+            return Optional.of(new ActionList(actions));
         }
     }
 
-    @Nullable
-    public ItemAction read(@NotNull String id, @Nullable Object object) {
+    @NotNull
+    public Optional<ItemAction> readAction(@NotNull String id, @Nullable Object object) {
         for (var entry : actionTypes.entrySet()) {
             if (entry.getValue().matches(id)) {
-                return entry.getValue().build(id, object);
+                return Optional.of(entry.getValue().build(id, object));
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

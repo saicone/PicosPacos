@@ -7,12 +7,6 @@ import java.util.function.Predicate;
 @FunctionalInterface
 public interface ItemPredicate extends Predicate<ItemHolder> {
 
-    @NotNull
-    static ItemPredicate empty() {
-        return holder -> false;
-    }
-
     @Override
     boolean test(@NotNull ItemHolder holder);
-
 }
