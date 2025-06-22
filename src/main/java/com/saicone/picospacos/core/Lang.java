@@ -43,7 +43,7 @@ public class Lang extends LangLoader {
 
     @Override
     public void load(@NotNull File langFolder) {
-        logLevel = PicosPacos.settings().getIgnoreCase("plugin", "loglevel").asInt(3);
+        logLevel = PicosPacos.settings().getIgnoreCase("plugin", "log-level").asInt(3);
         if (languageAliases != null) {
             languageAliases.clear();
         } else {

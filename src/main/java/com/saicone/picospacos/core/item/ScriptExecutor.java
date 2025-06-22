@@ -29,17 +29,17 @@ public interface ScriptExecutor<E extends Event> {
 
     @NotNull
     default ItemHolder holder(@NotNull org.bukkit.entity.Entity entity) {
-        return PacoItemHolder.valueOf("", entity, Items.empty());
+        return PacoItemHolder.valueOf(null, entity, Items.empty());
     }
 
     @NotNull
     default ItemHolder holder(@NotNull org.bukkit.entity.Player player) {
-        return PacoItemHolder.valueOf("", player, Items.empty());
+        return PacoItemHolder.valueOf(null, player, Items.empty());
     }
 
     @NotNull
     default ItemHolder holder(@NotNull Location location) {
-        return PacoItemHolder.valueOf("", Items.empty(), location);
+        return PacoItemHolder.valueOf(null, Items.empty(), location);
     }
 
     void iterate(@NotNull E event, @NotNull UnaryOperator<ItemStack> operator);

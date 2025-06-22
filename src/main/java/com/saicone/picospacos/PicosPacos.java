@@ -7,18 +7,20 @@ import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.data.Database;
 import com.saicone.picospacos.core.item.ActionRegistry;
 import com.saicone.picospacos.core.item.ScriptRegistry;
-import com.saicone.picospacos.core.paco.Paco;
 import com.saicone.picospacos.module.cmd.CommandLoader;
 import com.saicone.picospacos.module.hook.DeluxeCombatHook;
 import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.module.hook.PlayerProvider;
+import com.saicone.picospacos.module.listener.BukkitListener;
 import com.saicone.picospacos.module.settings.SettingsFile;
+import com.saicone.picospacos.module.settings.SettingsUpdater;
+import com.saicone.types.Types;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 @Dependencies({
@@ -64,9 +66,8 @@ public class PicosPacos extends JavaPlugin {
     private final Database database;
     private final ActionRegistry actionRegistry;
     private final ScriptRegistry scriptRegistry;
-    private final Paco paco;
 
-    private List<String> placeholderNames;
+    private Set<String> placeholderNames;
 
     public PicosPacos() {
         this.settings = new SettingsFile("settings.yml", true);
@@ -74,7 +75,6 @@ public class PicosPacos extends JavaPlugin {
         this.database = new Database(this);
         this.actionRegistry = new ActionRegistry();
         this.scriptRegistry = new ScriptRegistry();
-        this.paco = new Paco(this);
 
         new EzlibLoader().logger((level, msg) -> {
             switch (level) {
@@ -97,22 +97,22 @@ public class PicosPacos extends JavaPlugin {
     public void onLoad() {
         instance = this;
         settings.loadFrom(getDataFolder(), true);
+        SettingsUpdater.run(settings);
         lang.load();
-        PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
+        PlayerProvider.compute(settings.getIgnoreCase("plugin", "player-provider").asString("AUTO"));
         this.database.onLoad();
         this.actionRegistry.load();
         this.scriptRegistry.load();
-        this.paco.onLoad();
     }
 
     @Override
     public void onEnable() {
         this.database.onEnable();
-        this.paco.onEnable();
+        Bukkit.getPluginManager().registerEvents(new BukkitListener(), this);
 
         // Register hooks
         registerPlaceholders();
-        if (Bukkit.getPluginManager().isPluginEnabled("DeluxeCombat") && settings.getBoolean("Hook.DeluxeCombat.enabled", true)) {
+        if (Bukkit.getPluginManager().isPluginEnabled("DeluxeCombat") && settings.getIgnoreCase("hook", "DeluxeCombat", "enabled").asBoolean(true)) {
             new DeluxeCombatHook().load();
         }
 
@@ -123,7 +123,6 @@ public class PicosPacos extends JavaPlugin {
     public void onDisable() {
         CommandLoader.unload();
         unregisterPlaceholders();
-        this.paco.onDisable();
         this.scriptRegistry.disable();
         this.database.onDisable();
     }
@@ -131,10 +130,9 @@ public class PicosPacos extends JavaPlugin {
     public void onReload() {
         settings.loadFrom(getDataFolder(), true);
         lang.load();
-        PlayerProvider.compute(settings.getIgnoreCase("plugin", "playerprovider").asString("AUTO"));
+        PlayerProvider.compute(settings.getIgnoreCase("plugin", "player-provider").asString("AUTO"));
         this.database.onReload();
         this.scriptRegistry.reload();
-        this.paco.onReload();
         unregisterPlaceholders();
         registerPlaceholders();
         CommandLoader.reload();
@@ -165,14 +163,9 @@ public class PicosPacos extends JavaPlugin {
         return scriptRegistry;
     }
 
-    @NotNull
-    public Paco getPaco() {
-        return paco;
-    }
-
     private void registerPlaceholders() {
-        if (settings.getBoolean("Hook.PlaceholderAPI.enabled", true)) {
-            this.placeholderNames = Placeholders.register(this, settings.getStringList("Hook.PlaceholderAPI.names"), (player, params) -> {
+        if (settings.getIgnoreCase("hook", "PlaceholderAPI", "enabled").asBoolean(true)) {
+            this.placeholderNames = Placeholders.register(this, settings.getIgnoreCase("hook", "PlaceholderAPI", "names").asSet(Types.STRING), (player, params) -> {
                 if (params.equalsIgnoreCase("saves")) {
                     return String.valueOf(this.database.getPlayerDataAsync(player).join().getSaves());
                 }

@@ -1,6 +1,7 @@
 package com.saicone.picospacos.core.item;
 
 import com.saicone.picospacos.api.item.ItemHolder;
+import com.saicone.picospacos.api.item.ItemScript;
 import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.util.Items;
 import org.bukkit.Bukkit;
@@ -10,26 +11,27 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PacoItemHolder extends ItemHolder {
 
     @NotNull
-    public static ItemHolder valueOf(@NotNull String event, @NotNull Entity entity, @NotNull ItemStack item) {
+    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull Entity entity, @NotNull ItemStack item) {
         if (entity instanceof Player) {
-            return valueOf(event, (Player) entity, item);
+            return valueOf(script, (Player) entity, item);
         } else {
-            return valueOf(event, item, entity.getLocation());
+            return valueOf(script, item, entity.getLocation());
         }
     }
 
     @NotNull
-    public static ItemHolder valueOf(@NotNull String event, @NotNull Player player, @NotNull ItemStack item) {
-        return new PacoItemHolder(event, player, item);
+    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull Player player, @NotNull ItemStack item) {
+        return new PacoItemHolder(script, player, item);
     }
 
     @NotNull
-    public static ItemHolder valueOf(@NotNull String event, @NotNull ItemStack item, @NotNull Location location) {
-        return new PacoItemHolder(event, Bukkit.getConsoleSender(), item) {
+    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull ItemStack item, @NotNull Location location) {
+        return new PacoItemHolder(script, Bukkit.getConsoleSender(), item) {
             @Override
             public @NotNull Location getLocation() {
                 return location;
@@ -37,8 +39,8 @@ public class PacoItemHolder extends ItemHolder {
         };
     }
 
-    public PacoItemHolder(@NotNull String event, @NotNull CommandSender user, @NotNull ItemStack item) {
-        super(event, user, item);
+    public PacoItemHolder(@Nullable ItemScript script, @NotNull CommandSender user, @NotNull ItemStack item) {
+        super(script, user, item);
     }
 
     @NotNull
@@ -48,7 +50,7 @@ public class PacoItemHolder extends ItemHolder {
 
     @Override
     public @NotNull String parse(@NotNull String s) {
-        s = s.replace("{event}", getEvent()).replace("{player}", isPlayer() ? getPlayer().getName() : "@console");
+        s = s.replace("{event}", getScript().id()).replace("{player}", isPlayer() ? getPlayer().getName() : "@console");
         if (s.contains("{event_location}")) {
             s = s.replace("{event_location}", parseLocation(getLocation()));
         }

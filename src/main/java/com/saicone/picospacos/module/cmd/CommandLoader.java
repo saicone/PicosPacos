@@ -32,7 +32,7 @@ public class CommandLoader {
 
     @SuppressWarnings("unchecked")
     public static void reload() {
-        cmd.setPerms(PicosPacos.settings().getString("Command.permission.all", "picospacos.*"), PicosPacos.settings().getString("Command.permission.use", "picospacos.use"), PicosPacos.settings().getString("Command.permission.reload", "picospacos.command.reload"), PicosPacos.settings().getString("Command.permission.saves", "picospacos.command.saves"));
+        cmd.setPerms(PicosPacos.settings().getString("command.permission.all", "picospacos.*"), PicosPacos.settings().getString("command.permission.use", "picospacos.use"), PicosPacos.settings().getString("command.permission.reload", "picospacos.command.reload"), PicosPacos.settings().getString("command.permission.saves", "picospacos.command.saves"));
 
         Map<String, Command> commands;
         try {
@@ -45,7 +45,7 @@ public class CommandLoader {
             commands.put("picospacos", cmd);
             cmd.register(commandMap);
         }
-        List<String> aliases = PicosPacos.settings().getStringList("Command.aliases");
+        List<String> aliases = PicosPacos.settings().getStringList("command.aliases");
         cmd.getAliases().forEach(alias -> {
             if (!aliases.contains(alias) && !alias.equalsIgnoreCase("picospacos") && commands.containsKey(alias) && commands.get(alias).getName().equalsIgnoreCase("picospacos")) {
                 commands.remove(alias);

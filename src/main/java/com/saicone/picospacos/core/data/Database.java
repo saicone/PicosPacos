@@ -50,28 +50,30 @@ public class Database implements Listener {
 
     public void onLoad() {
         this.method = PicosPacos.settings().getIgnoreCase("database", "method").asString("UUID").equalsIgnoreCase("NAME") ? DataMethod.NAME : DataMethod.UUID;
-        final String type = PicosPacos.settings().getIgnoreCase("database", "type").asString("SQLITE").toUpperCase();
+        final String type = PicosPacos.settings().getIgnoreCase("database", "type").asString("SQL").toUpperCase();
         switch (type) {
-            case "JSON":
+            case "SQL":
+                final String sqlType = PicosPacos.settings().getIgnoreCase("database", "sql", "type").asString("SQLITE").toUpperCase();
+                switch (sqlType) {
+                    case "SQLITE":
+                        this.client = new SqliteClient();
+                        break;
+                    case "MYSQL":
+                        this.client = new MySQLClient();
+                        break;
+                    default:
+                        PicosPacos.log(2, "The sql database type '" + sqlType + "' doesn't exist");
+                        return;
+                }
+                break;
+            case "FILE":
                 this.client = new JsonClient();
-                break;
-            case "SQLITE":
-                this.client = new SqliteClient();
-                break;
-            case "MYSQL":
-                this.client = new MySQLClient();
                 break;
             default:
                 PicosPacos.log(2, "The database type '" + type + "' doesn't exist");
                 return;
         }
-        final BukkitSettings config = PicosPacos.settings().getConfigurationSection(settings -> {
-            if (type.equalsIgnoreCase("JSON")) {
-                return settings.getRegex("(?i)database", "(?i)json|file");
-            } else {
-                return settings.getRegex("(?i)database", "(?i)sql|" + type);
-            }
-        });
+        final BukkitSettings config = PicosPacos.settings().getConfigurationSection(settings -> settings.getIgnoreCase("database", type));
         this.client.onLoad(config != null ? config : new BukkitSettings());
     }
 

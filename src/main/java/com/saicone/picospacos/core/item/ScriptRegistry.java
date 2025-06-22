@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class ScriptRegistry implements Listener {
 
-    private static final Supplier<File> EVENTS_FOLDER = Suppliers.memoize(() -> new File(PicosPacos.get().getDataFolder(), "events"));
+    private static final Supplier<File> SCRIPTS_FOLDER = Suppliers.memoize(() -> new File(PicosPacos.get().getDataFolder(), "scripts"));
 
     private final SimpleMultimap<ScriptEvent, ScriptExecutor<?>, List<ScriptExecutor<?>>> eventExecutors = new SimpleMultimap<>(ArrayList::new);
     private final Map<String, ItemScript> scripts = new HashMap<>();
@@ -90,7 +90,7 @@ public class ScriptRegistry implements Listener {
 
     public void load() {
         // Load scripts
-        loadScripts(EVENTS_FOLDER.get());
+        loadScripts(SCRIPTS_FOLDER.get());
         // Load listeners
         for (ScriptEvent event : ScriptEvent.VALUES) {
             for (EventPriority priority : EventPriority.values()) {
@@ -159,6 +159,9 @@ public class ScriptRegistry implements Listener {
 
     @NotNull
     public Optional<ItemScript> readScript(@NotNull String id, @NotNull BukkitSettings config) {
+        if (!config.getIgnoreCase("enabled").asBoolean(true)) {
+            return Optional.empty();
+        }
         final Set<ScriptEvent> when = new HashSet<>();
         for (String s : config.getIgnoreCase("when").asList(Types.STRING)) {
             ScriptEvent.of(s).ifPresent(when::add);
@@ -210,7 +213,7 @@ public class ScriptRegistry implements Listener {
             return file.getName();
         }
         try {
-            if (parent.getCanonicalPath().equals(EVENTS_FOLDER.get().getCanonicalPath())) {
+            if (parent.getCanonicalPath().equals(SCRIPTS_FOLDER.get().getCanonicalPath())) {
                 return file.getName();
             }
         } catch (IOException e) {
@@ -258,7 +261,7 @@ public class ScriptRegistry implements Listener {
         }
 
         private void execute(@NotNull ItemHolder holder, @NotNull ItemScript script, @NotNull E event) {
-            holder.next(script.id());
+            holder.next(script);
             executor.iterate(event, item -> {
                 holder.next(item);
                 if (script.predicate().test(holder)) {

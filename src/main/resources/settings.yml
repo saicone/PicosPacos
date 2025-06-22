@@ -1,29 +1,29 @@
-# Locale configuration
-Locale:
-  # Language file to use
-  # Available files are on "plugins/PicosPacos/lang" folder
-  # You can create your own language file and put the name here
-  Language: 'en_US'
+# Plugin configuration
+plugin:
   # Log levels (Messages to see in console)
   # 0 = Disabled
   # 1 = Errors
   # 2 = Errors and warnings
   # 3 = Errors, warnings and information
   # 4 = Errors, warnings, information and debug messages
-  LogLevel: 2
+  log-level: 2
+  # Language file to use
+  # Available files are on "plugins/PicosPacos/lang" folder
+  # You can create your own language file and put the name here
+  language: 'en_US'
   # Player information provider:
   # AUTO      = Choose automatically the best available option
   # LUCKPERMS = Use LuckPerms plugin.
   # BUKKIT    = Use the default Bukkit offline player methods (it also acts like fallback value)
-  PlayerProvider: AUTO
+  player-provider: AUTO
 
 
 # Lang configuration
-Lang:
+lang:
   # Default player language
-  Default: 'en_US'
+  default: 'en_US'
   # Language aliases
-  Aliases:
+  aliases:
     en_US:
       - 'en_AU'
       - 'en_CA'
@@ -38,71 +38,44 @@ Lang:
       - 'es_VE'
 
 
-# Plugin configuration
-Config:
+# Item restoration configuration
+restore:
   # Give saved items on player respawn
-  Respawn:
+  respawn:
     # Enable or not this function
-    Enabled: true
+    enabled: true
     # Blacklisted worlds
-    Blacklist-Worlds:
+    world-blacklist:
       - 'worldName'
     # Delay in seconds to give saved items on respawn
     # Set to 0 to disable
-    Delay: 0
-  # Give saved items on player joins (Only if player disconnects after death)
-  Join:
+    delay: 0
+  # Give saved items on player join
+  join:
     # Enable or not this function
-    Enabled: true
+    enabled: true
     # Blacklisted worlds
-    Blacklist-Worlds:
+    world-blacklist:
       - 'worldName'
     # Delay in seconds to give saved on join
-    Delay: 10
-  # Drop warning configuration
-  Drop:
-    # Enable or not this feature
-    Enabled: true
-    # Blacklisted worlds
-    Blacklist-Worlds: []
-    # Permission to have this feature
-    Permission: 'picospacos.drop'
+    delay: 10
 
-# Event executors
-# Compatible with placeholders from PlaceholderAPI
-# So you can use {player} from player name and {rule} for rule ID
-Execute:
-  # Commands to execute when an item is removed by "DELETE" rule
-  onDelete:
-    - 'warn {player} Illegal item detected (id: {rule})'
 
 # Database configuration
-Database:
+database:
   # Available types:
   #
-  # JSON   = Save player data locally in .json file
-  # SQLITE = Save player data locally in one .db file (Recommended for local database)
-  # MYSQL  = Save player data externally in sql database, you can configure this below
-  Type: 'SQLITE'
-  # Available types:
-  # UUID = Use player uuid to recognize him on database
-  # NAME = Use player name to recognize him on database (Recommended for cracked/offline servers)
-  Method: 'UUID'
+  # SQL  = Save data on a sql database
+  # FILE = Save data locally on files
+  type: 'SQLITE'
   # SQL database configuration
-  Sql:
-    # Database host
+  sql:
     host: localhost
-    # Database port
     port: 3306
-    # Database name
     database: 'database'
-    # Database user
     user: 'username'
-    # Database password
     password: 'password'
-    # Database timeout to check if had valid connection
     timeout: 1000
-    # Database flags
     flags:
       - 'autoReconnect=true'
       - 'useSSL=false'
@@ -112,7 +85,7 @@ Database:
 
 
 # Plugin hooks configuration
-Hook:
+hook:
   # PlaceholderAPI hook
   PlaceholderAPI:
     # Enable or not this hook
@@ -121,15 +94,13 @@ Hook:
     names:
       - 'picospacos'
       - 'pipa'
-    # Text to put in rule tags name to allow PlaceholderAPI
-    rule: 'allowPapi'
   # DeluxeCombat hook
   DeluxeCombat:
     # Enable or not this hook
     enabled: true
 
 # Plugin command configuration
-Command:
+command:
   aliases:
     - 'ppacos'
     - 'picosp'
@@ -139,3 +110,6 @@ Command:
     use: 'picospacos.use'
     reload: 'picospacos.command.reload'
     saves: 'picospacos.command.saves'
+
+# Settings version, DO NOT CHANGE THIS or you will face the doom!
+version: 1

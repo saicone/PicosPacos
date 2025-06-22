@@ -2,7 +2,6 @@ package com.saicone.picospacos.api.item;
 
 import com.saicone.picospacos.api.PicosPacosAPI;
 import com.saicone.picospacos.api.data.PlayerData;
-import com.saicone.picospacos.util.Items;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +14,7 @@ import java.util.function.Function;
 
 public abstract class ItemHolder implements Function<Object, Object> {
 
-    private String event;
+    private ItemScript script;
     private CommandSender user;
     private ItemStack item;
 
@@ -23,8 +22,8 @@ public abstract class ItemHolder implements Function<Object, Object> {
     private transient boolean edited;
     private transient ItemStack editedItem;
 
-    public ItemHolder(@NotNull String event, @NotNull CommandSender user, @NotNull ItemStack item) {
-        this.event = event;
+    public ItemHolder(@Nullable ItemScript script, @NotNull CommandSender user, @NotNull ItemStack item) {
+        this.script = script;
         this.user = user;
         this.item = item;
     }
@@ -40,8 +39,8 @@ public abstract class ItemHolder implements Function<Object, Object> {
 
     @ApiStatus.Internal
     @Contract("_ -> this")
-    public ItemHolder next(@NotNull String event) {
-        this.event = event;
+    public ItemHolder next(@NotNull ItemScript event) {
+        this.script = event;
         return this;
     }
 
@@ -58,8 +57,8 @@ public abstract class ItemHolder implements Function<Object, Object> {
     }
 
     @NotNull
-    public String getEvent() {
-        return event;
+    public ItemScript getScript() {
+        return script;
     }
 
     @NotNull
@@ -108,7 +107,7 @@ public abstract class ItemHolder implements Function<Object, Object> {
     }
 
     public void clear() {
-        this.event = null;
+        this.script = null;
         this.user = null;
         this.item = null;
         this.editedItem = null;

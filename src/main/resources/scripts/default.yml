@@ -47,3 +47,14 @@ protected-lore:
     lore(any): 'contains=PROTECTED ITEM'
   run:
     - 'cancel'
+
+illegal-item:
+  when:
+    - PLAYER_JOIN
+    - ITEM_DROP
+    - ITEM_CLICK
+  item:
+    material: BEDROCK
+    name: '&c&lSUPER BEDROCK'
+  run:
+    - 'delete'
