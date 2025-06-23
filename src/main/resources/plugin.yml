@@ -1,5 +1,5 @@
 name: PicosPacos
-description: The ultimate system to protect items
+description: The ultimate item utility system
 version: ${version}
 main: com.saicone.picospacos.PicosPacos
 authors: [Rubenicos]

@@ -1,0 +1,13 @@
+name: PicosPacos
+description: The ultimate item utility system
+version: ${version}
+main: com.saicone.picospacos.PicosPacos
+api-version: '1.13'
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+    DeluxeCombat:
+      load: BEFORE
+      required: false
