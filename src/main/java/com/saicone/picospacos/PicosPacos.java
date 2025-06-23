@@ -25,7 +25,8 @@ import java.util.function.Supplier;
 
 @Dependencies({
         @Dependency(value = "com.saicone:types:1.3.0", relocate = {"com.saicone.types", "{package}.libs.types"}),
-        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.10", relocate = {"com.saicone.rtag", "{package}.libs.rtag"})
+        @Dependency(value = "com.saicone.rtag:rtag-item:1.5.11", relocate = {"com.saicone.rtag", "{package}.libs.rtag"}),
+        @Dependency(value = "com.github.cryptomorin:XSeries:13.3.1", relocate = {"com.cryptomorin.xseries", "{package}.libs.xseries"})
 })
 public class PicosPacos extends JavaPlugin {
 
