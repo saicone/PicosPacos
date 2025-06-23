@@ -62,7 +62,7 @@ public class PicosPacosCommand extends Command {
                     } else if (args.length > 3) {
                         int amount = Types.INTEGER.parse(args[3], -1);
                         if (amount < 0) {
-                            Lang.COMMAND_SAVES_INVALID_AMOUNT.sendTo(sender, args[3]);
+                            Lang.COMMAND_SAVES_INVALID.sendTo(sender, args[3]);
                             return true;
                         } else {
                             PicosPacosAPI.editPlayerData(args[2], data -> {
@@ -123,14 +123,14 @@ public class PicosPacosCommand extends Command {
         if (testPermissionSilent(sender)) {
             return true;
         } else {
-            Lang.COMMAND_NO_PERM.sendTo(sender);
+            Lang.COMMAND_PERMISSION.sendTo(sender);
             return false;
         }
     }
 
     private boolean hasPerm(CommandSender sender, String perm) {
         if (!sender.hasPermission(permAll) && !sender.hasPermission(perm)) {
-            Lang.COMMAND_NO_PERM.sendTo(sender);
+            Lang.COMMAND_PERMISSION.sendTo(sender);
             return false;
         }
         return true;

@@ -57,6 +57,11 @@ public abstract class ItemHolder implements Function<Object, Object> {
     }
 
     @NotNull
+    public CommandSender getUser() {
+        return user;
+    }
+
+    @NotNull
     public ItemScript getScript() {
         return script;
     }

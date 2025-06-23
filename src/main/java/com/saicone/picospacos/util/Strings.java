@@ -1,22 +1,14 @@
 package com.saicone.picospacos.util;
 
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Strings {
-
-    private static final Map<String, Pattern> regexCache = new HashMap<>();
-
-    public static boolean regexMatch(@NotNull @Language("RegExp") String regex, @NotNull String text) {
-        return regexCache.getOrDefault(regex, newPattern(regex)).matcher(text).matches();
-    }
 
     @NotNull
     public static String before(@NotNull String s, char before) {
@@ -42,74 +34,43 @@ public class Strings {
         return -1;
     }
 
-    @NotNull
-    private static Pattern newPattern(@NotNull @Language("RegExp") String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        regexCache.put(regex, pattern);
-        return pattern;
+    public static int quote(int c) {
+        return (c == '\'' || c == '"' || c == '`') ? c : -1;
     }
 
     @NotNull
-    public static Object[] rangeShort(@NotNull String string) {
-        Object[] a = new Object[2];
-        String[] s = string.split("\\|");
-        try {
-            a[0] = Short.parseShort(s[0]);
-        } catch (NullPointerException | NumberFormatException e) {
-            a[0] = s[0];
+    public static String[] splitQuoted(@NotNull String s, char separator) {
+        if (s.isEmpty()) {
+            return new String[] { s };
         }
-        if (s.length > 1) {
-            try {
-                a[1] = Short.parseShort(s[1]);
-            } catch (NullPointerException | NumberFormatException e) {
-                a[1] = s[0];
+        final List<String> result = new ArrayList<>();
+        int quote = quote(s.charAt(0));
+        int start = quote + 1;
+        boolean escape = false;
+        for (int i = start; i < s.length(); i++) {
+            final char c = s.charAt(i);
+            if (escape) {
+                if (c == quote) {
+                    continue;
+                }
+            } else if (c == quote) {
+                if (i + 1 >= s.length() || s.charAt(i + 1) != separator) {
+                    quote = -1;
+                    start--;
+                    i = start - 1;
+                    continue;
+                }
+            } else if (c == separator) {
+                if (quote != -1) {
+                    result.add(s.substring(start, i - 1));
+                } else {
+                    result.add(s.substring(start, i));
+                }
+            } else if (c == '\\') {
+                escape = true;
             }
-        } else {
-            a[1] = (short) 0;
         }
-        return a;
-    }
-
-    @NotNull
-    public static Object[] rangeInt(@NotNull String string) {
-        Object[] a = new Object[2];
-        String[] s = string.split("\\|");
-        try {
-            a[0] = Integer.parseInt(s[0]);
-        } catch (NullPointerException | NumberFormatException e) {
-            a[0] = s[0];
-        }
-        if (s.length > 1) {
-            try {
-                a[1] = Integer.parseInt(s[1]);
-            } catch (NullPointerException | NumberFormatException e) {
-                a[1] = s[0];
-            }
-        } else {
-            a[1] = 0;
-        }
-        return a;
-    }
-
-    @NotNull
-    public static Object[] rangeDouble(@NotNull String string) {
-        Object[] a = new Object[2];
-        String[] s = string.split("\\|");
-        try {
-            a[0] = Double.parseDouble(s[0]);
-        } catch (NullPointerException | NumberFormatException e) {
-            a[0] = s[0];
-        }
-        if (s.length > 1) {
-            try {
-                a[1] = Double.parseDouble(s[1]);
-            } catch (NullPointerException | NumberFormatException e) {
-                a[1] = s[0];
-            }
-        } else {
-            a[1] = 0D;
-        }
-        return a;
+        return result.toArray(new String[0]);
     }
 
     @NotNull

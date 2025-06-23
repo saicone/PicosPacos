@@ -24,6 +24,8 @@ public class Updater_v1 extends SettingsUpdater {
     private static final Map<String, String> MOVE = new LinkedHashMap<>();
     private static final Map<String, List<String>> COMMENT = new LinkedHashMap<>();
 
+    private static final Map<String, String> LANG_MOVE = new LinkedHashMap<>();
+
     static {
         // Plugin
         MOVE.put("Locale.LogLevel", "plugin.log-level");
@@ -43,6 +45,7 @@ public class Updater_v1 extends SettingsUpdater {
         MOVE.put("Config.Join.Blacklist-Worlds", "restore.join.world-blacklist");
         MOVE.put("Config.Join.Delay", "restore.join.delay");
         MOVE.put("#Config.Join", "restore.join");
+        MOVE.put("Config", "");
         COMMENT.put("restore", List.of("Item restoration configuration"));
         // Database
         MOVE.put("Database.Type", "database.type");
@@ -60,14 +63,25 @@ public class Updater_v1 extends SettingsUpdater {
         MOVE.put("#Hook", "hook");
         // Command
         MOVE.put("Command", "command");
+
+        LANG_MOVE.put("Prefix", "prefix");
+        LANG_MOVE.put("Paco.Drop.Error", "script.drop-message");
+        LANG_MOVE.put("Paco", "");
+        LANG_MOVE.put("Command.NoPerm", "command.permission");
+        LANG_MOVE.put("Command.Help", "command.help");
+        LANG_MOVE.put("Command.Reload", "command.reload");
+        LANG_MOVE.put("Command.Saves.Usage", "command.saves.usage");
+        LANG_MOVE.put("Command.Saves.Invalid-Amount", "command.saves.invalid");
+        LANG_MOVE.put("Command.Saves.Give", "command.saves.give");
+        LANG_MOVE.put("Command.Saves.Take", "command.saves.take");
+        LANG_MOVE.put("Command.Saves.Set", "command.saves.set");
+        LANG_MOVE.put("Command.Saves.Info", "command.saves.info");
+        LANG_MOVE.put("Command", "");
     }
 
     public static void update(@NotNull SettingsFile settings) {
         move(settings, MOVE);
         comment(settings, COMMENT);
-
-        // Config
-        settings.set("Config", null);
 
         // Execute
         final List<String> onDeleteCommands = settings.getStringList("Execute.onDelete");
@@ -92,6 +106,7 @@ public class Updater_v1 extends SettingsUpdater {
         // Hook
         settings.set("hook.PlaceholderAPI.rule", true);
 
+        // --- Migrate rules to scripts
         final File rulesFile = new File(PicosPacos.get().getDataFolder(), "rules.yml");
         if (rulesFile.exists()) {
             File toFile = new File(new File(PicosPacos.get().getDataFolder(), "scripts"), "default.yml");
@@ -100,6 +115,19 @@ public class Updater_v1 extends SettingsUpdater {
             }
             save(rulesToScripts(BukkitSettings.of(rulesFile), onDeleteCommands), toFile);
             rulesFile.delete();
+        }
+
+        // --- Migrate lang
+        final File langFolder = new File(PicosPacos.get().getDataFolder(), "lang");
+        if (langFolder.exists()) {
+            final File[] files = langFolder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    final BukkitSettings lang = BukkitSettings.of(file);
+                    move(lang, LANG_MOVE);
+                    save(lang, file);
+                }
+            }
         }
     }
 
@@ -146,6 +174,7 @@ public class Updater_v1 extends SettingsUpdater {
             case "DROP":
             case "NODROP":
                 when.add("ITEM_DROP");
+                run.add("lang: script.drop-message");
                 run.add("cancel");
                 break;
             case "DELETE":

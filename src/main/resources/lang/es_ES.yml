@@ -1,38 +1,22 @@
-Prefix: '&6Picos&ePacos &8» '
+prefix: '&6Picos&ePacos &8» '
 
-Paco:
-  Drop:
-    # Puedes cambiar el tipo de mensaje, por ejemplo
-    # Para enviar un título pon el tipo como "title" y añade sus parámetros
-    # Warning:
-    #   type: title
-    #   title: '&cEstás seguro de que quieres dropear esto?'
-    #   subtitle: '&fDropealo otra vez para confirmar'
-    #   fadeIn: 10
-    #   stay: 70
-    #   fadeOut: 20
-    # Para enviar un actionbar pon el tipo como "actionbar" y añade sus parámetros
-    # Warning:
-    #   type: actionbar
-    #   text: '&c&lDropea el item otra vez para confirmar'
-    # Los mensajes sin tipo se muestran normalmente en el chat
-    Warning: '&c&lEstás seguro de que quieres dropear esto? &f&lDropealo otra vez para confirmar'
-    Error: '&c&lNo puedes dropear este item!'
+script:
+  drop-message: '&c&lNo puedes dropear este item!'
 
-Command:
-  NoPerm: '{prefix}&cNo tienes permiso para ejecutar este comando!'
-  Help:
+command:
+  permission: '{prefix}&cNo tienes permiso para ejecutar este comando!'
+  help:
     - '&6----------[PicosPacos]------------'
     - '&e/picospacos &7- &fVer información sobre el plugin'
     - '&e/picospacos help &7- &fMostrar esta información'
     - '&e/picospacos reload &7- &fRecargar el plugin'
     - '&e/picospacos saves <give/take/set/info> <jugador> [cantidad] &7- &fEditar los guardados del jugador'
     - '&6---------------------------------'
-  Reload: '{prefix}&aPlugin recargado correctamente &a[&f{0} &ams]'
-  Saves:
-    Usage: '{prefix}&eDebes usar: &f/picospacos saves <give/take/set/info> <jugador> [cantidad]'
-    Invalid-Amount: '{prefix}&c"{0}" no es un número válido!'
-    Give: '{prefix}&aEl jugador &f{0} &arecibió &f{1} &aguardados de inventario'
-    Take: '{prefix}&f{0} &cguardados de inventario han sido removidos del jugador &f{1}'
-    Set: '{prefix}&9El jugador &f{0} &9ahora tiene &f{1} &9guardados de inventario'
-    Info: '{prefix}&9El jugador &f{0} &9tiene &f{1} &9guardados de inventario'
+  reload: '{prefix}&aPlugin recargado correctamente &a[&f{0} &ams]'
+  saves:
+    usage: '{prefix}&eDebes usar: &f/picospacos saves <give/take/set/info> <jugador> [cantidad]'
+    invalid: '{prefix}&c"{0}" no es un número válido!'
+    give: '{prefix}&aEl jugador &f{0} &arecibió &f{1} &aguardados de inventario'
+    take: '{prefix}&f{0} &cguardados de inventario han sido removidos del jugador &f{1}'
+    set: '{prefix}&9El jugador &f{0} &9ahora tiene &f{1} &9guardados de inventario'
+    info: '{prefix}&9El jugador &f{0} &9tiene &f{1} &9guardados de inventario'

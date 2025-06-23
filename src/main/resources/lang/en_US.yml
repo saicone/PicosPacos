@@ -1,38 +1,22 @@
-Prefix: '&6Picos&ePacos &8» '
+prefix: '&6Picos&ePacos &8» '
 
-Paco:
-  Drop:
-    # You can change message types, for example
-    # To send a title use "title" type and add parameters
-    # Warning:
-    #   type: title
-    #   title: '&cAre you sure to drop this item?'
-    #   subtitle: '&fDrop again to confirm'
-    #   fadeIn: 10
-    #   stay: 70
-    #   fadeOut: 20
-    # To send an actionbar use "actionbar" type and add parameters
-    # Warning:
-    #   type: actionbar
-    #   text: '&c&lDrop again the item to confirm'
-    # Messages without type be displayed on chat
-    Warning: '&c&lAre you sure to drop this item? &f&lDrop again to confirm'
-    Error: '&c&lYou can''t drop this item!'
+script:
+  drop-message: '&c&lYou can''t drop this item!'
 
-Command:
-  NoPerm: '{prefix}&cYou don''t have permission to execute this command!'
-  Help:
+command:
+  permission: '{prefix}&cYou don''t have permission to execute this command!'
+  help:
     - '&6----------[PicosPacos]------------'
     - '&e/picospacos &7- &fView info about plugin'
     - '&e/picospacos help &7- &fDisplay this information'
     - '&e/picospacos reload &7- &fReload the plugin'
     - '&e/picospacos saves <give/take/set/info> <player> [amount] &7- &fEdit player saves'
     - '&6---------------------------------'
-  Reload: '{prefix}&aPlugin reloaded successfully &a[&f{0} &ams]'
-  Saves:
-    Usage: '{prefix}&eUsage: &f/picospacos saves <give/take/set/info> <player> [amount]'
-    Invalid-Amount: '{prefix}&c"{0}" is not a valid number!'
-    Give: '{prefix}&aThe player &f{0} &areceived &f{1} &ainventory saves'
-    Take: '{prefix}&f{0} &cinventory saves have been removed from player &f{1}'
-    Set: '{prefix}&9The player &f{0} &9now has &f{1} &9inventory saves'
-    Info: '{prefix}&9The player &f{0} &9have &f{1} &9inventory saves'
+  reload: '{prefix}&aPlugin reloaded successfully &a[&f{0} &ams]'
+  saves:
+    usage: '{prefix}&eUsage: &f/picospacos saves <give/take/set/info> <player> [amount]'
+    invalid: '{prefix}&c"{0}" is not a valid number!'
+    give: '{prefix}&aThe player &f{0} &areceived &f{1} &ainventory saves'
+    take: '{prefix}&f{0} &cinventory saves have been removed from player &f{1}'
+    set: '{prefix}&9The player &f{0} &9now has &f{1} &9inventory saves'
+    info: '{prefix}&9The player &f{0} &9have &f{1} &9inventory saves'

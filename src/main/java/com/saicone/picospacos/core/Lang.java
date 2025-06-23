@@ -17,17 +17,15 @@ import java.util.Map;
 
 public class Lang extends LangLoader {
 
-    public static final Value PACO_DROP_WARNING = new Value("Paco.Drop.Warning");
-    public static final Value PACO_DROP_ERROR = new Value("Paco.Drop.Error");
-    public static final Value COMMAND_NO_PERM = new Value("Command.NoPerm");
-    public static final Value COMMAND_HELP = new Value("Command.Help");
-    public static final Value COMMAND_RELOAD = new Value("Command.Reload");
-    public static final Value COMMAND_SAVES_USAGE = new Value("Command.Saves.Usage");
-    public static final Value COMMAND_SAVES_INVALID_AMOUNT = new Value("Command.Saves.Invalid-Amount");
-    public static final Value COMMAND_SAVES_GIVE = new Value("Command.Saves.Give");
-    public static final Value COMMAND_SAVES_TAKE = new Value("Command.Saves.Take");
-    public static final Value COMMAND_SAVES_SET = new Value("Command.Saves.Set");
-    public static final Value COMMAND_SAVES_INFO = new Value("Command.Saves.Info");
+    public static final Value COMMAND_PERMISSION = new Value("command.permission");
+    public static final Value COMMAND_HELP = new Value("command.help");
+    public static final Value COMMAND_RELOAD = new Value("command.reload");
+    public static final Value COMMAND_SAVES_USAGE = new Value("command.saves.usage");
+    public static final Value COMMAND_SAVES_INVALID = new Value("command.saves.invalid");
+    public static final Value COMMAND_SAVES_GIVE = new Value("command.saves.give");
+    public static final Value COMMAND_SAVES_TAKE = new Value("command.saves.take");
+    public static final Value COMMAND_SAVES_SET = new Value("command.savesS.set");
+    public static final Value COMMAND_SAVES_INFO = new Value("command.saves.info");
 
 
     private int logLevel;

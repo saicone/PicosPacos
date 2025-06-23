@@ -40,6 +40,10 @@ public class SettingsUpdater {
         for (Map.Entry<String, String> entry : paths.entrySet()) {
             String fromPath = entry.getKey();
             final String toPath = entry.getValue();
+            if (toPath.isBlank()) {
+                section.set(fromPath, null);
+                continue;
+            }
 
             if (fromPath.startsWith("#")) {
                 fromPath = fromPath.substring(1);
