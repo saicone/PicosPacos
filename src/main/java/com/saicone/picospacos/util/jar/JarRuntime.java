@@ -169,7 +169,9 @@ public class JarRuntime extends LinkedHashMap<String, Class<?>> {
                         if (found == null) {
                             throw new NoSuchElementException();
                         }
-                        return found;
+                        final T result = found;
+                        found = null;
+                        return result;
                     }
                 };
             }

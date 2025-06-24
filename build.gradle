@@ -95,7 +95,7 @@ jar {
 
 shadowJar {
     archiveClassifier.set('')
-    relocate 'com.sacone.ezlib', project.group + '.ezlib'
+    relocate 'com.saicone.ezlib', project.group + '.ezlib'
     relocate 'com.saicone.types', project.group + '.libs.types'
     relocate 'com.saicone.rtag', project.group + '.libs.rtag'
     relocate 'com.cryptomorin.xseries', project.group + '.libs.xseries'

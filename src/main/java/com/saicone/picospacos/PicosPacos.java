@@ -102,7 +102,9 @@ public class PicosPacos extends JavaPlugin {
         lang.load();
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "player-provider").asString("AUTO"));
         this.database.onLoad();
+        getLogger().info("Loading actions");
         this.actionRegistry.load();
+        getLogger().info("Loading scripts");
         this.scriptRegistry.load();
     }
 

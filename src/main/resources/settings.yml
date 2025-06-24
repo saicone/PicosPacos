@@ -67,7 +67,7 @@ database:
   #
   # SQL  = Save data on a sql database
   # FILE = Save data locally on files
-  type: 'SQLITE'
+  type: 'SQL'
   # SQL database configuration
   sql:
     host: localhost

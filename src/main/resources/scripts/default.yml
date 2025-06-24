@@ -1,5 +1,7 @@
 # The event ID
 example-event:
+  # Enable or not this script (true by default)
+  enabled: false
   # Event types:
   # PLAYER_JOIN    = Player join server
   # PLAYER_LEAVE   = Player leave server
@@ -42,6 +44,7 @@ example-event:
     - 'command: msg %player_name% Hey! You almost lost the thunder sword!'
 
 protected-lore:
+  enabled: false
   when: ITEM_DROP
   item:
     lore(any): 'contains=PROTECTED ITEM'
@@ -49,6 +52,7 @@ protected-lore:
     - 'cancel'
 
 illegal-item:
+  enabled: false
   when:
     - PLAYER_JOIN
     - ITEM_DROP
