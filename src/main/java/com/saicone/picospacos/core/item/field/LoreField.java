@@ -1,6 +1,8 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.MStrings;
+import com.saicone.picospacos.util.Strings;
 import com.saicone.picospacos.util.function.AnyPredicate;
 import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +16,7 @@ public class LoreField implements ItemField.Iterable<String, List<String>> {
 
     @Override
     public @NotNull AnyPredicate<?> elementPredicate(@NotNull Object object) {
-        return StringPredicate.valueOf(object);
+        return StringPredicate.valueOf(Strings.map(object, MStrings::color));
     }
 
     @Override

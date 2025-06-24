@@ -1,14 +1,39 @@
 package com.saicone.picospacos.util;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Strings {
+
+    @Nullable
+    @Contract("!null, _ -> !null")
+    public static Object map(@Nullable Object object, @NotNull UnaryOperator<String> mapper) {
+        if (object instanceof Map) {
+            final Map<Object, Object> map = new HashMap<>();
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
+                map.put(map(entry.getKey(), mapper), map(entry.getValue(), mapper));
+            }
+            return map;
+        } else if (object instanceof Iterable) {
+            final List<Object> list = new ArrayList<>();
+            for (Object element : (Iterable<?>) object) {
+                list.add(map(element, mapper));
+            }
+            return list;
+        } else if (object instanceof String) {
+            return mapper.apply((String) object);
+        }
+        return object;
+    }
 
     @NotNull
     public static String before(@NotNull String s, char before) {

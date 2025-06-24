@@ -40,6 +40,9 @@ allprojects {
 
     shadowJar {
         archiveClassifier.set('')
+        manifest {
+            attributes 'Paperweight-Mappings-Namespace': 'mojang'
+        }
     }
 }
 

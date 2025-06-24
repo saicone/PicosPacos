@@ -1,6 +1,8 @@
 package com.saicone.picospacos.core.item.field;
 
 import com.saicone.picospacos.core.item.ItemField;
+import com.saicone.picospacos.util.MStrings;
+import com.saicone.picospacos.util.Strings;
 import com.saicone.picospacos.util.function.AnyPredicate;
 import com.saicone.picospacos.util.function.StringPredicate;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +14,7 @@ public class DisplayNameField implements ItemField<String> {
 
     @Override
     public @NotNull AnyPredicate<?> predicate(@NotNull Object object, @NotNull String... args) {
-        return StringPredicate.valueOf(object);
+        return StringPredicate.valueOf(Strings.map(object, MStrings::color));
     }
 
     @Override
