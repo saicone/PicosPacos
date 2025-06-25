@@ -136,8 +136,10 @@ public class PicosPacos extends JavaPlugin {
         PlayerProvider.compute(settings.getIgnoreCase("plugin", "player-provider").asString("AUTO"));
         this.database.onReload();
         this.scriptRegistry.reload();
-        unregisterPlaceholders();
-        registerPlaceholders();
+        Bukkit.getScheduler().runTask(this, () -> {
+            unregisterPlaceholders();
+            registerPlaceholders();
+        });
         CommandLoader.reload();
     }
 
