@@ -109,9 +109,11 @@ public class Updater_v1 extends SettingsUpdater {
         // --- Migrate rules to scripts
         final File rulesFile = new File(PicosPacos.get().getDataFolder(), "rules.yml");
         if (rulesFile.exists()) {
-            File toFile = new File(new File(PicosPacos.get().getDataFolder(), "scripts"), "default.yml");
+            final File folder = new File(PicosPacos.get().getDataFolder(), "scripts");
+            folder.mkdirs();
+            File toFile = new File(folder, "default.yml");
             if (toFile.exists()) {
-                toFile = new File(new File(PicosPacos.get().getDataFolder(), "scripts"), "rules-migrated.yml");
+                toFile = new File(folder, "rules-migrated.yml");
             }
             save(rulesToScripts(BukkitSettings.of(rulesFile), onDeleteCommands), toFile);
             rulesFile.delete();

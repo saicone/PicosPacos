@@ -90,6 +90,10 @@ public class ScriptRegistry implements Listener {
 
     public void load() {
         // Load scripts
+        if (!SCRIPTS_FOLDER.get().exists()) {
+            SCRIPTS_FOLDER.get().mkdirs();
+            PicosPacos.get().saveResource("scripts/default.yml", false);
+        }
         loadScripts(SCRIPTS_FOLDER.get());
         // Load listeners
         for (ScriptEvent event : ScriptEvent.VALUES) {
@@ -109,12 +113,18 @@ public class ScriptRegistry implements Listener {
     }
 
     private void registerListeners(@NotNull ScriptEvent event, @NotNull EventPriority priority, @NotNull List<ItemScript> scripts) {
+        if (!scripts.isEmpty()) {
+            PicosPacos.log(3, event.name() + ":");
+        }
         for (ScriptExecutor<?> scriptExecutor : eventExecutors.get(event)) {
             registerListeners(priority, scripts, scriptExecutor);
         }
     }
 
     private void registerListeners(@NotNull ScriptEvent event, @NotNull ScriptExecutor<?> scriptExecutor) {
+        if (!scripts.isEmpty()) {
+            PicosPacos.log(3, event.name() + ":");
+        }
         for (EventPriority priority : EventPriority.values()) {
             registerListeners(priority, scripts.values().stream().filter(itemScript -> itemScript.when().contains(event) && itemScript.priority().equals(priority)).collect(Collectors.toList()), scriptExecutor);
         }
@@ -126,6 +136,7 @@ public class ScriptRegistry implements Listener {
         }
         final ListenerExecutor<?> listenerExecutor = new ListenerExecutor<>(scriptExecutor, scripts);
         final RegisteredListener listener = new RegisteredListener(this, listenerExecutor, priority, PicosPacos.get(), true);
+        PicosPacos.log(3, "  - Priority " + priority.name() + " with " + scripts.size() + " scripts");
         scriptExecutor.handlerList().register(listener);
     }
 
@@ -146,7 +157,7 @@ public class ScriptRegistry implements Listener {
         final BukkitSettings settings = BukkitSettings.of(file);
         for (String key : settings.getKeys(false)) {
             String path = path(file);
-            path = path.substring(0, path.length() + suffix.length() + 1);
+            path = path.substring(0, path.length() - suffix.length() - 1);
             final String id = path + ":" + key;
             final BukkitSettings config = settings.getConfigurationSection(key);
             if (config != null) {
@@ -167,7 +178,7 @@ public class ScriptRegistry implements Listener {
             ScriptEvent.of(s).ifPresent(when::add);
         }
 
-        final EventPriority priority = Enums.getIfPresent(EventPriority.class, config.getIgnoreCase("priority").asString("NORMAL").toUpperCase()).or((EventPriority) null);
+        final EventPriority priority = Enums.getIfPresent(EventPriority.class, config.getIgnoreCase("priority").asString("NORMAL").toUpperCase()).orNull();
         if (priority == null) {
             PicosPacos.log(2, "Cannot load script " + id + ", the event priority '' doesn't exist, available values: " + join(", ", EventPriority.values()));
             return Optional.empty();
@@ -200,7 +211,7 @@ public class ScriptRegistry implements Listener {
         final String name = file.getName();
         final int index = name.lastIndexOf('.');
         if (index >= 0) {
-            return name.substring(index);
+            return name.substring(index + 1);
         }
         return "";
     }
