@@ -255,16 +255,42 @@ public class BukkitSettings extends YamlConfiguration {
     @NotNull
     protected <T> Map.Entry<String[], Object> getEntryIf(@NotNull Function<String, T> keyConversion, @NotNull BiPredicate<String, T> condition, @NotNull String... path) {
         final List<String> list = new ArrayList<>();
-        Object object = getMemorySection();
+        Map.Entry<String, Object> entry = new AbstractMap.SimpleEntry<>(null, getMemorySection());
         for (String key : path) {
-            list.add(key);
-            if (object instanceof MemorySection) {
-                object = getIfType((MemorySection) object, condition, keyConversion.apply(key));
-                continue;
+            if (entry != null) {
+                if (entry.getKey() != null) {
+                    list.add(entry.getKey());
+                }
+                if (entry.getValue() instanceof MemorySection) {
+                    entry = getEntryIfType((MemorySection) entry.getValue(), condition, keyConversion.apply(key));
+                    continue;
+                }
             }
             return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), null);
         }
-        return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), object);
+        if (entry == null) {
+            return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), null);
+        }
+        if (entry.getKey() != null) {
+            list.add(entry.getKey());
+        }
+        return new AbstractMap.SimpleEntry<>(list.toArray(new String[0]), entry.getValue());
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static <T> Map.Entry<String, Object> getEntryIfType(@NotNull MemorySection section, @NotNull BiPredicate<String, T> condition, @NotNull T type) {
+        try {
+            for (var entry : ((Map<String, ?>) MAP.invoke(section)).entrySet()) {
+                final String key = entry.getKey();
+                if (condition.test(key, type)) {
+                    return new AbstractMap.SimpleEntry<>(key, section.get(key));
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return null;
     }
 
     @NotNull

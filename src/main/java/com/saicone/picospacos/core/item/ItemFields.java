@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public class ItemFields {
 
     private static final String NBT_PATH = "nbt";
 
-    private static final Map<String[], ItemField<?>> REGISTRY = new TreeMap<>((path1, path2) -> Integer.compare(path2.length, path1.length));
+    private static final Map<String[], ItemField<?>> REGISTRY = new TreeMap<>(Comparator.comparingInt((String[] arr) -> arr.length).thenComparing(Arrays::compare));
 
     public static final ItemField<Integer> AMOUNT = register("amount", new AmountField());
     public static final ItemField<Integer> CUSTOM_MODEL_DATA = register("custom_model_data", new CustomModelDataField.Plain());
