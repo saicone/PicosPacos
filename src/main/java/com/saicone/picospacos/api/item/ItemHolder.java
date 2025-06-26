@@ -15,15 +15,16 @@ import java.util.function.Function;
 public abstract class ItemHolder implements Function<Object, Object> {
 
     private ItemScript script;
+    private Object event;
     private CommandSender user;
     private ItemStack item;
 
-    private transient boolean cancelled;
     private transient boolean edited;
     private transient ItemStack editedItem;
 
-    public ItemHolder(@Nullable ItemScript script, @NotNull CommandSender user, @NotNull ItemStack item) {
+    public ItemHolder(@Nullable ItemScript script, @Nullable Object event, @NotNull CommandSender user, @NotNull ItemStack item) {
         this.script = script;
+        this.event = event;
         this.user = user;
         this.item = item;
     }
@@ -38,18 +39,15 @@ public abstract class ItemHolder implements Function<Object, Object> {
     }
 
     @ApiStatus.Internal
-    @Contract("_ -> this")
-    public ItemHolder next(@NotNull ItemScript event) {
-        this.script = event;
+    @Contract("_, _ -> this")
+    public ItemHolder next(@NotNull ItemScript script, @NotNull Object event) {
+        this.script = script;
+        this.event = event;
         return this;
     }
 
     public boolean isPlayer() {
         return user instanceof Player;
-    }
-
-    public boolean isCancelled() {
-        return cancelled;
     }
 
     public boolean isEdited() {
@@ -64,6 +62,11 @@ public abstract class ItemHolder implements Function<Object, Object> {
     @NotNull
     public ItemScript getScript() {
         return script;
+    }
+
+    @NotNull
+    public Object getEvent() {
+        return event;
     }
 
     @NotNull
@@ -96,10 +99,6 @@ public abstract class ItemHolder implements Function<Object, Object> {
         this.editedItem = item;
     }
 
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
     @NotNull
     public abstract String parse(@NotNull String s);
 
@@ -113,8 +112,10 @@ public abstract class ItemHolder implements Function<Object, Object> {
 
     public void clear() {
         this.script = null;
+        this.event = null;
         this.user = null;
         this.item = null;
+        this.edited = false;
         this.editedItem = null;
     }
 }

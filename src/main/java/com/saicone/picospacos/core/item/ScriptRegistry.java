@@ -272,14 +272,11 @@ public class ScriptRegistry implements Listener {
         }
 
         private void execute(@NotNull ItemHolder holder, @NotNull ItemScript script, @NotNull E event) {
-            holder.next(script);
+            holder.next(script, event);
             executor.iterate(event, item -> {
                 holder.next(item);
                 if (script.predicate().test(holder)) {
                     script.execution().apply(holder);
-                    if (holder.isCancelled() && event instanceof Cancellable) {
-                        ((Cancellable) event).setCancelled(true);
-                    }
                 }
                 return holder.getEditedItem();
             });

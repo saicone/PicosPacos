@@ -14,7 +14,7 @@ import java.util.function.UnaryOperator;
 public class DeluxeCombatHook implements ScriptExecutor<CombatlogEvent> {
 
     public void load() {
-        PicosPacos.get().scriptRegistry().register(ScriptEvent.ITEM_DROP, this);
+        PicosPacos.get().scriptRegistry().register(ScriptEvent.PLAYER_DIES, this);
     }
 
     @Override

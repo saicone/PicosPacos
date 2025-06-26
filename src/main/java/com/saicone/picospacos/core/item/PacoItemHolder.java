@@ -16,22 +16,22 @@ import org.jetbrains.annotations.Nullable;
 public class PacoItemHolder extends ItemHolder {
 
     @NotNull
-    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull Entity entity, @NotNull ItemStack item) {
+    public static ItemHolder valueOf(@NotNull Entity entity) {
         if (entity instanceof Player) {
-            return valueOf(script, (Player) entity, item);
+            return valueOf((Player) entity);
         } else {
-            return valueOf(script, item, entity.getLocation());
+            return valueOf(entity.getLocation());
         }
     }
 
     @NotNull
-    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull Player player, @NotNull ItemStack item) {
-        return new PacoItemHolder(script, player, item);
+    public static ItemHolder valueOf(@NotNull Player player) {
+        return new PacoItemHolder(null, null, player, Items.empty());
     }
 
     @NotNull
-    public static ItemHolder valueOf(@Nullable ItemScript script, @NotNull ItemStack item, @NotNull Location location) {
-        return new PacoItemHolder(script, Bukkit.getConsoleSender(), item) {
+    public static ItemHolder valueOf(@NotNull Location location) {
+        return new PacoItemHolder(null, null, Bukkit.getConsoleSender(), Items.empty()) {
             @Override
             public @NotNull Location getLocation() {
                 return location;
@@ -39,8 +39,8 @@ public class PacoItemHolder extends ItemHolder {
         };
     }
 
-    public PacoItemHolder(@Nullable ItemScript script, @NotNull CommandSender user, @NotNull ItemStack item) {
-        super(script, user, item);
+    public PacoItemHolder(@Nullable ItemScript script, @Nullable Object event, @NotNull CommandSender user, @NotNull ItemStack item) {
+        super(script, event, user, item);
     }
 
     @NotNull

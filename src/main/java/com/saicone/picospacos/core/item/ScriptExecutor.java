@@ -1,7 +1,6 @@
 package com.saicone.picospacos.core.item;
 
 import com.saicone.picospacos.api.item.ItemHolder;
-import com.saicone.picospacos.util.Items;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,17 +28,17 @@ public interface ScriptExecutor<E extends Event> {
 
     @NotNull
     default ItemHolder holder(@NotNull org.bukkit.entity.Entity entity) {
-        return PacoItemHolder.valueOf(null, entity, Items.empty());
+        return PacoItemHolder.valueOf(entity);
     }
 
     @NotNull
     default ItemHolder holder(@NotNull org.bukkit.entity.Player player) {
-        return PacoItemHolder.valueOf(null, player, Items.empty());
+        return PacoItemHolder.valueOf(player);
     }
 
     @NotNull
     default ItemHolder holder(@NotNull Location location) {
-        return PacoItemHolder.valueOf(null, Items.empty(), location);
+        return PacoItemHolder.valueOf(location);
     }
 
     void iterate(@NotNull E event, @NotNull UnaryOperator<ItemStack> operator);
@@ -48,12 +47,14 @@ public interface ScriptExecutor<E extends Event> {
         final org.bukkit.inventory.Inventory inventory = player.getInventory();
         int slot = 0;
         for (ItemStack item : inventory.getContents()) {
-            final ItemStack edited = operator.apply(item);
-            if (edited != null) {
-                if (edited.getType() == Material.AIR) {
-                    inventory.setItem(slot, null);
-                } else {
-                    inventory.setItem(slot, edited);
+            if (item != null) {
+                final ItemStack edited = operator.apply(item);
+                if (edited != null) {
+                    if (edited.getType() == Material.AIR) {
+                        inventory.setItem(slot, null);
+                    } else {
+                        inventory.setItem(slot, edited);
+                    }
                 }
             }
             slot++;

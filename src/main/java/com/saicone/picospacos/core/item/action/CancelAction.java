@@ -2,6 +2,7 @@ package com.saicone.picospacos.core.item.action;
 
 import com.saicone.picospacos.api.item.ItemAction;
 import com.saicone.picospacos.api.item.ItemHolder;
+import org.bukkit.event.Cancellable;
 import org.jetbrains.annotations.NotNull;
 
 public class CancelAction implements ItemAction {
@@ -10,6 +11,8 @@ public class CancelAction implements ItemAction {
 
     @Override
     public void execute(@NotNull ItemHolder holder) {
-        holder.setCancelled(true);
+        if (holder.getEvent() instanceof Cancellable) {
+            ((Cancellable) holder.getEvent()).setCancelled(true);
+        }
     }
 }
