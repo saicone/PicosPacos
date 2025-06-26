@@ -1,5 +1,6 @@
 package com.saicone.picospacos.core.item.action;
 
+import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.item.ItemAction;
 import com.saicone.picospacos.api.item.ItemHolder;
 import com.saicone.types.Types;
@@ -32,10 +33,18 @@ public class CommandAction implements ItemAction {
         if (console) {
             sender = Bukkit.getConsoleSender();
         } else {
-            sender = holder.getPlayer();
+            sender = holder.getUser();
         }
-        for (String command : commands) {
-            Bukkit.dispatchCommand(sender, holder.parse(command));
+        if (Bukkit.isPrimaryThread()) {
+            for (String command : commands) {
+                Bukkit.dispatchCommand(sender, holder.parse(command));
+            }
+        } else {
+            Bukkit.getScheduler().runTask(PicosPacos.get(), () -> {
+                for (String command : commands) {
+                    Bukkit.dispatchCommand(sender, holder.parse(command));
+                }
+            });
         }
     }
 }
