@@ -141,6 +141,7 @@ public class Updater_v1 extends SettingsUpdater {
             if (value instanceof ConfigurationSection) {
                 final ConfigurationSection section = (ConfigurationSection) value;
                 final Set<String> types = new HashSet<>();
+                int count = 0;
                 for (String type : section.getString("type", "").toUpperCase().split(",")) {
                     type = type.trim();
                     if (types.contains(type)) {
@@ -150,7 +151,8 @@ public class Updater_v1 extends SettingsUpdater {
                         continue;
                     }
                     types.add(type);
-                    rules.set(key, ruleToScript(type, section, onDeleteCommands));
+                    rules.set(count > 0 ? key + "-" + count : key, ruleToScript(type, section, onDeleteCommands));
+                    count++;
                 }
             }
         }

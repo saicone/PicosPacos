@@ -37,11 +37,11 @@ public class BukkitListener implements Listener {
             if (data.getItems().isEmpty()) {
                 return;
             }
-            final List<String> blacklist = PicosPacos.settings().getIgnoreCase("config", type, "world-blacklist").asList(Types.STRING);
+            final List<String> blacklist = PicosPacos.settings().getIgnoreCase("restore", type, "world-blacklist").asList(Types.STRING);
             if (blacklist.contains(player.getWorld().getName())) {
                 return;
             }
-            final int delay = PicosPacos.settings().getIgnoreCase("config", type, "delay").asInt(10);
+            final int delay = PicosPacos.settings().getIgnoreCase("restore", type, "delay").asInt(10);
             if (delay > 0) {
                 Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> restoreItems(player, data), delay * 20L);
             } else {
