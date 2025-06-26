@@ -17,7 +17,16 @@ public class DelayAction implements ItemAction {
                         .replace("  ", " ")
                         .split(" ", 2);
                 final long time = Long.parseLong(value[0]);
-                final TimeUnit unit = value.length > 1 ? TimeUnit.valueOf(value[1].toUpperCase()) : TimeUnit.SECONDS;
+                final TimeUnit unit;
+                if (value.length > 1) {
+                    String name = value[1].toUpperCase();
+                    if (!name.endsWith("S")) {
+                        name = name + "S";
+                    }
+                    unit = TimeUnit.valueOf(name);
+                } else {
+                    unit = TimeUnit.SECONDS;
+                }
                 return new DelayAction(ActionResult.delay(time, unit));
             });
 

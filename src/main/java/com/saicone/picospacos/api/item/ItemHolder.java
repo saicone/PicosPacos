@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public abstract class ItemHolder implements Function<Object, Object> {
+public abstract class ItemHolder implements Function<Object, Object>, Cloneable {
 
     private ItemScript script;
     private Object event;
@@ -21,6 +21,9 @@ public abstract class ItemHolder implements Function<Object, Object> {
 
     private transient boolean edited;
     private transient ItemStack editedItem;
+
+    protected ItemHolder() {
+    }
 
     public ItemHolder(@Nullable ItemScript script, @Nullable Object event, @NotNull CommandSender user, @NotNull ItemStack item) {
         this.script = script;
@@ -108,6 +111,15 @@ public abstract class ItemHolder implements Function<Object, Object> {
             return parse((String) o);
         }
         return o;
+    }
+
+    @Override
+    public ItemHolder clone() {
+        try {
+            return (ItemHolder) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public void clear() {

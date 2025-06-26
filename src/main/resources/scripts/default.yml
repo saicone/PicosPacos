@@ -1,5 +1,5 @@
-# The event ID
-example-event:
+# The script ID
+example-script:
   # Enable or not this script (true by default)
   enabled: false
   # Event types:
@@ -38,7 +38,8 @@ example-event:
   # TAKE    = Confiscate item from player
   # DELETE  = Delete item from existence
   # CANCEL  = Cancel the event from being executed
-  # COMMAND = Execute a console command
+  # COMMAND = Execute a console command (for example "command: broadcast HELLO EVERYONE!")
+  # DELAY   = Delay the execution (for example "delay: 5 seconds")
   run:
     - 'restore'
     - 'command: msg %player_name% Hey! You almost lost the thunder sword!'
@@ -62,3 +63,5 @@ illegal-item:
     name: '&c&lSUPER BEDROCK'
   run:
     - 'delete'
+    - 'delay: 1 second' # The items should be deleted first, and then run the command
+    - 'command: ban %player_name% Illegal item detected'

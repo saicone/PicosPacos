@@ -39,6 +39,9 @@ public class PacoItemHolder extends ItemHolder {
         };
     }
 
+    protected PacoItemHolder() {
+    }
+
     public PacoItemHolder(@Nullable ItemScript script, @Nullable Object event, @NotNull CommandSender user, @NotNull ItemStack item) {
         super(script, event, user, item);
     }

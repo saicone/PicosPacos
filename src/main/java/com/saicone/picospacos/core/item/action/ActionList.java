@@ -35,11 +35,12 @@ public class ActionList implements ItemAction {
             if (result.isBreak()) {
                 break;
             } else if (result instanceof ActionResult.Delay) {
+                final ItemHolder clone = holder.clone();
                 final int next = i + 1;
                 if (Bukkit.isPrimaryThread()) {
-                    Bukkit.getScheduler().runTaskLater(PicosPacos.get(), () -> result(holder, actions, next), ((ActionResult.Delay) result).ticks());
+                    Bukkit.getScheduler().runTaskLater(PicosPacos.get(), () -> result(clone, actions, next), ((ActionResult.Delay) result).ticks());
                 } else {
-                    Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> result(holder, actions, next), ((ActionResult.Delay) result).ticks());
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(PicosPacos.get(), () -> result(clone, actions, next), ((ActionResult.Delay) result).ticks());
                 }
                 break;
             }
