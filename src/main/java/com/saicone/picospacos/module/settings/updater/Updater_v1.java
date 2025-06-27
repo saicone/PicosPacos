@@ -57,6 +57,7 @@ public class Updater_v1 extends SettingsUpdater {
         ));
         MOVE.put("Database.Method", "database.method");
         MOVE.put("Database.Sql", "database.sql");
+        MOVE.put("#Database", "database");
         // Hook
         MOVE.put("Hook.PlaceholderAPI", "hook.PlaceholderAPI");
         MOVE.put("Hook.DeluxeCombat", "hook.DeluxeCombat");
@@ -88,17 +89,17 @@ public class Updater_v1 extends SettingsUpdater {
         settings.set("Execute", null);
 
         // Database
-        if ("UUID".equals(settings.getString("Database.Method"))) {
-            settings.set("Database.Method", null);
+        if ("UUID".equals(settings.getString("database.method"))) {
+            settings.set("database.method", null);
         }
-        final String databaseType = settings.getString("Database.Type", "JSON");
+        final String databaseType = settings.getString("database.type", "JSON");
         switch (databaseType) {
             case "JSON":
-                settings.set("Database.Type", "FILE");
+                settings.set("database.type", "FILE");
                 break;
             case "SQLITE":
             case "MYSQL":
-                settings.set("Database.Type", "SQL");
+                settings.set("database.type", "SQL");
                 settings.set("database.sql.type", databaseType);
                 break;
         }
@@ -140,8 +141,64 @@ public class Updater_v1 extends SettingsUpdater {
             final Object value = rules.get(key);
             if (value instanceof ConfigurationSection) {
                 final ConfigurationSection section = (ConfigurationSection) value;
+                final BukkitSettings script = new BukkitSettings();
+
+                for (String itemKey : section.getKeys(false)) {
+                    final String[] split = itemKey.replace("<allowPapi>", "").split(":");
+                    final String comparator = split.length > 1 ? split[1].toLowerCase() : "equal";
+                    switch (split[0].toLowerCase()) {
+                        case "material":
+                        case "mat":
+                            script.set("item.material", stringPredicate(comparator, section.getString(itemKey)));
+                            break;
+                        case "durability":
+                            script.set("item.durability", numberPredicate(comparator, section.getString(itemKey)));
+                            break;
+                        case "amount":
+                        case "size":
+                            script.set("item.amount", numberPredicate(comparator, section.getString(itemKey)));
+                            break;
+                        case "name":
+                        case "displayname":
+                            script.set("item.name", stringPredicate(comparator, section.getString(itemKey)));
+                            break;
+                        case "lore":
+                        case "description":
+                            script.set("item.lore" + iterableComparator(split[split.length - 1]), listPredicate(comparator, section.getStringList(itemKey)));
+                            break;
+                        case "custommodeldata":
+                        case "modeldata":
+                            script.set("item.custom-model-data", numberPredicate(comparator, section.getString(itemKey)));
+                            break;
+                        case "enchantments":
+                        case "enchants":
+                            final ConfigurationSection enchants = new BukkitSettings();
+                            final boolean all = split[split.length - 1].equalsIgnoreCase("all");
+                            final String levelComparator = split.length > 2 ? (all ? (split.length > 3 ? split[3] : "equal") : split[2]) : "equal";
+                            for (String str : section.getStringList(itemKey)) {
+                                String[] s = str.split("=", 2);
+                                final String enchant;
+                                final String level;
+                                if (s.length > 1) {
+                                    enchant = s[0];
+                                    level = s[1];
+                                } else {
+                                    enchant = str;
+                                    level = "1";
+                                }
+                                enchants.set(stringPredicate(comparator, enchant), numberPredicate(levelComparator, level));
+                            }
+                            script.set("item.enchants" + iterableComparator(split[split.length - 1]), enchants);
+                            break;
+                        case "flags":
+                            script.set("item.flags" + iterableComparator(split[split.length - 1]), listPredicate(comparator, section.getStringList(itemKey)));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
                 final Set<String> types = new HashSet<>();
-                int count = 0;
                 for (String type : section.getString("type", "").toUpperCase().split(",")) {
                     type = type.trim();
                     if (types.contains(type)) {
@@ -151,18 +208,16 @@ public class Updater_v1 extends SettingsUpdater {
                         continue;
                     }
                     types.add(type);
-                    rules.set(count > 0 ? key + "-" + count : key, ruleToScript(type, section, onDeleteCommands));
-                    count++;
+                    ruleToScript(script, type, section, onDeleteCommands);
                 }
+
+                scripts.set(key, scripts);
             }
         }
         return scripts;
     }
 
-    @NotNull
-    private static ConfigurationSection ruleToScript(@NotNull String type, @NotNull ConfigurationSection section, @NotNull List<String> onDeleteCommands) {
-        final BukkitSettings script = new BukkitSettings();
-
+    private static void ruleToScript(@NotNull BukkitSettings script, @NotNull String type, @NotNull ConfigurationSection section, @NotNull List<String> onDeleteCommands) {
         final List<String> when = new ArrayList<>();
         final List<String> run = new ArrayList<>();
 
@@ -195,72 +250,14 @@ public class Updater_v1 extends SettingsUpdater {
                 break;
             case "DISABLED":
                 script.set("enabled", false);
-                break;
+                return;
             default:
-                break;
+                return;
         }
-        
-        script.set("when", when);
+
         if (!run.isEmpty()) {
-            script.set("run", run);
+            script.set("when." + String.join(",", when), run);
         }
-
-        for (String key : section.getKeys(false)) {
-            final String[] split = key.replace("<allowPapi>", "").split(":");
-            final String comparator = split.length > 1 ? split[1].toLowerCase() : "equal";
-            switch (split[0].toLowerCase()) {
-                case "material":
-                case "mat":
-                    script.set("item.material", stringPredicate(comparator, section.getString(key)));
-                    break;
-                case "durability":
-                    script.set("item.durability", numberPredicate(comparator, section.getString(key)));
-                    break;
-                case "amount":
-                case "size":
-                    script.set("item.amount", numberPredicate(comparator, section.getString(key)));
-                    break;
-                case "name":
-                case "displayname":
-                    script.set("item.name", stringPredicate(comparator, section.getString(key)));
-                    break;
-                case "lore":
-                case "description":
-                    script.set("item.lore" + iterableComparator(split[split.length - 1]), listPredicate(comparator, section.getStringList(key)));
-                    break;
-                case "custommodeldata":
-                case "modeldata":
-                    script.set("item.custom-model-data", numberPredicate(comparator, section.getString(key)));
-                    break;
-                case "enchantments":
-                case "enchants":
-                    final ConfigurationSection enchants = new BukkitSettings();
-                    final boolean all = split[split.length - 1].equalsIgnoreCase("all");
-                    final String levelComparator = split.length > 2 ? (all ? (split.length > 3 ? split[3] : "equal") : split[2]) : "equal";
-                    for (String str : section.getStringList(key)) {
-                        String[] s = str.split("=", 2);
-                        final String enchant;
-                        final String level;
-                        if (s.length > 1) {
-                            enchant = s[0];
-                            level = s[1];
-                        } else {
-                            enchant = str;
-                            level = "1";
-                        }
-                        enchants.set(stringPredicate(comparator, enchant), numberPredicate(levelComparator, level));
-                    }
-                    script.set("item.enchants" + iterableComparator(split[split.length - 1]), enchants);
-                    break;
-                case "flags":
-                    script.set("item.flags" + iterableComparator(split[split.length - 1]), listPredicate(comparator, section.getStringList(key)));
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return script;
     }
 
     @Nullable

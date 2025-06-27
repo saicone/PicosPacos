@@ -14,9 +14,8 @@ import com.saicone.picospacos.core.item.executor.ItemPickupExecutor;
 import com.saicone.picospacos.core.item.executor.PlayerDeathExecutor;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import com.saicone.picospacos.util.SimpleMultimap;
-import com.saicone.types.Types;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventPriority;
@@ -35,11 +34,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -98,7 +95,7 @@ public class ScriptRegistry implements Listener {
         // Load listeners
         for (ScriptEvent event : ScriptEvent.VALUES) {
             for (EventPriority priority : EventPriority.values()) {
-                registerListeners(event, priority, scripts.values().stream().filter(itemScript -> itemScript.when().contains(event) && itemScript.priority().equals(priority)).collect(Collectors.toList()));
+                registerListeners(event, priority, scripts.values().stream().filter(itemScript -> itemScript.actions().containsKey(event) && itemScript.priority(event).equals(priority)).collect(Collectors.toList()));
             }
         }
     }
@@ -117,7 +114,7 @@ public class ScriptRegistry implements Listener {
             PicosPacos.log(3, event.name() + ":");
         }
         for (ScriptExecutor<?> scriptExecutor : eventExecutors.get(event)) {
-            registerListeners(priority, scripts, scriptExecutor);
+            registerListeners(event, priority, scripts, scriptExecutor);
         }
     }
 
@@ -126,15 +123,15 @@ public class ScriptRegistry implements Listener {
             PicosPacos.log(3, event.name() + ":");
         }
         for (EventPriority priority : EventPriority.values()) {
-            registerListeners(priority, scripts.values().stream().filter(itemScript -> itemScript.when().contains(event) && itemScript.priority().equals(priority)).collect(Collectors.toList()), scriptExecutor);
+            registerListeners(event, priority, scripts.values().stream().filter(itemScript -> itemScript.actions().containsKey(event) && itemScript.priority(event).equals(priority)).collect(Collectors.toList()), scriptExecutor);
         }
     }
 
-    private void registerListeners(@NotNull EventPriority priority, @NotNull List<ItemScript> scripts, @NotNull ScriptExecutor<?> scriptExecutor) {
+    private void registerListeners(@NotNull ScriptEvent event, @NotNull EventPriority priority, @NotNull List<ItemScript> scripts, @NotNull ScriptExecutor<?> scriptExecutor) {
         if (scripts.isEmpty()) {
             return;
         }
-        final ListenerExecutor<?> listenerExecutor = new ListenerExecutor<>(scriptExecutor, scripts);
+        final ListenerExecutor<?> listenerExecutor = new ListenerExecutor<>(event, scriptExecutor, scripts);
         final RegisteredListener listener = new RegisteredListener(this, listenerExecutor, priority, PicosPacos.get(), true);
         PicosPacos.log(3, "  - Priority " + priority.name() + " with " + scripts.size() + " scripts");
         scriptExecutor.handlerList().register(listener);
@@ -173,16 +170,6 @@ public class ScriptRegistry implements Listener {
         if (!config.getIgnoreCase("enabled").asBoolean(true)) {
             return Optional.empty();
         }
-        final Set<ScriptEvent> when = new HashSet<>();
-        for (String s : config.getIgnoreCase("when").asList(Types.STRING)) {
-            ScriptEvent.of(s).ifPresent(when::add);
-        }
-
-        final EventPriority priority = Enums.getIfPresent(EventPriority.class, config.getIgnoreCase("priority").asString("NORMAL").toUpperCase()).orNull();
-        if (priority == null) {
-            PicosPacos.log(2, "Cannot load script " + id + ", the event priority '' doesn't exist, available values: " + join(", ", EventPriority.values()));
-            return Optional.empty();
-        }
 
         final long delay = config.getIgnoreCase("delay").asLong(0L);
 
@@ -197,13 +184,50 @@ public class ScriptRegistry implements Listener {
             return Optional.empty();
         }
 
-        final Optional<ItemAction> execution = PicosPacos.get().actionRegistry().readAction(config.getRegex("(?i)run|actions?").getValue());
-        if (execution.isEmpty()) {
-            PicosPacos.log(2, "Cannot load script " + id + ", the item action is empty");
+        final BukkitSettings when = config.getConfigurationSection(settings -> settings.getIgnoreCase("when"));
+        if (when == null) {
+            PicosPacos.log(2, "Cannot load script " + id + ", there is no 'when' configuration");
+            return Optional.empty();
+        }
+        final Map<ScriptEvent, EventPriority> priorities = new HashMap<>();
+        final Map<ScriptEvent, ItemAction> actions = new HashMap<>();
+        for (String key : when.getKeys(false)) {
+            final Object value = when.get(key);
+            final EventPriority priority;
+            final Optional<ItemAction> execution;
+            if (value instanceof ConfigurationSection) {
+                final BukkitSettings section = BukkitSettings.of(value);
+                priority = Enums.getIfPresent(EventPriority.class, section.getIgnoreCase("priority").asString("NORMAL").toUpperCase()).orNull();
+                if (priority == null) {
+                    PicosPacos.log(2, "The script " + id + " use an invalid priority '" + section.getIgnoreCase("priority").asString("NORMAL") + "', available values: " + join(", ", EventPriority.values()));
+                }
+                execution = PicosPacos.get().actionRegistry().readAction(section.getRegex("(?i)run|execute|actions?").getValue());
+            } else {
+                priority = null;
+                execution = PicosPacos.get().actionRegistry().readAction(value);
+            }
+            if (execution.isEmpty()) {
+                PicosPacos.log(2, "The execution '" + key + "' inside script " + id + " is empty");
+            } else {
+                for (String s : key.split(",")) {
+                    ScriptEvent.of(s.trim()).ifPresentOrElse(event -> {
+                        if (priority != null) {
+                            priorities.put(event, priority);
+                        }
+                        actions.put(event, execution.get());
+                    }, () -> {
+                        PicosPacos.log(2, "The script " + id + " use an invalid event '" + s.trim() + "', available values: " + join(", ", ScriptEvent.VALUES));
+                    });
+                }
+            }
+        }
+
+        if (actions.isEmpty()) {
+            PicosPacos.log(2, "Cannot load script " + id + ", it doesn't have actions");
             return Optional.empty();
         }
 
-        return Optional.of(new ItemScript(id, when, priority, delay, predicate.get(), execution.get()));
+        return Optional.of(new ItemScript(id, delay, predicate.get(), priorities, actions));
     }
 
     @NotNull
@@ -244,10 +268,12 @@ public class ScriptRegistry implements Listener {
 
     private static class ListenerExecutor<E extends Event> implements EventExecutor {
 
+        private final ScriptEvent event;
         private final ScriptExecutor<E> executor;
         private final List<ItemScript> scripts;
 
-        private ListenerExecutor(@NotNull ScriptExecutor<E> executor, @NotNull List<ItemScript> scripts) {
+        private ListenerExecutor(@NotNull ScriptEvent event, @NotNull ScriptExecutor<E> executor, @NotNull List<ItemScript> scripts) {
+            this.event = event;
             this.executor = executor;
             this.scripts = scripts;
         }
@@ -276,7 +302,7 @@ public class ScriptRegistry implements Listener {
             executor.iterate(event, item -> {
                 holder.next(item);
                 if (script.predicate().test(holder)) {
-                    script.execution().apply(holder);
+                    script.actions().get(this.event).apply(holder);
                 }
                 return holder.getEditedItem();
             });

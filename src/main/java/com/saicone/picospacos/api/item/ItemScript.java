@@ -3,39 +3,27 @@ package com.saicone.picospacos.api.item;
 import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
+import java.util.Map;
 
 public class ItemScript {
 
     private final String id;
-    private final Set<ScriptEvent> when;
-    private final EventPriority priority;
     private final long delay;
     private final ItemPredicate predicate;
-    private final ItemAction execution;
+    private final Map<ScriptEvent, EventPriority> priorities;
+    private final Map<ScriptEvent, ItemAction> actions;
 
-    public ItemScript(@NotNull String id, @NotNull Set<ScriptEvent> when, @NotNull EventPriority priority, long delay, @NotNull ItemPredicate predicate, @NotNull ItemAction execution) {
+    public ItemScript(@NotNull String id, long delay, @NotNull ItemPredicate predicate, @NotNull Map<ScriptEvent, EventPriority> priorities, @NotNull Map<ScriptEvent, ItemAction> actions) {
         this.id = id;
-        this.when = when;
-        this.priority = priority;
         this.delay = delay;
         this.predicate = predicate;
-        this.execution = execution;
+        this.priorities = priorities;
+        this.actions = actions;
     }
 
     @NotNull
     public String id() {
         return id;
-    }
-
-    @NotNull
-    public Set<ScriptEvent> when() {
-        return when;
-    }
-
-    @NotNull
-    public EventPriority priority() {
-        return priority;
     }
 
     public long delay() {
@@ -48,7 +36,17 @@ public class ItemScript {
     }
 
     @NotNull
-    public ItemAction execution() {
-        return execution;
+    public EventPriority priority(@NotNull ScriptEvent event) {
+        return priorities.getOrDefault(event, EventPriority.NORMAL);
+    }
+
+    @NotNull
+    public Map<ScriptEvent, EventPriority> priorities() {
+        return priorities;
+    }
+
+    @NotNull
+    public Map<ScriptEvent, ItemAction> actions() {
+        return actions;
     }
 }

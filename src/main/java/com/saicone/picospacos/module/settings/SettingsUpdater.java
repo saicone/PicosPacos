@@ -53,7 +53,7 @@ public class SettingsUpdater {
             }
             if (SettingsFile.ALLOW_COMMENTS) {
                 section.setComments(toPath, section.getComments(fromPath));
-                section.setComments(toPath, section.getComments(fromPath));
+                section.setInlineComments(toPath, section.getInlineComments(fromPath));
             }
             section.set(fromPath, null);
         }

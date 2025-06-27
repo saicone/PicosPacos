@@ -2,24 +2,6 @@
 example-script:
   # Enable or not this script (true by default)
   enabled: false
-  # Event types:
-  # PLAYER_JOIN    = Player join server
-  # PLAYER_LEAVE   = Player leave server
-  # PLAYER_RESPAWN = Player respawn
-  # PLAYER_DIES    = Player dies
-  # PLAYER_WORLD   = Player change world
-  # ITEM_DROP      = Item being drop
-  # ITEM_PICKUP    = Item being pickup
-  # ITEM_CLICK     = Item is clicked on inventory
-  when: PLAYER_DIES
-  # Event priorities:
-  # - LOWEST = First to be executed
-  # - LOW
-  # - NORMAL
-  # - HIGH
-  # - HIGHEST
-  # - MONITOR = Last to be executed
-  priority: MONITOR
   # Delay to check items
   delay: 0
   # Filter item to detect
@@ -32,6 +14,16 @@ example-script:
     lore(contains):
       - '&7This item can''t be'
       - '&7lose on death!'
+  # Event types:
+  # PLAYER_JOIN    = Player join server
+  # PLAYER_LEAVE   = Player leave server
+  # PLAYER_RESPAWN = Player respawn
+  # PLAYER_DIES    = Player dies
+  # PLAYER_WORLD   = Player change world
+  # ITEM_DROP      = Item being drop
+  # ITEM_PICKUP    = Item being pickup
+  # ITEM_CLICK     = Item is clicked on inventory
+  #
   # Action types:
   # RESTORE = Return the item when player respawn or joins
   # SAVE    = Save the item to be claimed with /lostitems (Configure it on setting.yml)
@@ -40,28 +32,26 @@ example-script:
   # CANCEL  = Cancel the event from being executed
   # COMMAND = Execute a console command (for example "command: broadcast HELLO EVERYONE!")
   # DELAY   = Delay the execution (for example "delay: 5 seconds")
-  run:
-    - 'restore'
-    - 'command: msg %player_name% Hey! You almost lost the thunder sword!'
+  when:
+    PLAYER_DIES:
+      - 'restore'
+      - 'command: msg %player_name% Hey! You almost lost the thunder sword!'
 
 protected-lore:
   enabled: false
-  when: ITEM_DROP
   item:
     lore(any): 'contains=PROTECTED ITEM'
-  run:
-    - 'cancel'
+  when:
+    ITEM_DROP:
+      - 'cancel'
 
 illegal-item:
   enabled: false
-  when:
-    - PLAYER_JOIN
-    - ITEM_DROP
-    - ITEM_CLICK
   item:
     material: BEDROCK
     name: '&c&lSUPER BEDROCK'
-  run:
-    - 'delete'
-    - 'delay: 1 second' # The items should be deleted first, and then run the command
-    - 'command: ban %player_name% Illegal item detected'
+  when:
+    PLAYER_JOIN,ITEM_DROP,ITEM_CLICK:
+      - 'delete'
+      - 'delay: 1 second' # The items should be deleted first on join, and then run the command
+      - 'command: ban %player_name% Illegal item detected'
