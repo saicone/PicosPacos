@@ -70,6 +70,8 @@ database:
   type: 'SQL'
   # SQL database configuration
   sql:
+    # Available types: SQL, MYSQL
+    type: SQLITE
     host: localhost
     port: 3306
     database: 'database'

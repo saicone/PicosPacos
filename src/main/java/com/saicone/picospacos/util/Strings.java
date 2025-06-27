@@ -83,42 +83,53 @@ public class Strings {
         return -1;
     }
 
-    public static int quote(int c) {
-        return (c == '\'' || c == '"' || c == '`') ? c : -1;
+    public static boolean isQuote(int c) {
+        return c == '\'' || c == '"' || c == '`';
     }
 
     @NotNull
     public static String[] splitQuoted(@NotNull String s, char separator) {
-        if (s.isEmpty()) {
-            return new String[] { s };
-        }
-        final List<String> result = new ArrayList<>();
-        int quote = quote(s.charAt(0));
-        int start = quote + 1;
+        List<String> result = new ArrayList<>();
+        StringBuilder token = new StringBuilder();
+        boolean inQuotes = false;
+        char quoteChar = 0;
         boolean escape = false;
-        for (int i = start; i < s.length(); i++) {
-            final char c = s.charAt(i);
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
             if (escape) {
-                if (c == quote) {
-                    continue;
-                }
-            } else if (c == quote) {
-                if (i + 1 >= s.length() || s.charAt(i + 1) != separator) {
-                    quote = -1;
-                    start--;
-                    i = start - 1;
-                    continue;
-                }
-            } else if (c == separator) {
-                if (quote != -1) {
-                    result.add(s.substring(start, i - 1));
-                } else {
-                    result.add(s.substring(start, i));
-                }
-            } else if (c == '\\') {
+                token.append(c);
+                escape = false;
+                continue;
+            }
+
+            if (c == '\\') {
                 escape = true;
+                continue;
+            }
+
+            if (inQuotes) {
+                if (c == quoteChar) {
+                    inQuotes = false;
+                } else {
+                    token.append(c);
+                }
+            } else {
+                if (isQuote(c)) {
+                    inQuotes = true;
+                    quoteChar = c;
+                } else if (c == separator) {
+                    result.add(token.toString());
+                    token.setLength(0);
+                } else {
+                    token.append(c);
+                }
             }
         }
+
+        result.add(token.toString());
+
         return result.toArray(new String[0]);
     }
 
