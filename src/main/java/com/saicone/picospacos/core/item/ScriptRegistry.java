@@ -14,6 +14,7 @@ import com.saicone.picospacos.core.item.executor.ItemPickupExecutor;
 import com.saicone.picospacos.core.item.executor.PlayerDeathExecutor;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import com.saicone.picospacos.util.SimpleMultimap;
+import com.saicone.picospacos.util.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Event;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -171,8 +173,6 @@ public class ScriptRegistry implements Listener {
             return Optional.empty();
         }
 
-        final long delay = config.getIgnoreCase("delay").asLong(0L);
-
         final BukkitSettings item = config.getConfigurationSection(settings -> settings.getIgnoreCase("item"));
         if (item == null) {
             PicosPacos.log(2, "Cannot load script " + id + ", there is no 'item' configured to detect");
@@ -189,31 +189,45 @@ public class ScriptRegistry implements Listener {
             PicosPacos.log(2, "Cannot load script " + id + ", there is no 'when' configuration");
             return Optional.empty();
         }
+        final Map<ScriptEvent, Long> delays = new HashMap<>();
         final Map<ScriptEvent, EventPriority> priorities = new HashMap<>();
         final Map<ScriptEvent, ItemAction> actions = new HashMap<>();
         for (String key : when.getKeys(false)) {
             final Object value = when.get(key);
+
+            final Long delay;
             final EventPriority priority;
             final Optional<ItemAction> execution;
             if (value instanceof ConfigurationSection) {
                 final BukkitSettings section = BukkitSettings.of(value);
+
+                delay = Strings.time(section.getIgnoreCase("delay").asString(), TimeUnit.MILLISECONDS);
+
                 priority = Enums.getIfPresent(EventPriority.class, section.getIgnoreCase("priority").asString("NORMAL").toUpperCase()).orNull();
                 if (priority == null) {
                     PicosPacos.log(2, "The script " + id + " use an invalid priority '" + section.getIgnoreCase("priority").asString("NORMAL") + "', available values: " + join(", ", EventPriority.values()));
                 }
+
                 execution = PicosPacos.get().actionRegistry().readAction(section.getRegex("(?i)run|execute|actions?").getValue());
             } else {
+                delay = null;
                 priority = null;
                 execution = PicosPacos.get().actionRegistry().readAction(value);
             }
+
             if (execution.isEmpty()) {
                 PicosPacos.log(2, "The execution '" + key + "' inside script " + id + " is empty");
             } else {
                 for (String s : key.split(",")) {
                     ScriptEvent.of(s.trim()).ifPresentOrElse(event -> {
+                        if (delay != null) {
+                            delays.put(event, delay);
+                        }
+
                         if (priority != null) {
                             priorities.put(event, priority);
                         }
+
                         actions.put(event, execution.get());
                     }, () -> {
                         PicosPacos.log(2, "The script " + id + " use an invalid event '" + s.trim() + "', available values: " + join(", ", ScriptEvent.VALUES));
@@ -227,7 +241,7 @@ public class ScriptRegistry implements Listener {
             return Optional.empty();
         }
 
-        return Optional.of(new ItemScript(id, delay, predicate.get(), priorities, actions));
+        return Optional.of(new ItemScript(id, predicate.get(), delays, priorities, actions));
     }
 
     @NotNull
@@ -285,8 +299,9 @@ public class ScriptRegistry implements Listener {
                 try {
                     final ItemHolder holder = executor.holder((E) event);
                     for (ItemScript script : scripts) {
-                        if (script.delay() > 0) {
-                            later(() -> execute(holder, script, (E) event), (long) (script.delay() * 0.02));
+                        final long delay = script.delay(this.event);
+                        if (delay > 0) {
+                            later(() -> execute(holder, script, (E) event), (long) (delay * 0.02));
                         } else {
                             execute(holder, script, (E) event);
                         }

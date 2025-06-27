@@ -2,8 +2,6 @@
 example-script:
   # Enable or not this script (true by default)
   enabled: false
-  # Delay to check items
-  delay: 0
   # Filter item to detect
   item:
     material: 'contains=SWORD'
@@ -31,6 +29,7 @@ example-script:
   # DELETE  = Delete item from existence
   # CANCEL  = Cancel the event from being executed
   # COMMAND = Execute a console command (for example "command: broadcast HELLO EVERYONE!")
+  # LANG    = Send a lang message by its path (for example "lang: script.drop-message")
   # DELAY   = Delay the execution (for example "delay: 5 seconds")
   when:
     PLAYER_DIES:
@@ -51,7 +50,13 @@ illegal-item:
     material: BEDROCK
     name: '&c&lSUPER BEDROCK'
   when:
-    PLAYER_JOIN,ITEM_DROP,ITEM_CLICK:
+    PLAYER_JOIN:
+      # Delay to check items
+      delay: 5 seconds
+      actions:
+        - 'delete'
+        - 'delay: 1 second' # The items should be deleted first on join, and then run the command
+        - 'command: ban %player_name% Illegal item detected'
+    ITEM_DROP,ITEM_CLICK:
       - 'delete'
-      - 'delay: 1 second' # The items should be deleted first on join, and then run the command
       - 'command: ban %player_name% Illegal item detected'

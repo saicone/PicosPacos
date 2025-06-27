@@ -9,10 +9,31 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Strings {
+
+    @Nullable
+    public static Long time(@Nullable String s, @NotNull TimeUnit toUnit) {
+        if (s == null) {
+            return null;
+        }
+        final String[] value = s.replace("  ", " ").replace("  ", " ").split(" ", 2);
+        final long time = Long.parseLong(value[0]);
+        final TimeUnit unit;
+        if (value.length > 1) {
+            String name = value[1].toUpperCase();
+            if (!name.endsWith("S")) {
+                name = name + "S";
+            }
+            unit = TimeUnit.valueOf(name);
+        } else {
+            unit = TimeUnit.SECONDS;
+        }
+        return toUnit.convert(time, unit);
+    }
 
     @Nullable
     @Contract("!null, _ -> !null")
