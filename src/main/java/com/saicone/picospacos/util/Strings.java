@@ -49,11 +49,14 @@ public class Strings {
         boolean escape = false;
         for (int i = fromIndex; i < s.length(); i++) {
             final char c1 = s.charAt(i);
-            if (c1 == c) {
-                if (escape) continue;
-                return i;
-            } else if (c1 == '\\') {
+            if (escape) {
+                escape = false;
+                continue;
+            }
+            if (c1 == '\\') {
                 escape = true;
+            } else if (c1 == c) {
+                return i;
             }
         }
         return -1;

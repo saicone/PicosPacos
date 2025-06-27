@@ -169,24 +169,28 @@ public class ItemFields {
         }
         final List<String> args = new ArrayList<>();
         int start = -1;
-        boolean skip = false;
         for (int i = 0; i < s.length(); i++) {
             final char c = s.charAt(i);
             if (c == ',') {
-                if (skip) continue;
-                args.add(s.substring(Math.min(start, 0), i).trim());
+                args.add(s.substring(Math.max(start, 0), i).trim());
                 start = -1;
-            } else if (start < 0) {
+            } else if (start == -1 && c != ' ') {
                 if (c == '"' || c == '\'' || c == '`') {
                     final int finish = Strings.escapeIndexOf(s, c, i + 1);
                     if (finish >= 0) {
                         args.add(s.substring(i + 1, finish).replace("\\" + c, String.valueOf(c)));
-                        skip = true;
+                        i = s.indexOf(',', finish);
+                        if (i == -1) {
+                            break;
+                        }
                         continue;
                     }
                 }
                 start = i;
             }
+        }
+        if (start != -1) {
+            args.add(s.substring(start).trim());
         }
         return args.toArray(new String[0]);
     }
