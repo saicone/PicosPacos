@@ -1,11 +1,13 @@
 package com.saicone.picospacos.core.item.executor;
 
 import com.saicone.picospacos.core.item.ScriptExecutor;
+import org.bukkit.Material;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ListIterator;
 import java.util.function.UnaryOperator;
 
 public class PlayerDeathExecutor implements ScriptExecutor.Entity<PlayerDeathEvent> {
@@ -29,6 +31,19 @@ public class PlayerDeathExecutor implements ScriptExecutor.Entity<PlayerDeathEve
 
     @Override
     public void iterate(@NotNull PlayerDeathEvent event, @NotNull UnaryOperator<ItemStack> operator) {
-        iterate(event.getEntity(), operator);
+        final ListIterator<ItemStack> drops = event.getDrops().listIterator();
+        while (drops.hasNext()) {
+            final ItemStack item = drops.next();
+            if (item != null) {
+                final ItemStack edited = operator.apply(item);
+                if (edited != null) {
+                    if (edited.getType() == Material.AIR) {
+                        drops.remove();
+                    } else {
+                        drops.set(edited);
+                    }
+                }
+            }
+        }
     }
 }
