@@ -3,6 +3,7 @@ package com.saicone.picospacos.core.item.executor;
 import com.saicone.picospacos.core.item.ScriptExecutor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +32,14 @@ public class ItemClickExecutor implements ScriptExecutor.Inventory<InventoryClic
     public void iterate(@NotNull InventoryClickEvent event, @NotNull UnaryOperator<ItemStack> operator) {
         ItemStack item = event.getCurrentItem();
         if (item == null) {
+            return;
+        }
+        final org.bukkit.inventory.Inventory inventory = event.getClickedInventory();
+        if (inventory == null) {
+            return;
+        }
+        final InventoryHolder holder = inventory.getHolder();
+        if (holder == null || !holder.getClass().getName().startsWith("org.bukkit.")) {
             return;
         }
         item = operator.apply(item);
