@@ -58,10 +58,10 @@ public class PacoItemHolder extends ItemHolder {
             s = s.replace("{event_location}", parseLocation(getLocation()));
         }
         if (s.contains("{item}")) {
-            s = s.replace("{item}", Items.getFilteredItemData(getItem()));
+            s = s.replace("{item}", Items.getFilteredItemData(getOriginalItem()));
         }
         if (s.contains("{item_all}")) {
-            s = s.replace("{item_all}", Items.getItemData(getItem()));
+            s = s.replace("{item_all}", Items.getItemData(getOriginalItem()));
         }
         if (s.indexOf('%') >= 0) {
             if (isPlayer()) {

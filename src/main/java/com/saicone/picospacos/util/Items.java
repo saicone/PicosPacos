@@ -73,13 +73,13 @@ public class Items {
             final Map<String, Object> components = TagCompound.getValue(TagCompound.get(base, "components"));
             components.remove("minecraft:custom_data");
             if (components.containsKey("minecraft:custom_name")) {
-                Object name = DISPLAY_MIRROR.processTag(TagCompound.get(components, "minecraft:custom_name"), false);
+                Object name = DISPLAY_MIRROR.processTag(components.get("minecraft:custom_name"), false);
                 if (name != null) {
-                    TagCompound.set(components, "minecraft:custom_name", name);
+                    components.put("minecraft:custom_name", name);
                 }
             }
             if (components.containsKey("minecraft:lore")) {
-                Object lore = TagCompound.get(components, "minecraft:lore");
+                Object lore = components.get("minecraft:lore");
                 if (lore != null) {
                     int size = TagList.size(lore);
                     for (int i = 0; i < size; i++) {
