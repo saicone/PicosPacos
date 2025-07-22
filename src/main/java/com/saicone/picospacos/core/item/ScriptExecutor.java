@@ -1,5 +1,6 @@
 package com.saicone.picospacos.core.item;
 
+import com.cryptomorin.xseries.inventory.XInventoryView;
 import com.saicone.picospacos.api.item.ItemHolder;
 
 import org.bukkit.Location;
@@ -101,7 +102,7 @@ public interface ScriptExecutor<E extends Event> {
 
         @Override
         default @NotNull ItemHolder holder(@NotNull E event) {
-            return holder(event.getView().getPlayer());
+            return holder(XInventoryView.of(event.getView()).getPlayer());
         }
     }
 }
