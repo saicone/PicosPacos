@@ -1,5 +1,6 @@
 package com.saicone.picospacos.util.function;
 
+import com.saicone.types.Types;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,19 +10,71 @@ import java.util.function.Predicate;
 
 public abstract class AnyPredicate<T> implements Predicate<T> {
 
-    @NotNull
-    public static <T> AnyPredicate<T> empty() {
-        return new AnyPredicate<T>() {
-            @Override
-            protected @NotNull Object getRaw() {
-                return null;
-            }
+    private static final AnyPredicate<?> EMPTY = new AnyPredicate<>() {
+        @Override
+        protected @NotNull Object getRaw() {
+            return null;
+        }
 
-            @Override
-            protected boolean compareAny(@NotNull T base, @NotNull T actual) {
-                return false;
-            }
-        };
+        @Override
+        protected boolean compareAny(@NotNull Object base, @NotNull Object actual) {
+            return false;
+        }
+    };
+    private static final AnyPredicate<?> EXIST_TRUE = new AnyPredicate<>() {
+        @Override
+        protected @NotNull Object getRaw() {
+            return null;
+        }
+
+        @Override
+        public boolean test(@Nullable Object t) {
+            return t != null;
+        }
+
+        @Override
+        public boolean test(@Nullable Object t, @NotNull Function<Object, Object> parser) {
+            return t != null;
+        }
+
+        @Override
+        protected boolean compareAny(@NotNull Object base, @NotNull Object actual) {
+            return true;
+        }
+    };
+    private static final AnyPredicate<?> EXIST_FALSE = new AnyPredicate<>() {
+        @Override
+        protected @NotNull Object getRaw() {
+            return null;
+        }
+
+        @Override
+        public boolean test(@Nullable Object t) {
+            return t == null;
+        }
+
+        @Override
+        public boolean test(@Nullable Object t, @NotNull Function<Object, Object> parser) {
+            return t == null;
+        }
+
+        @Override
+        protected boolean compareAny(@NotNull Object base, @NotNull Object actual) {
+            return true;
+        }
+    };
+
+    @NotNull
+    @SuppressWarnings("unchecked")
+    public static <T> AnyPredicate<T> empty() {
+        return (AnyPredicate<T>) EMPTY;
+    }
+
+    @NotNull
+    @SuppressWarnings("unchecked")
+    public static <T> AnyPredicate<T> exist(@Nullable Object exist) {
+        final boolean check = Types.BOOLEAN.parseOrDefault(exist, true);
+        return check ? (AnyPredicate<T>) EXIST_TRUE : (AnyPredicate<T>) EXIST_FALSE;
     }
 
     @Override

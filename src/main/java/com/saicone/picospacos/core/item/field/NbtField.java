@@ -60,7 +60,7 @@ public class NbtField implements ItemField<Object> {
                 return predicate(args[0], object);
             }
         }
-        return StringPredicate.valueOf(object);
+        return AnyPredicate.exist(object);
     }
 
     @NotNull
@@ -102,7 +102,11 @@ public class NbtField implements ItemField<Object> {
 
     @Override
     public @Nullable Object get(@NotNull ItemStack item) {
-        return new RtagItem(item).get(path);
+        try {
+            return new RtagItem(item).get(path);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     @Override
