@@ -160,9 +160,13 @@ public class ScriptRegistry implements Listener {
             final String id = path + ":" + key;
             final BukkitSettings config = settings.getConfigurationSection(key);
             if (config != null) {
-                readScript(id, config).ifPresent(script -> {
-                    scripts.put(id, script);
-                });
+                try {
+                    readScript(id, config).ifPresent(script -> {
+                        scripts.put(id, script);
+                    });
+                } catch (Throwable t) {
+                    PicosPacos.logException(2, t, "There is an error while reading script '" + id + "' on file " + file.getPath());
+                }
             }
         }
     }
