@@ -1,7 +1,8 @@
-package com.saicone.picospacos.module.settings;
+package com.saicone.picospacos.core.settings;
 
 import com.saicone.picospacos.PicosPacos;
-import com.saicone.picospacos.module.settings.updater.Updater_v1;
+import com.saicone.picospacos.module.settings.SettingsFile;
+import com.saicone.picospacos.core.settings.updater.Updater_v1;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;

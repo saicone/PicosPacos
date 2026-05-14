@@ -13,7 +13,7 @@ import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.module.hook.PlayerProvider;
 import com.saicone.picospacos.core.entity.PlayerListener;
 import com.saicone.picospacos.module.settings.SettingsFile;
-import com.saicone.picospacos.module.settings.SettingsUpdater;
+import com.saicone.picospacos.core.settings.SettingsUpdater;
 import com.saicone.types.Types;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;

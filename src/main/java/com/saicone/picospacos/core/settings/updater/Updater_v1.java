@@ -1,9 +1,9 @@
-package com.saicone.picospacos.module.settings.updater;
+package com.saicone.picospacos.core.settings.updater;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import com.saicone.picospacos.module.settings.SettingsFile;
-import com.saicone.picospacos.module.settings.SettingsUpdater;
+import com.saicone.picospacos.core.settings.SettingsUpdater;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
