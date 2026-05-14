@@ -8,13 +8,20 @@ import com.saicone.picospacos.util.function.IterablePredicate;
 import com.saicone.picospacos.util.function.MapPredicate;
 import com.saicone.picospacos.util.function.NumberPredicate;
 import com.saicone.picospacos.util.function.StringPredicate;
+import com.saicone.rtag.Rtag;
 import com.saicone.rtag.RtagItem;
+import com.saicone.rtag.RtagMirror;
+import com.saicone.rtag.item.ItemObject;
+import com.saicone.rtag.tag.TagList;
+import com.saicone.rtag.util.ThrowableFunction;
 import com.saicone.types.IterableType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 
 public class NbtField implements ItemField<Object> {
@@ -25,16 +32,48 @@ public class NbtField implements ItemField<Object> {
     public static NbtField valueOf(@NotNull Object... path) {
         NbtField field = REGISTRY.get(path);
         if (field == null) {
-            field = new NbtField(path);
+            Object[] finalPath = path;
+            NbtField child = null;
+            boolean all = false;
+            for (int i = 0; i < path.length; i++) {
+                final Object key = path[i];
+                if (key instanceof String && i + 1 < path.length) {
+                    final String str = (String) key;
+                    if (str.equals("[]") || str.equals("[*]")) {
+                        finalPath = Arrays.copyOfRange(finalPath, 0, i);
+                        child = valueOf(Arrays.copyOfRange(finalPath, i + 1, finalPath.length));
+                        all = str.equals("[*]");
+                        break;
+                    } else if (str.startsWith("[") && str.endsWith("]")) {
+                        final Integer index = Strings.asInt(str.substring(1, str.length() - 1));
+                        if (index != null) {
+                            final ThrowableFunction<Object, Object> function = tag -> {
+                                if (TagList.isTagList(tag)) {
+                                    final List<Object> list = TagList.getValue(tag);
+                                    return index < list.size() ? list.get(index) : null;
+                                } else {
+                                    return null;
+                                }
+                            };
+                            finalPath[i] = function;
+                        }
+                    }
+                }
+            }
+            field = new NbtField(finalPath, child, all);
             REGISTRY.put(path, field);
         }
         return field;
     }
 
     private final Object[] path;
+    private final NbtField child;
+    private final boolean all;
 
-    public NbtField(@NotNull Object... path) {
+    public NbtField(@NotNull Object[] path, @Nullable NbtField child, boolean all) {
         this.path = path;
+        this.child = child;
+        this.all = all;
     }
 
     @Override
@@ -102,11 +141,24 @@ public class NbtField implements ItemField<Object> {
 
     @Override
     public @Nullable Object get(@NotNull ItemStack item) {
-        try {
-            return new RtagItem(item).get(path);
-        } catch (Throwable t) {
+        final Object tag = getTag(item);
+        if (tag == null) {
             return null;
         }
+        return Rtag.INSTANCE.get(tag, this.path);
+    }
+
+    @Nullable
+    public Object getTag(@NotNull ItemStack item) {
+        final Object mcItem;
+        final ItemStack craftItem = ItemObject.getCraftStack(item);
+        if (craftItem == null) {
+            mcItem = ItemObject.asNMSCopy(item);
+        } else {
+            mcItem = ItemObject.getUncheckedHandle(craftItem);
+        }
+
+        return ItemObject.getCustomDataTag(mcItem);
     }
 
     @Override
@@ -117,22 +169,51 @@ public class NbtField implements ItemField<Object> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean test(@NotNull ItemStack item, @NotNull AnyPredicate<?> predicate) {
-        Object value = get(item);
-        if ((value instanceof Object[] || (value != null && value.getClass().isArray())) && predicate instanceof IterablePredicate) {
-            value = IterableType.of(value);
-        }
-        return ((AnyPredicate<Object>) predicate).test(value);
+        return test(getTag(item), predicate, null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean test(@NotNull ItemStack item, @NotNull AnyPredicate<?> predicate, @NotNull Function<Object, Object> parser) {
-        Object value = get(item);
+        return test(getTag(item), predicate, parser);
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean test(@Nullable Object tag, @NotNull AnyPredicate<?> predicate, @Nullable Function<Object, Object> parser) {
+        if (tag == null) {
+            return false;
+        }
+
+        tag = Rtag.INSTANCE.getExact(tag, this.path);
+
+        if (this.child != null) {
+            if (TagList.isTagList(tag)) {
+                for (Object element : TagList.getValue(tag)) {
+                    if (this.child.test(element, predicate, parser)) {
+                        if (!this.all) {
+                            return true;
+                        }
+                    } else {
+                        if (this.all) {
+                            return false;
+                        }
+                    }
+                }
+                return this.all;
+            } else {
+                return this.child.test(tag, predicate, parser);
+            }
+        }
+
+        Object value = RtagMirror.INSTANCE.getTagValue(tag);
         if ((value instanceof Object[] || (value != null && value.getClass().isArray())) && predicate instanceof IterablePredicate) {
             value = IterableType.of(value);
         }
-        return ((AnyPredicate<Object>) predicate).test(value, parser);
+
+        if (parser == null) {
+            return ((AnyPredicate<Object>) predicate).test(value);
+        } else {
+            return ((AnyPredicate<Object>) predicate).test(value, parser);
+        }
     }
 }

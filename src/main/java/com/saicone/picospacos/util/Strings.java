@@ -16,6 +16,18 @@ import java.util.stream.Collectors;
 public class Strings {
 
     @Nullable
+    public static Integer asInt(@Nullable String s) {
+        if (s == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Nullable
     public static Long time(@Nullable String s, @NotNull TimeUnit toUnit) {
         if (s == null) {
             return null;
