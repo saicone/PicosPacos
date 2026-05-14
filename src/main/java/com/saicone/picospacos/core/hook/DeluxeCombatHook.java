@@ -1,4 +1,4 @@
-package com.saicone.picospacos.module.hook;
+package com.saicone.picospacos.core.hook;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.item.ItemHolder;

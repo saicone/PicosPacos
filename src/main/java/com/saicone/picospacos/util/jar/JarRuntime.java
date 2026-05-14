@@ -1,7 +1,7 @@
 /*
- * This file is part of mcode, licensed under the MIT License
+ * This file is licensed under the MIT License
  *
- * Copyright (c) Rubenicos
+ * Copyright (c) 2025-2026 Rubenicos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,19 +64,7 @@ public class JarRuntime extends LinkedHashMap<String, Class<?>> {
 
     @NotNull
     public static JarRuntime of(@NotNull ClassLoader classLoader, @NotNull URL url) throws IOException {
-        File file;
-        try {
-            try {
-                file = new File(url.toURI());
-            } catch (IllegalArgumentException e) {
-                file = new File(((JarURLConnection) url.openConnection()).getJarFileURL().toURI());
-            }
-        } catch (URISyntaxException e) {
-            file = new File(url.getPath());
-        }
-        try (JarFile jarFile = new JarFile(file)) {
-            return of(classLoader, jarFile);
-        }
+        return new JarRuntime(classLoader).append(url);
     }
 
     @NotNull
@@ -86,13 +74,7 @@ public class JarRuntime extends LinkedHashMap<String, Class<?>> {
 
     @NotNull
     public static JarRuntime of(@NotNull ClassLoader classLoader, @NotNull JarFile file) {
-        final JarRuntime jarRuntime = new JarRuntime(classLoader);
-        file.stream().filter(entry -> entry.getName().endsWith(".class")).forEach(entry -> {
-            final String name = entry.getName();
-            final String parsedName = name.replace('/', '.').substring(0, name.length() - 6);
-            jarRuntime.put(parsedName);
-        });
-        return jarRuntime;
+        return new JarRuntime(classLoader).append(file);
     }
 
     public JarRuntime() {
@@ -186,6 +168,35 @@ public class JarRuntime extends LinkedHashMap<String, Class<?>> {
                 put(name);
             }
         }
+        return this;
+    }
+
+    @NotNull
+    @Contract("_ -> this")
+    public JarRuntime append(@NotNull URL url) throws IOException {
+        File file;
+        try {
+            try {
+                file = new File(url.toURI());
+            } catch (IllegalArgumentException e) {
+                file = new File(((JarURLConnection) url.openConnection()).getJarFileURL().toURI());
+            }
+        } catch (URISyntaxException e) {
+            file = new File(url.getPath());
+        }
+        try (JarFile jarFile = new JarFile(file)) {
+            return append(jarFile);
+        }
+    }
+
+    @NotNull
+    @Contract("_ -> this")
+    public JarRuntime append(@NotNull JarFile file) {
+        file.stream().filter(entry -> entry.getName().endsWith(".class")).forEach(entry -> {
+            final String name = entry.getName();
+            final String parsedName = name.replace('/', '.').substring(0, name.length() - 6);
+            this.put(parsedName);
+        });
         return this;
     }
 

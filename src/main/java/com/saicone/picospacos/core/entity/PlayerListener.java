@@ -1,4 +1,4 @@
-package com.saicone.picospacos.module.listener;
+package com.saicone.picospacos.core.entity;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.PicosPacosAPI;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BukkitListener implements Listener {
+public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {

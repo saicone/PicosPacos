@@ -2,11 +2,9 @@ package com.saicone.picospacos.core.data;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.data.PlayerData;
-import com.saicone.picospacos.module.data.DataClient;
-import com.saicone.picospacos.module.data.DataMethod;
-import com.saicone.picospacos.module.data.client.JsonClient;
-import com.saicone.picospacos.module.data.client.MySQLClient;
-import com.saicone.picospacos.module.data.client.SqliteClient;
+import com.saicone.picospacos.core.data.client.JsonClient;
+import com.saicone.picospacos.core.data.client.MySQLClient;
+import com.saicone.picospacos.core.data.client.SqliteClient;
 import com.saicone.picospacos.module.hook.PlayerProvider;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import org.bukkit.Bukkit;

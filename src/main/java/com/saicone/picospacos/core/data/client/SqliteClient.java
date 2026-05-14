@@ -1,9 +1,9 @@
-package com.saicone.picospacos.module.data.client;
+package com.saicone.picospacos.core.data.client;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.data.PlayerData;
-import com.saicone.picospacos.module.data.DataClient;
-import com.saicone.picospacos.module.data.DataMethod;
+import com.saicone.picospacos.core.data.DataClient;
+import com.saicone.picospacos.core.data.DataMethod;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package com.saicone.picospacos.module.cmd;
+package com.saicone.picospacos.core.command;
 
 import com.saicone.picospacos.PicosPacos;
 import com.saicone.picospacos.api.PicosPacosAPI;
@@ -25,7 +25,7 @@ public class PicosPacosCommand extends Command {
     private String permReload = "picospacos.command.reload";
     private String permSaves = "picospacos.command.saves";
 
-    PicosPacosCommand() {
+    public PicosPacosCommand() {
         super("picospacos");
         setPermission("picospacos.*;picospacos.use");
     }

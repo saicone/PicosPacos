@@ -1,4 +1,4 @@
-package com.saicone.picospacos.module.data;
+package com.saicone.picospacos.core.data;
 
 import com.saicone.picospacos.api.data.PlayerData;
 import com.saicone.picospacos.module.settings.BukkitSettings;

@@ -1,4 +1,4 @@
-package com.saicone.picospacos.module.data;
+package com.saicone.picospacos.core.data;
 
 public enum DataMethod {
     NAME,

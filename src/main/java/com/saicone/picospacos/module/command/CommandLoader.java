@@ -1,6 +1,7 @@
-package com.saicone.picospacos.module.cmd;
+package com.saicone.picospacos.module.command;
 
 import com.saicone.picospacos.PicosPacos;
+import com.saicone.picospacos.core.command.PicosPacosCommand;
 import com.saicone.rtag.util.EasyLookup;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

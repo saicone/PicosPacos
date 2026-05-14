@@ -7,11 +7,11 @@ import com.saicone.picospacos.core.Lang;
 import com.saicone.picospacos.core.data.Database;
 import com.saicone.picospacos.core.item.ActionRegistry;
 import com.saicone.picospacos.core.item.ScriptRegistry;
-import com.saicone.picospacos.module.cmd.CommandLoader;
-import com.saicone.picospacos.module.hook.DeluxeCombatHook;
+import com.saicone.picospacos.module.command.CommandLoader;
+import com.saicone.picospacos.core.hook.DeluxeCombatHook;
 import com.saicone.picospacos.module.hook.Placeholders;
 import com.saicone.picospacos.module.hook.PlayerProvider;
-import com.saicone.picospacos.module.listener.BukkitListener;
+import com.saicone.picospacos.core.entity.PlayerListener;
 import com.saicone.picospacos.module.settings.SettingsFile;
 import com.saicone.picospacos.module.settings.SettingsUpdater;
 import com.saicone.types.Types;
@@ -111,7 +111,7 @@ public class PicosPacos extends JavaPlugin {
     @Override
     public void onEnable() {
         this.database.onEnable();
-        Bukkit.getPluginManager().registerEvents(new BukkitListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
         // Register hooks
         registerPlaceholders();
