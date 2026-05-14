@@ -4,7 +4,7 @@ import com.saicone.rtag.item.ItemObject;
 import com.saicone.rtag.item.mirror.IDisplayMirror;
 import com.saicone.rtag.tag.TagCompound;
 import com.saicone.rtag.tag.TagList;
-import com.saicone.rtag.util.ServerInstance;
+import com.saicone.rtag.util.MC;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -60,14 +60,14 @@ public class Items {
     @NotNull
     public static String getFilteredItemData(@NotNull ItemStack item) {
         final Object base = ItemObject.save(ItemObject.asNMSCopy(item));
-        if (ServerInstance.Release.LEGACY) {
+        if (MC.version().isLegacy()) {
             return base.toString();
         }
         if (TagCompound.hasKey(base, "tag")) {
             final Map<String, Object> tag = TagCompound.getValue(TagCompound.get(base, "tag"));
             tag.entrySet().removeIf(entry -> !ALLOWED_TAGS.contains(entry.getKey()));
-            if (ServerInstance.Release.FLAT && tag.containsKey("display")) {
-                DISPLAY_MIRROR.downgrade(base, "", TagCompound.get(base, "tag"), ServerInstance.VERSION, 12);
+            if (MC.version().isFlat() && tag.containsKey("display")) {
+                DISPLAY_MIRROR.downgrade(base, "", TagCompound.get(base, "tag"), MC.version(), MC.V_1_12_2);
             }
         } else if (TagCompound.hasKey(base, "components")) {
             final Map<String, Object> components = TagCompound.getValue(TagCompound.get(base, "components"));

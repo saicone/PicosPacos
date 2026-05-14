@@ -3,7 +3,7 @@ package com.saicone.picospacos.core.item;
 import com.saicone.picospacos.util.function.AnyPredicate;
 import com.saicone.picospacos.util.function.IterablePredicate;
 import com.saicone.picospacos.util.function.MapPredicate;
-import com.saicone.types.IterableType;
+import com.saicone.types.AnyIterable;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,9 +35,9 @@ public interface ItemField<T> {
         @Override
         default @NotNull IterablePredicate<?> predicate(@NotNull Object object, @NotNull String... args) {
             if (args.length > 0) {
-                return IterablePredicate.valueOf(args[0], IterableType.of(object), this::elementPredicate);
+                return IterablePredicate.valueOf(args[0], AnyIterable.of(object), this::elementPredicate);
             }
-            return IterablePredicate.exact(IterableType.of(object), this::elementPredicate);
+            return IterablePredicate.exact(AnyIterable.of(object), this::elementPredicate);
         }
 
         @NotNull

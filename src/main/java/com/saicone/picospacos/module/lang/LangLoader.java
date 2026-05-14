@@ -29,8 +29,7 @@ import com.saicone.picospacos.module.lang.display.TitleDisplay;
 import com.saicone.picospacos.module.settings.BukkitSettings;
 import com.saicone.picospacos.util.MStrings;
 import com.saicone.picospacos.util.Strings;
-import com.saicone.types.IterableType;
-import com.saicone.types.ValueType;
+import com.saicone.types.AnyIterable;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -164,7 +163,7 @@ public abstract class LangLoader implements Listener {
             }
         } else if (object != null) {
             final List<String> text = new ArrayList<>();
-            for (Object obj : IterableType.of(object)) {
+            for (Object obj : AnyIterable.of(object)) {
                 text.add(MStrings.color(String.valueOf(obj).replace("{prefix}", prefix)));
             }
             return new TextDisplay(text);

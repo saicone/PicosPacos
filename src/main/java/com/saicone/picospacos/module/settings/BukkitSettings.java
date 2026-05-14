@@ -1,7 +1,7 @@
 /*
- * This file is part of PixelBuy, licensed under the MIT License
+ * This file is licensed under the MIT License
  *
- * Copyright (c) 2024 Rubenicos
+ * Copyright (c) 2024-2026 Rubenicos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,8 @@
  */
 package com.saicone.picospacos.module.settings;
 
-import com.saicone.types.IterableType;
-import com.saicone.types.ValueType;
+import com.saicone.types.AnyIterable;
+import com.saicone.types.AnyObject;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -193,7 +193,7 @@ public class BukkitSettings extends YamlConfiguration {
     @Nullable
     public Object get(@NotNull Function<BukkitSettings, Object> getter) {
         final Object object = getter.apply(this);
-        return object instanceof ValueType ? ((ValueType<?>) object).getValue() : object;
+        return object instanceof AnyObject<?> ? ((AnyObject<?>) object).getValue() : object;
     }
 
     @Nullable
@@ -338,34 +338,34 @@ public class BukkitSettings extends YamlConfiguration {
     }
 
     @NotNull
-    public ValueType<Object> getAny(@NotNull String key) {
-        return ValueType.of(get(key));
+    public AnyObject<Object> getAny(@NotNull String key) {
+        return AnyObject.of(get(key));
     }
 
     @NotNull
-    public ValueType<Object> getAny(@NotNull String... path) {
-        return ValueType.of(get(path));
+    public AnyObject<Object> getAny(@NotNull String... path) {
+        return AnyObject.of(get(path));
     }
 
     @NotNull
-    public ValueType<Object> getIgnoreCase(@NotNull String key) {
-        return ValueType.of(getIf(s -> s.equalsIgnoreCase(key)));
+    public AnyObject<Object> getIgnoreCase(@NotNull String key) {
+        return AnyObject.of(getIf(s -> s.equalsIgnoreCase(key)));
     }
 
     @NotNull
-    public ValueType<Object> getIgnoreCase(@NotNull String... path) {
-        return ValueType.of(getIf(String::equalsIgnoreCase, path));
+    public AnyObject<Object> getIgnoreCase(@NotNull String... path) {
+        return AnyObject.of(getIf(String::equalsIgnoreCase, path));
     }
 
     @NotNull
-    public ValueType<Object> getRegex(@NotNull @Language("RegExp") String regex) {
+    public AnyObject<Object> getRegex(@NotNull @Language("RegExp") String regex) {
         final Pattern pattern = Pattern.compile(regex);
-        return ValueType.of(getIf(s -> pattern.matcher(s).matches()));
+        return AnyObject.of(getIf(s -> pattern.matcher(s).matches()));
     }
 
     @NotNull
-    public ValueType<Object> getRegex(@NotNull @Language("RegExp") String... regexPath) {
-        return ValueType.of(getIf(Pattern::compile, (s, pattern) -> pattern.matcher(s).matches(), regexPath));
+    public AnyObject<Object> getRegex(@NotNull @Language("RegExp") String... regexPath) {
+        return AnyObject.of(getIf(Pattern::compile, (s, pattern) -> pattern.matcher(s).matches(), regexPath));
     }
 
     @NotNull
@@ -446,7 +446,7 @@ public class BukkitSettings extends YamlConfiguration {
                         merge((ConfigurationSection) value, (ConfigurationSection) currentValue);
                     }
                 } else if (value != null && currentValue instanceof List) {
-                    for (Object o : IterableType.of(value)) {
+                    for (Object o : AnyIterable.of(value)) {
                         try {
                             ((List<Object>) currentValue).add(o);
                         } catch (Throwable ignored) { }
@@ -496,7 +496,7 @@ public class BukkitSettings extends YamlConfiguration {
         } else if (object instanceof Iterable) {
             final List<Object> list = new ArrayList<>();
             int i = 0;
-            for (Object o : IterableType.of(object)) {
+            for (Object o : AnyIterable.of(object)) {
                 list.add(parse(path + "[" + i + "]", o, function));
                 i++;
             }

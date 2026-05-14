@@ -14,7 +14,7 @@ import com.saicone.rtag.RtagMirror;
 import com.saicone.rtag.item.ItemObject;
 import com.saicone.rtag.tag.TagList;
 import com.saicone.rtag.util.ThrowableFunction;
-import com.saicone.types.IterableType;
+import com.saicone.types.AnyIterable;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,12 +89,12 @@ public class NbtField implements ItemField<Object> {
             } else if (type.endsWith("[]")) {
                 final String elementType = type.substring(0, type.length() - 2);
                 final String listType = args.length > 1 ? args[1] : "";
-                return IterablePredicate.valueOf(listType, IterableType.of(object), element -> predicate(elementType, element));
+                return IterablePredicate.valueOf(listType, AnyIterable.of(object), element -> predicate(elementType, element));
             } else if (type.equals("iterable") || type.equals("collection") || type.equals("list") || type.equals("set")) {
                 final String[] params = params(args[0]);
                 final String elementType = params.length > 0 ? params[0] : "";
                 final String listType = args.length > 1 ? args[1] : "";
-                return IterablePredicate.valueOf(listType, IterableType.of(object), element -> predicate(elementType, element));
+                return IterablePredicate.valueOf(listType, AnyIterable.of(object), element -> predicate(elementType, element));
             } else {
                 return predicate(args[0], object);
             }
@@ -207,7 +207,7 @@ public class NbtField implements ItemField<Object> {
 
         Object value = RtagMirror.INSTANCE.getTagValue(tag);
         if ((value instanceof Object[] || (value != null && value.getClass().isArray())) && predicate instanceof IterablePredicate) {
-            value = IterableType.of(value);
+            value = AnyIterable.of(value);
         }
 
         if (parser == null) {
