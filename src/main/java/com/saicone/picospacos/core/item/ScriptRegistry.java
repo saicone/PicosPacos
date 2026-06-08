@@ -8,6 +8,7 @@ import com.saicone.picospacos.api.item.ItemHolder;
 import com.saicone.picospacos.api.item.ItemPredicate;
 import com.saicone.picospacos.api.item.ItemScript;
 import com.saicone.picospacos.api.item.ScriptEvent;
+import com.saicone.picospacos.core.item.executor.BlockPlaceExecutor;
 import com.saicone.picospacos.core.item.executor.ItemClickExecutor;
 import com.saicone.picospacos.core.item.executor.ItemDropExecutor;
 import com.saicone.picospacos.core.item.executor.ItemPickupExecutor;
@@ -59,6 +60,7 @@ public class ScriptRegistry implements Listener {
         register(ScriptEvent.ITEM_DROP, ItemDropExecutor.instance());
         register(ScriptEvent.ITEM_PICKUP, ItemPickupExecutor.instance());
         register(ScriptEvent.ITEM_CLICK, ItemClickExecutor.instance());
+        register(ScriptEvent.BLOCK_PLACE, BlockPlaceExecutor.instance());
     }
 
     public <T extends Event> void register(@NotNull ScriptEvent event, @NotNull ScriptExecutor<T> executor) {

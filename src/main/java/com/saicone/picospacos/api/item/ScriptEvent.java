@@ -13,7 +13,8 @@ public enum ScriptEvent {
     PLAYER_WORLD,
     ITEM_DROP,
     ITEM_PICKUP,
-    ITEM_CLICK;
+    ITEM_CLICK,
+    BLOCK_PLACE;
 
     public static final ScriptEvent[] VALUES = values();
 
